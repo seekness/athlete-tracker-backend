@@ -214,11 +214,11 @@ app.get('/locations', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodavanje novog sportiste (za trenere)
-app.post('/athletes', authenticateToken, isTrener, async (req, res) => {
+app.post('/athletes', authenticateToken, async (req, res) => {
   const { 
     ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
     mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
-    broj_telefona, email, aktivan 
+    broj_telefona, email, aktivan , broj_knjizice, datum_poslednjeg_sportskog_pregleda
   } = req.body;
   
   if (!username) {
@@ -230,8 +230,8 @@ app.post('/athletes', authenticateToken, isTrener, async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO athletes (ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, mesto_rodenja, adresa_stanovanja, mesto_stanovanja, broj_telefona, email, aktivan) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO athletes (ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, mesto_rodenja, adresa_stanovanja, mesto_stanovanja, broj_telefona, email, aktivan, broj_knjizice, datum_poslednjeg_sportskog_pregleda) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     await dbPool.query(query, [
       ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
@@ -248,7 +248,7 @@ app.post('/athletes', authenticateToken, isTrener, async (req, res) => {
   }
 });
 
-app.get('/athletes', authenticateToken, isTrener, async (req, res) => {
+app.get('/athletes', authenticateToken, async (req, res) => {
   try {
     const query = `
       SELECT
@@ -264,6 +264,8 @@ app.get('/athletes', authenticateToken, isTrener, async (req, res) => {
         a.mesto_stanovanja,
         a.email,
         a.aktivan,  
+        a.broj_knjizice,  
+        a.datum_poslednjeg_sportskog_pregleda,  
         u.username,
         g.naziv AS group_name
       FROM athletes a
@@ -280,11 +282,41 @@ app.get('/athletes', authenticateToken, isTrener, async (req, res) => {
   }
 });
 
+app.get('/athletes/:athleteId/groups', authenticateToken, async (req, res) => {
+  const { athleteId } = req.params;
+  try {
+    const query = `
+      SELECT g.id, g.naziv 
+      FROM groups g
+      JOIN group_memberships gm ON g.id = gm.group_id
+      WHERE gm.athlete_id = ?;
+    `;
+    
+    // dbPool bi trebalo da ima metodu za izvršavanje upita. 
+    // Primer za mysql2 paket:
+    const [groups] = await dbPool.query(query, [athleteId]);
+
+    // U slučaju da sportista postoji, ali nema grupa, vratite prazan niz
+    if (groups.length === 0) {
+      // Opciono: Provera da li sportista uopšte postoji pre slanja praznog niza
+      const athleteCheck = await dbPool.query('SELECT id FROM athletes WHERE id = ?', [athleteId]);
+      if (athleteCheck[0].length === 0) {
+        return res.status(404).send('Sportista nije pronađen.');
+      }
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json(groups);
+  } catch (error) {
+    console.error('Greška pri dobijanju grupa za sportistu:', error);
+    res.status(500).send('Došlo je do greške na serveru.');
+  }
+});
 
 //--- RUTAS ZA UPRAVLJANJE CLANOVIMA GRUPA ---
 
 // Ruta za dobijanje sportista u određenoj grupi
-app.get('/groups/:groupId/athletes', authenticateToken, isTrener, async (req, res) => {
+app.get('/groups/:groupId/athletes', authenticateToken, async (req, res) => {
   const { groupId } = req.params;
   try {
     const query = `
@@ -364,35 +396,91 @@ app.delete('/athletes/:id', authenticateToken, isTrener, async (req, res) => {
   }
 });
 
-app.put('/athletes/:id', authenticateToken, isTrener, async (req, res) => {
-  const { id } = req.params;
-  const { ime, prezime, datum_rodenja, broj_telefona, ime_roditelja, jmbg, mesto_rodenja, adresa_stanovanja, mesto_stanovanja, email, group_id, username } = req.body;
-  
-  if (!ime || !prezime) {
-    return res.status(400).send('Ime i prezime su obavezni.');
-  }
+app.put('/athletes/:athleteId', authenticateToken, async (req, res) => {
+  const { athleteId } = req.params;
+  const {
+    ime,
+    prezime,
+    username,
+    datum_rodenja,
+    broj_knjizice,
+    datum_poslednjeg_sportskog_pregleda,
+    broj_telefona,
+    ime_roditelja,
+    jmbg,
+    mesto_rodenja,
+    adresa_stanovanja,
+    mesto_stanovanja,
+    email,
+    aktivan,
+    group_ids // KLJUČNA LINIJA: Izdvajanje niza group_ids
+  } = req.body;
 
   try {
-    const [rows] = await dbPool.query('SELECT user_id FROM athletes WHERE id = ?', [id]);
-    if (rows.length === 0) {
-      return res.status(404).send('Sportista nije pronađen.');
+    // Pokretanje transakcije radi sigurnosti
+    await dbPool.query('START TRANSACTION');
+
+    // 1. Ažuriranje podataka u tabeli `athletes`
+    const updateAthleteQuery = `
+      UPDATE athletes
+      SET
+        ime = ?,
+        prezime = ?,
+        username = ?,
+        datum_rodenja = ?,
+        broj_knjizice = ?,
+        datum_poslednjeg_sportskog_pregleda = ?,
+        broj_telefona = ?,
+        ime_roditelja = ?,
+        jmbg = ?,
+        mesto_rodenja = ?,
+        adresa_stanovanja = ?,
+        mesto_stanovanja = ?,
+        email = ?,
+        aktivan = ?
+      WHERE id = ?;
+    `;
+    await dbPool.query(updateAthleteQuery, [
+      ime,
+      prezime,
+      username,
+      datum_rodenja,
+      broj_knjizice,
+      datum_poslednjeg_sportskog_pregleda,
+      broj_telefona,
+      ime_roditelja,
+      jmbg,
+      mesto_rodenja,
+      adresa_stanovanja,
+      mesto_stanovanja,
+      email,
+      aktivan,
+      athleteId,
+    ]);
+
+    // 2. Brisanje starih grupa za tog sportistu iz tabele `group_memberships`
+    const deleteGroupsQuery = `
+      DELETE FROM group_memberships WHERE athlete_id = ?;
+    `;
+    await dbPool.query(deleteGroupsQuery, [athleteId]);
+
+    // 3. Dodavanje novih grupa
+    if (group_ids && group_ids.length > 0) {
+      const insertGroupValues = group_ids.map(groupId => [athleteId, groupId]);
+      const insertGroupsQuery = `
+        INSERT INTO group_memberships (athlete_id, group_id) VALUES ?;
+      `;
+      // Koristi se placeholder za više redova, što je efikasnije
+      await dbPool.query(insertGroupsQuery, [insertGroupValues]);
     }
-    const userId = rows[0].user_id;
 
-    await dbPool.query(
-      `UPDATE athletes SET ime = ?, prezime = ?, datum_rodenja = ?, broj_telefona = ?, ime_roditelja = ?, jmbg = ?, mesto_rodenja = ?, adresa_stanovanja = ?, mesto_stanovanja = ?, email = ? WHERE id = ?`,
-      [ime, prezime, datum_rodenja, broj_telefona, ime_roditelja, jmbg, mesto_rodenja, adresa_stanovanja, mesto_stanovanja, email, id]
-    );
+    // Završetak transakcije
+    await dbPool.query('COMMIT');
 
-    await dbPool.query('UPDATE users SET username = ? WHERE id = ?', [username, userId]);
-
-    if (group_id) {
-      await dbPool.query('DELETE FROM group_memberships WHERE athlete_id = ?', [id]);
-      await dbPool.query('INSERT INTO group_memberships (group_id, athlete_id) VALUES (?, ?)', [group_id, id]);
-    }
-    
-    res.send('Podaci sportiste uspešno ažurirani.');
+    res.status(200).json({ message: 'Sportista je uspešno ažuriran.' });
   } catch (error) {
+    // Vraćanje transakcije u slučaju greške
+    await dbPool.query('ROLLBACK');
     console.error('Greška pri ažuriranju sportiste:', error);
     res.status(500).send('Došlo je do greške na serveru.');
   }
@@ -427,7 +515,7 @@ app.delete('/locations/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih grupa
-app.get('/groups', authenticateToken, isTrener, async (req, res) => {
+app.get('/groups', authenticateToken, async (req, res) => {
   try {
     const [rows] = await dbPool.query('SELECT * FROM groups ORDER BY naziv ASC');
     res.json(rows);
@@ -438,7 +526,7 @@ app.get('/groups', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dodavanje nove grupe
-app.post('/groups', authenticateToken, isTrener, async (req, res) => {
+app.post('/groups', authenticateToken, async (req, res) => {
   const { naziv, opis } = req.body;
   if (!naziv) {
     return res.status(400).send('Naziv grupe je obavezan.');
@@ -453,7 +541,7 @@ app.post('/groups', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za ažuriranje grupe
-app.put('/groups/:id', authenticateToken, isTrener, async (req, res) => {
+app.put('/groups/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis } = req.body;
   if (!naziv) {
@@ -469,7 +557,7 @@ app.put('/groups/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za brisanje grupe
-app.delete('/groups/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/groups/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const connection = await dbPool.getConnection();
   try {
@@ -490,7 +578,7 @@ app.delete('/groups/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Nova ruta za dobijanje spiska SVIH sportista bez informacija o grupi
-app.get('/all-athletes', authenticateToken, isTrener, async (req, res) => {
+app.get('/all-athletes', authenticateToken, async (req, res) => {
   try {
     const [rows] = await dbPool.query(`
       SELECT 
@@ -506,7 +594,7 @@ app.get('/all-athletes', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih kategorija vežbi
-app.get('/exercise-categories', authenticateToken, isTrener, async (req, res) => {
+app.get('/exercise-categories', authenticateToken, async (req, res) => {
   try {
     const [rows] = await dbPool.query('SELECT * FROM exercise_categories ORDER BY naziv ASC');
     res.json(rows);
@@ -517,7 +605,7 @@ app.get('/exercise-categories', authenticateToken, isTrener, async (req, res) =>
 });
 
 // Ruta za dodavanje nove kategorije vežbi
-app.post('/exercise-categories', authenticateToken, isTrener, async (req, res) => {
+app.post('/exercise-categories', authenticateToken, async (req, res) => {
   const { naziv, opis } = req.body;
   if (!naziv) {
     return res.status(400).send('Naziv kategorije je obavezan.');
@@ -532,7 +620,7 @@ app.post('/exercise-categories', authenticateToken, isTrener, async (req, res) =
 });
 
 // Ruta za ažuriranje kategorije vežbi
-app.put('/exercise-categories/:id', authenticateToken, isTrener, async (req, res) => {
+app.put('/exercise-categories/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis } = req.body;
   if (!naziv) {
@@ -548,7 +636,7 @@ app.put('/exercise-categories/:id', authenticateToken, isTrener, async (req, res
 });
 
 // Ruta za brisanje kategorije vežbi
-app.delete('/exercise-categories/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/exercise-categories/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     // Ovde bi trebalo da dodate proveru da li je kategorija u upotrebi pre brisanja
@@ -572,7 +660,7 @@ app.get('/muscle-groups', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih vežbi sa informacijama o mišićnim grupama i kategorijama
-app.get('/exercises', authenticateToken, isTrener, async (req, res) => {
+app.get('/exercises', authenticateToken, async (req, res) => {
   try {
     const query = `
       SELECT 
@@ -596,7 +684,7 @@ app.get('/exercises', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dodavanje nove vežbe
-app.post('/exercises', authenticateToken, isTrener, async (req, res) => {
+app.post('/exercises', authenticateToken, async (req, res) => {
   const { naziv, opis, muscle_group_id, exercise_category_id, other_muscle_group_id, oprema, unilateral, video_link, slika } = req.body;
   if (!naziv || !muscle_group_id || !exercise_category_id) {
     return res.status(400).send('Naziv vežbe, mišićna grupa, kategorija i vrsta unosa su obavezni.');
@@ -614,7 +702,7 @@ app.post('/exercises', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za ažuriranje vežbe
-app.put('/exercises/:id', authenticateToken, isTrener, async (req, res) => {
+app.put('/exercises/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis, muscle_group_id, exercise_category_id, other_muscle_group_id, oprema, unilateral, video_link, slika } = req.body;
   if (!naziv || !muscle_group_id || !exercise_category_id || !vrsta_unosa) {
@@ -633,7 +721,7 @@ app.put('/exercises/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za brisanje vežbe
-app.delete('/exercises/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/exercises/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await dbPool.query('DELETE FROM exercises WHERE id = ?', [id]);
@@ -644,13 +732,56 @@ app.delete('/exercises/:id', authenticateToken, isTrener, async (req, res) => {
   }
 });
 
+// Ruta za dobijanje svih trenera
+app.get('/coaches', authenticateToken, async (req, res) => {
+    try {
+        const [coaches] = await dbPool.query(
+            `
+            SELECT id, ime, prezime FROM trainers order by prezime ASC
+            `
+        );
+        res.status(200).json(coaches);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju liste trenera.' });
+    }
+});
+
+// Ruta za dobijanje svih takmičara
+app.get('/allathletes', authenticateToken, async (req, res) => {
+    try {
+        const [coaches] = await dbPool.query(
+            `
+            SELECT id, ime, prezime, datum_rodenja FROM athletes order by prezime ASC
+            `
+        );
+        res.status(200).json(coaches);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju liste takmičara.' });
+    }
+});
 
 // Ruta za dobijanje svih programa
-app.get('/programs', authenticateToken, isTrener, async (req, res) => {
+app.get('/programs', authenticateToken, async (req, res) => {
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
   try {
-    const query = 'SELECT id, naziv, opis FROM programs ORDER BY naziv ASC';
-    const [rows] = await dbPool.query(query);
-    res.json(rows);
+    let query = '';
+    let params = [];
+
+    if (userRole === 'admin') {
+      // Admini vide sve programe
+      query = 'SELECT * FROM programs;';
+    } else {
+      // Treneri vide samo programe koje su kreirali
+      query = 'SELECT * FROM programs WHERE kreirao_id = ?;';
+      params = [userId];
+    }
+
+    const [programs] = await dbPool.query(query, params);
+    res.status(200).json(programs);
   } catch (error) {
     console.error('Greška pri dobijanju programa:', error);
     res.status(500).send('Došlo je do greške na serveru.');
@@ -658,30 +789,55 @@ app.get('/programs', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dodavanje novog programa
-app.post('/programs', authenticateToken, isTrener, async (req, res) => {
+app.post('/programs', authenticateToken, async (req, res) => {
   const { naziv, opis } = req.body;
-  if (!naziv) {
-    return res.status(400).send('Naziv programa je obavezan.');
-  }
+  const userId = req.user.id; // Pretpostavka da token sadrži ID korisnika
+
   try {
-    const [result] = await dbPool.query('INSERT INTO programs (naziv, opis) VALUES (?, ?)', [naziv, opis]);
-    res.status(201).send({ id: result.insertId, naziv, opis });
+    const query = `
+      INSERT INTO programs (naziv, opis, kreirao_id)
+      VALUES (?, ?, ?);
+    `;
+    await dbPool.query(query, [naziv, opis, userId]);
+    res.status(201).json({ message: 'Program uspešno kreiran.' });
   } catch (error) {
-    console.error('Greška pri dodavanju programa:', error);
+    console.error('Greška pri kreiranju programa:', error);
     res.status(500).send('Došlo je do greške na serveru.');
   }
 });
 
 // Ruta za ažuriranje programa
-app.put('/programs/:id', authenticateToken, isTrener, async (req, res) => {
+app.put('/programs/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis } = req.body;
-  if (!naziv) {
-    return res.status(400).send('Naziv programa je obavezan.');
-  }
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
   try {
-    await dbPool.query('UPDATE programs SET naziv = ?, opis = ? WHERE id = ?', [naziv, opis, id]);
-    res.send('Program uspešno ažuriran.');
+    // Provera da li korisnik ima dozvolu za izmenu
+    let programCheckQuery = 'SELECT kreirao_id FROM programs WHERE id = ?;';
+    const [programResult] = await dbPool.query(programCheckQuery, [id]);
+
+    if (programResult.length === 0) {
+      return res.status(404).json({ message: 'Program nije pronađen.' });
+    }
+
+    const kreatorId = programResult[0].kreirao_id;
+
+    // Dozvoli izmenu samo adminu ili kreatoru programa
+    if (userRole !== 'admin' && kreatorId !== userId) {
+      return res.status(403).json({ message: 'Nemate dozvolu za izmenu ovog programa.' });
+    }
+
+    // Ažuriranje programa
+    const updateQuery = `
+      UPDATE programs
+      SET naziv = ?, opis = ?
+      WHERE id = ?;
+    `;
+    await dbPool.query(updateQuery, [naziv, opis, id]);
+
+    res.status(200).json({ message: 'Program uspešno ažuriran.' });
   } catch (error) {
     console.error('Greška pri ažuriranju programa:', error);
     res.status(500).send('Došlo je do greške na serveru.');
@@ -887,6 +1043,694 @@ app.delete('/trainings/:trainingId', authenticateToken, isTrener, async (req, re
     console.error('Greška pri brisanju treninga:', error);
     res.status(500).send('Došlo je do greške na serveru.');
   }
+});
+
+// POST ruta za dodelu programa grupi
+app.post('/assign-program/group', authenticateToken, async (req, res) => {
+    const { programId, groupId } = req.body;
+    const assignedByUserId = req.user.id;
+
+    try {
+        await dbPool.query(
+            'INSERT INTO program_group_assignments (program_id, group_id, assigned_by_user_id) VALUES (?, ?, ?)',
+            [programId, groupId, assignedByUserId]
+        );
+        res.status(201).json({ message: 'Program uspešno dodeljen grupi.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dodeljivanju programa grupi.' });
+    }
+});
+
+// POST ruta za dodelu programa pojedinačnom sportisti
+app.post('/assign-program/athlete', authenticateToken, async (req, res) => {
+    const { programId, athleteId } = req.body;
+    const assignedByUserId = req.user.id;
+
+    try {
+        await dbPool.query(
+            'INSERT INTO program_athlete_assignments (program_id, athlete_id, assigned_by_user_id) VALUES (?, ?, ?)',
+            [programId, athleteId, assignedByUserId]
+        );
+        res.status(201).json({ message: 'Program uspešno dodeljen sportisti.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dodeljivanju programa sportisti.' });
+    }
+});
+
+// PUT ruta za azuriranje dodele programa grupi
+app.put('/assign-program/group', authenticateToken, async (req, res) => {
+    const { programId, groupId } = req.body;
+    const assignedByUserId = req.user.id;
+
+    try {
+        const [existingAssignment] = await dbPool.query(
+            'SELECT * FROM program_group_assignments WHERE group_id = ?',
+            [groupId]
+        );
+
+        if (existingAssignment.length > 0) {
+            await dbPool.query(
+                'UPDATE program_group_assignments SET program_id = ?, assigned_by_user_id = ? WHERE group_id = ?',
+                [programId, assignedByUserId, groupId]
+            );
+        } else {
+            await dbPool.query(
+                'INSERT INTO program_group_assignments (program_id, group_id, assigned_by_user_id) VALUES (?, ?, ?)',
+                [programId, groupId, assignedByUserId]
+            );
+        }
+        res.status(200).json({ message: 'Dodela programa grupi uspešno ažurirana.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri ažuriranju dodele programa grupi.' });
+    }
+});
+
+// PUT ruta za azuriranje dodele programa pojedinačnom sportisti
+app.put('/assign-program/athlete', authenticateToken, async (req, res) => {
+    const { programId, athleteId } = req.body;
+    const assignedByUserId = req.user.id;
+
+    try {
+        const [existingAssignment] = await dbPool.query(
+            'SELECT * FROM program_athlete_assignments WHERE athlete_id = ?',
+            [athleteId]
+        );
+
+        if (existingAssignment.length > 0) {
+            await dbPool.query(
+                'UPDATE program_athlete_assignments SET program_id = ?, assigned_by_user_id = ? WHERE athlete_id = ?',
+                [programId, assignedByUserId, athleteId]
+            );
+        } else {
+            await dbPool.query(
+                'INSERT INTO program_athlete_assignments (program_id, athlete_id, assigned_by_user_id) VALUES (?, ?, ?)',
+                [programId, athleteId, assignedByUserId]
+            );
+        }
+        res.status(200).json({ message: 'Dodela programa sportisti uspešno ažurirana.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri ažuriranju dodele programa sportisti.' });
+    }
+});
+
+// DELETE ruta za brisanje dodele programa grupi
+app.delete('/assign-program/group/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
+  try {
+    // Provera da li dodela postoji i ko ju je napravio
+    const checkQuery = 'SELECT assigned_by_user_id FROM program_group_assignments WHERE id = ?';
+    const [assignment] = await dbPool.query(checkQuery, [id]);
+
+    if (assignment.length === 0) {
+      return res.status(404).json({ message: 'Dodela nije pronađena.' });
+    }
+
+    const assignedByUserId = assignment[0].assigned_by_user_id;
+
+    // Dozvoli brisanje samo adminu ili korisniku koji je napravio dodelu
+    if (userRole !== 'admin' && assignedByUserId !== userId) {
+      return res.status(403).json({ message: 'Nemate dozvolu da obrišete ovu dodelu.' });
+    }
+
+    // Izvrši brisanje
+    const deleteQuery = 'DELETE FROM program_group_assignments WHERE id = ?';
+    await dbPool.query(deleteQuery, [id]);
+
+    res.status(200).json({ message: 'Dodela uspešno obrisana.' });
+  } catch (error) {
+    console.error('Greška pri brisanju dodele programa za grupu:', error);
+    res.status(500).send('Došlo je do greške na serveru.');
+  }
+});
+
+// DELETE ruta za brisanje dodele programa sportisti
+app.delete('/assign-program/athlete/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
+  try {
+    // Provera da li dodela postoji i ko ju je napravio
+    const checkQuery = 'SELECT assigned_by_user_id FROM program_athlete_assignments WHERE id = ?';
+    const [assignment] = await dbPool.query(checkQuery, [id]);
+
+    if (assignment.length === 0) {
+      return res.status(404).json({ message: 'Dodela nije pronađena.' });
+    }
+
+    const assignedByUserId = assignment[0].assigned_by_user_id;
+
+    // Dozvoli brisanje samo adminu ili korisniku koji je napravio dodelu
+    if (userRole !== 'admin' && assignedByUserId !== userId) {
+      return res.status(403).json({ message: 'Nemate dozvolu da obrišete ovu dodelu.' });
+    }
+
+    // Izvrši brisanje
+    const deleteQuery = 'DELETE FROM program_athlete_assignments WHERE id = ?';
+    await dbPool.query(deleteQuery, [id]);
+
+    res.status(200).json({ message: 'Dodela uspešno obrisana.' });
+  } catch (error) {
+    console.error('Greška pri brisanju dodele programa za sportistu:', error);
+    res.status(500).send('Došlo je do greške na serveru.');
+  }
+});
+
+// GET ruta za dobijanje dodeljenih programa za grupe
+app.get('/assigned-programs/groups', authenticateToken, async (req, res) => {
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
+  try {
+    let query = `
+      SELECT 
+        pg.id AS assignment_id,
+        p.naziv AS program_naziv,
+        g.naziv AS group_naziv
+      FROM program_group_assignments pg
+      JOIN programs p ON pg.program_id = p.id
+      JOIN groups g ON pg.group_id = g.id
+    `;
+    let params = [];
+
+    if (userRole !== 'admin') {
+      // Treneri vide samo grupe koje su im dodeljene
+      query += `
+        JOIN coach_group_assignments cg ON g.id = cg.group_id
+        JOIN trainers tr ON tr.id = cg.coach_id
+        WHERE tr.user_id = ?
+      `;
+      params.push(userId);
+    }
+
+    const [assignments] = await dbPool.query(query, params);
+    res.status(200).json(assignments);
+  } catch (error) {
+    console.error('Greška pri dobijanju dodeljenih programa za grupe:', error);
+    res.status(500).send('Došlo je do greške na serveru.');
+  }
+});
+
+// GET ruta za dobijanje dodeljenih programa za sportiste
+app.get('/assigned-programs/athletes', authenticateToken, async (req, res) => {
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
+  try {
+    let query = `
+      SELECT
+        pa.id AS assignment_id,
+        p.naziv AS program_naziv,
+        a.ime, a.prezime
+      FROM program_athlete_assignments pa
+      JOIN programs p ON pa.program_id = p.id
+      JOIN athletes a ON pa.athlete_id = a.id
+    `;
+    let params = [];
+
+    if (userRole !== 'admin') {
+      // Treneri vide samo sportiste iz svojih grupa
+      // Ovo zahteva kompleksniji JOIN
+      query += `
+        JOIN coach_athlete_assignments ag ON a.id = ag.athlete_id
+        JOIN trainers tr ON tr.id = ag.coach_id
+        WHERE tr.user_id = ?
+      `;
+      params.push(userId);
+    }
+    
+    const [assignments] = await dbPool.query(query, params);
+    res.status(200).json(assignments);
+  } catch (error) {
+    console.error('Greška pri dobijanju dodeljenih programa za sportiste:', error);
+    res.status(500).send('Došlo je do greške na serveru.');
+  }
+});
+
+// Ruta za dobijanje dodeljenih sportista za određenog trenera
+app.get('/coaches/:coachId/assigned-athletes', authenticateToken, async (req, res) => {
+    try {
+        const { coachId } = req.params;
+        const [athletes] = await dbPool.query(
+            `
+            SELECT
+                u.id,
+                u.ime,
+                u.prezime,
+                u.datum_rodenja
+            FROM
+                athletes u
+            JOIN
+                coach_athlete_assignments caa ON u.id = caa.athlete_id
+            WHERE
+                caa.coach_id = ?
+            `,
+            [coachId]
+        );
+        res.status(200).json(athletes);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju dodeljenih sportista.' });
+    }
+});
+
+// Ruta za dobijanje dodeljenih grupa za određenog trenera
+app.get('/coaches/:coachId/assigned-groups', authenticateToken, async (req, res) => {
+    try {
+        const { coachId } = req.params;
+        const [groups] = await dbPool.query(
+            `
+            SELECT
+                g.id,
+                g.naziv
+            FROM
+                groups g
+            JOIN
+                coach_group_assignments cga ON g.id = cga.group_id
+            WHERE
+                cga.coach_id = ?
+            `,
+            [coachId]
+        );
+        res.status(200).json(groups);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju dodeljenih grupa.' });
+    }
+});
+
+// Ruta za dobijanje dodeljenih sportista za određenog trenera na osnovu njegovog id usera
+app.get('/coaches/:userId/assigned-athletes-iduser', authenticateToken, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const [athletes] = await dbPool.query(
+            `
+            SELECT
+                u.id,
+                u.ime,
+                u.prezime,
+                u.datum_rodenja
+            FROM
+                athletes u
+            JOIN
+                coach_athlete_assignments caa ON u.id = caa.athlete_id
+            JOIN
+                trainers tr ON tr.id = caa.coach_id
+            WHERE
+                tr.user_id = ?
+            `,
+            [userId]
+        );
+        res.status(200).json(athletes);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju dodeljenih sportista.' });
+    }
+});
+
+// Ruta za dobijanje dodeljenih grupa za određenog trenera na osnovu njegovog id usera
+app.get('/coaches/:userId/assigned-groups-iduser', authenticateToken, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const [groups] = await dbPool.query(
+            `
+            SELECT
+                g.id,
+                g.naziv
+            FROM
+                groups g
+            JOIN
+                coach_group_assignments cga ON g.id = cga.group_id
+            JOIN
+                trainers tr ON tr.id = cga.coach_id
+            WHERE
+                tr.user_id = ?
+            `,
+            [userId]
+        );
+        res.status(200).json(groups);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju dodeljenih grupa.' });
+    }
+});
+
+// PUT ruta za dodelu trenera sportisti (upsert logikom)
+app.put('/coach/assign-athlete', authenticateToken, async (req, res) => {
+    const { athleteId } = req.body;
+    const coachId = req.user.id;
+
+    try {
+        const [existingAssignment] = await dbPool.query(
+            'SELECT * FROM coach_athlete_assignments WHERE coach_id = ? AND athlete_id = ?',
+            [coachId, athleteId]
+        );
+
+        if (existingAssignment.length === 0) {
+            await dbPool.query(
+                'INSERT INTO coach_athlete_assignments (coach_id, athlete_id) VALUES (?, ?)',
+                [coachId, athleteId]
+            );
+            res.status(201).json({ message: 'Sportista je uspešno dodat treneru.' });
+        } else {
+            res.status(200).json({ message: 'Sportista je već dodat treneru.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dodeli sportiste treneru.' });
+    }
+});
+
+// PUT ruta za dodelu trenera grupi (upsert logikom)
+app.put('/coach/assign-group', authenticateToken, async (req, res) => {
+    const { groupId } = req.body;
+    const coachId = req.user.id;
+
+    try {
+        const [existingAssignment] = await dbPool.query(
+            'SELECT * FROM coach_group_assignments WHERE coach_id = ? AND group_id = ?',
+            [coachId, groupId]
+        );
+
+        if (existingAssignment.length === 0) {
+            await dbPool.query(
+                'INSERT INTO coach_group_assignments (coach_id, group_id) VALUES (?, ?)',
+                [coachId, groupId]
+            );
+            res.status(201).json({ message: 'Grupa je uspešno dodata treneru.' });
+        } else {
+            res.status(200).json({ message: 'Grupa je već dodata treneru.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dodeli grupe treneru.' });
+    }
+});
+
+// Ruta za dodelu sportista i grupa treneru (sa administratorskim pristupom)
+app.post('/coaches/assign', authenticateToken, async (req, res) => {
+    const { coach_id, athlete_ids, group_ids } = req.body;
+
+    // Provera da li je korisnik administrator
+    // Pretpostavljamo da imate 'role' kolonu u tabeli 'users'
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Samo administrator može vršiti dodele.' });
+    }
+
+    // Provera da li je izabran trener
+    if (!coach_id) {
+        return res.status(400).json({ message: 'ID trenera je obavezan.' });
+    }
+
+    const connection = await dbPool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Dodeljivanje sportista
+        if (athlete_ids && athlete_ids.length > 0) {
+            // Izbegavajte duplikate: prvo obrišite postojeće dodele
+            await connection.query(
+                `DELETE FROM coach_athlete_assignments WHERE coach_id = ? AND athlete_id IN (?)`,
+                [coach_id, athlete_ids]
+            );
+            const athleteAssignments = athlete_ids.map(athleteId => [coach_id, athleteId]);
+            await connection.query(
+                `INSERT INTO coach_athlete_assignments (coach_id, athlete_id) VALUES ?`,
+                [athleteAssignments]
+            );
+        }
+
+        // Dodeljivanje grupa
+        if (group_ids && group_ids.length > 0) {
+            // Izbegavajte duplikate: prvo obrišite postojeće dodele
+            await connection.query(
+                `DELETE FROM coach_group_assignments WHERE coach_id = ? AND group_id IN (?)`,
+                [coach_id, group_ids]
+            );
+            const groupAssignments = group_ids.map(groupId => [coach_id, groupId]);
+            await connection.query(
+                `INSERT INTO coach_group_assignments (coach_id, group_id) VALUES ?`,
+                [groupAssignments]
+            );
+        }
+
+        await connection.commit();
+        res.status(200).json({ message: 'Sportisti i grupe su uspešno dodeljeni.' });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Greška pri dodeli:', error);
+        res.status(500).json({ message: 'Greška pri dodeli. Molimo pokušajte ponovo.' });
+    } finally {
+        connection.release();
+    }
+});
+
+// DELETE ruta za uklanjanje dodele trenera sportisti
+app.delete('/coach/unassign-athlete/:athleteId', authenticateToken, async (req, res) => {
+    const { athleteId } = req.params;
+    const coachId = req.user.id;
+
+    try {
+        const [result] = await dbPool.query(
+            'DELETE FROM coach_athlete_assignments WHERE coach_id = ? AND athlete_id = ?',
+            [coachId, athleteId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Dodela za datog sportistu nije pronađena.' });
+        }
+
+        res.status(200).json({ message: 'Sportista je uspešno uklonjen sa liste trenera.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri uklanjanju dodele sportisti.' });
+    }
+});
+
+// DELETE ruta za uklanjanje dodele trenera grupi
+app.delete('/coach/unassign-group/:groupId', authenticateToken, async (req, res) => {
+    const { groupId } = req.params;
+    const coachId = req.user.id;
+
+    try {
+        const [result] = await dbPool.query(
+            'DELETE FROM coach_group_assignments WHERE coach_id = ? AND group_id = ?',
+            [coachId, groupId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Dodela za datu grupu nije pronađena.' });
+        }
+
+        res.status(200).json({ message: 'Grupa je uspešno uklonjena sa liste trenera.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri uklanjanju dodele grupi.' });
+    }
+});
+
+// GET ruta za dobijanje podataka o treneru na osnovu user_id
+app.get('/trainers/:userId', authenticateToken, async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const [trainer] = await dbPool.query(
+            'SELECT * FROM trainers WHERE user_id = ?',
+            [userId]
+        );
+
+        if (trainer.length === 0) {
+            return res.status(404).json({ message: 'Trener nije pronađen.' });
+        }
+
+        res.status(200).json(trainer[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri dobijanju podataka o treneru.' });
+    }
+});
+
+// PUT ruta za ažuriranje podataka o treneru
+app.put('/trainers/:userId', authenticateToken, async (req, res) => {
+    const { userId } = req.params;
+    const { ime, prezime, datum_rodenja, adresa_stanovanja, mesto, telefon, broj_licence, datum_isticanja } = req.body;
+    
+    // Provera da li je prijavljeni korisnik ovlašćen
+    // if (req.user.id !== parseInt(userId)) {
+    //     return res.status(403).json({ message: 'Nemate dozvolu za ažuriranje ovog profila.' });
+    // }
+
+    try {
+        const [result] = await dbPool.query(
+            `
+            UPDATE trainers
+            SET
+                ime = ?,
+                prezime = ?,
+                datum_rodenja = ?,
+                adresa_stanovanja = ?,
+                mesto = ?,
+                telefon = ?,
+                broj_licence = ?,
+                datum_isticanja = ?
+            WHERE id = ?
+            `,
+            [ime, prezime, datum_rodenja, adresa_stanovanja, mesto, telefon, broj_licence, datum_isticanja, userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Trener nije pronađen za ažuriranje.' });
+        }
+
+        res.status(200).json({ message: 'Podaci o treneru su uspešno ažurirani.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri ažuriranju podataka o treneru.' });
+    }
+});
+
+// DELETE ruta za brisanje trenera
+app.delete('/trainers/:userId', authenticateToken, async (req, res) => {
+    const { userId } = req.params;
+
+    // Primer: samo administrator ili sam korisnik može da se obriše
+    if (req.user.role !== 'admin' && req.user.id !== parseInt(userId)) {
+        return res.status(403).json({ message: 'Nemate dozvolu za brisanje ovog profila.' });
+    }
+    
+    try {
+        const [result] = await dbPool.query(
+            'DELETE FROM trainers WHERE user_id = ?',
+            [userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Trener nije pronađen za brisanje.' });
+        }
+
+        res.status(200).json({ message: 'Trener je uspešno obrisan.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri brisanju trenera.' });
+    }
+});
+
+// GET ruta za dobijanje prisutnosti na treningu
+app.get('/trainings/:id/attendance', authenticateToken, async (req, res) => {
+    const { id: trainingId } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    try {
+        let query = `
+            SELECT
+                a.id AS athlete_id,
+                a.ime,
+                a.prezime,
+                ta.status,
+                ta.napomena
+            FROM
+                trainings t
+            JOIN
+                programs p ON t.program_id = p.id
+            LEFT JOIN
+                program_group_assignments pga ON p.id = pga.program_id
+            LEFT JOIN
+                program_athlete_assignments paa ON p.id = paa.program_id
+            JOIN
+                athletes a ON a.id = pga.athlete_id OR a.id = paa.athlete_id
+            LEFT JOIN
+                training_attendance ta ON a.id = ta.athlete_id AND t.id = ta.training_id
+            WHERE
+                t.id = ? AND (pga.program_id IS NOT NULL OR paa.program_id IS NOT NULL)
+        `;
+        const params = [trainingId];
+        
+        // Logika za kontrolu pristupa za trenere
+        if (userRole !== 'admin') {
+            query += `
+                AND (
+                    pga.group_id IN (SELECT group_id FROM coach_group_assignments WHERE coach_id = ?)
+                    OR paa.athlete_id IN (SELECT athlete_id FROM coach_athlete_assignments WHERE coach_id = ?)
+                )
+            `;
+            params.push(userId, userId);
+        }
+
+        const [results] = await dbPool.query(query, params);
+
+        // Uklanjanje duplikata jer je sportista mogao biti dodeljen i preko grupe i pojedinačno
+        const uniqueResults = Object.values(results.reduce((acc, current) => {
+            acc[current.athlete_id] = current;
+            return acc;
+        }, {}));
+
+        res.status(200).json(uniqueResults);
+    } catch (error) {
+        console.error('Greška pri dobijanju prisutnosti:', error);
+        res.status(500).send('Došlo je do greške na serveru.');
+    }
+});
+
+// POST ruta za evidentiranje prisutnosti
+app.post('/attendance', authenticateToken, async (req, res) => {
+    const { training_id, attendance_records } = req.body;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    // Provera dozvola
+    // Može se proveriti da li je trener odgovoran za grupu/sportiste na ovom treningu
+    try {
+        let isAuthorized = false;
+        if (userRole === 'admin') {
+            isAuthorized = true;
+        } else {
+            const [trainings] = await dbPool.query(
+                `SELECT group_id FROM trainings WHERE id = ?`,
+                [training_id]
+            );
+            if (trainings.length > 0) {
+                const groupId = trainings[0].group_id;
+                const [assignments] = await dbPool.query(
+                    `SELECT COUNT(*) AS count FROM coach_group_assignments WHERE coach_id = ? AND group_id = ?`,
+                    [userId, groupId]
+                );
+                if (assignments[0].count > 0) {
+                    isAuthorized = true;
+                }
+            }
+        }
+
+        if (!isAuthorized) {
+            return res.status(403).json({ message: 'Nemate dozvolu da evidentirate prisutnost za ovaj trening.' });
+        }
+
+        // Evidencija prisutnosti
+        for (const record of attendance_records) {
+            const { athlete_id, status, napomena } = record;
+            const date = new Date().toISOString().slice(0, 10);
+
+            await dbPool.query(
+                `INSERT INTO training_attendance (training_id, athlete_id, status, date, napomena) 
+                 VALUES (?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE status = VALUES(status), napomena = VALUES(napomena)`,
+                [training_id, athlete_id, status, date, napomena || null]
+            );
+        }
+
+        res.status(201).json({ message: 'Prisutnost uspešno evidentirana.' });
+    } catch (error) {
+        console.error('Greška pri evidentiranju prisutnosti:', error);
+        res.status(500).json({ message: 'Greška pri evidentiranju prisutnosti.' });
+    }
 });
 
 // Pokretanje servera
