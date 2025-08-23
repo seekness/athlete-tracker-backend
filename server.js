@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
   res.send('Server je pokrenut!');
 });
 
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { username, display_name, password, role } = req.body;
   let connection;
 
@@ -103,7 +103,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   
   if (!username || !password) {
@@ -184,7 +184,7 @@ function isTrener(req, res, next) {
 //--- RUTAS ZA LOKACIJE ---
 
 // Ruta za kreiranje nove lokacije (za trenere)
-app.post('/locations', authenticateToken, isTrener, async (req, res) => {
+app.post('/api/locations', authenticateToken, isTrener, async (req, res) => {
   const { naziv, adresa, mesto } = req.body;
   
   try {
@@ -203,7 +203,7 @@ app.post('/locations', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih lokacija (za sve prijavljene korisnike)
-app.get('/locations', authenticateToken, async (req, res) => {
+app.get('/api/locations', authenticateToken, async (req, res) => {
   try {
     const [locations] = await dbPool.query('SELECT * FROM locations');
     res.status(200).json(locations);
@@ -214,7 +214,7 @@ app.get('/locations', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodavanje novog sportiste (za trenere)
-app.post('/athletes', authenticateToken, async (req, res) => {
+app.post('/api/athletes', authenticateToken, async (req, res) => {
   const { 
     ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
     mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
@@ -248,32 +248,9 @@ app.post('/athletes', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/athletes', authenticateToken, async (req, res) => {
+app.get('/api/athletes', authenticateToken, async (req, res) => {
   try {
-    const query = `
-      SELECT
-        a.id,
-        a.ime,
-        a.prezime,
-        a.datum_rodenja,
-        a.broj_telefona,
-        a.ime_roditelja,
-        a.jmbg,
-        a.mesto_rodenja,
-        a.adresa_stanovanja,
-        a.mesto_stanovanja,
-        a.email,
-        a.aktivan,  
-        a.broj_knjizice,  
-        a.datum_poslednjeg_sportskog_pregleda,  
-        u.username,
-        g.naziv AS group_name
-      FROM athletes a
-      LEFT JOIN users u ON a.user_id = u.id
-      LEFT JOIN group_memberships gm ON a.id = gm.athlete_id
-      LEFT JOIN groups g ON gm.group_id = g.id
-      ORDER BY a.prezime ASC
-    `;
+    const query = 'SELECT a.id, a.ime, a.prezime, a.datum_rodenja, a.broj_telefona, a.ime_roditelja, a.jmbg, a.mesto_rodenja, a.adresa_stanovanja, a.mesto_stanovanja, a.email, a.aktivan, a.broj_knjizice, a.datum_poslednjeg_sportskog_pregleda, u.username, g.naziv AS group_name FROM athletes a LEFT JOIN users u ON a.user_id = u.id LEFT JOIN group_memberships gm ON a.id = gm.athlete_id LEFT JOIN `groups` g ON gm.group_id = g.id ORDER BY a.prezime ASC';
     const [rows] = await dbPool.query(query);
     res.json(rows);
   } catch (error) {
@@ -282,7 +259,7 @@ app.get('/athletes', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/athletes/:athleteId/groups', authenticateToken, async (req, res) => {
+app.get('/api/athletes/:athleteId/groups', authenticateToken, async (req, res) => {
   const { athleteId } = req.params;
   try {
     const query = `
@@ -316,7 +293,7 @@ app.get('/athletes/:athleteId/groups', authenticateToken, async (req, res) => {
 //--- RUTAS ZA UPRAVLJANJE CLANOVIMA GRUPA ---
 
 // Ruta za dobijanje sportista u određenoj grupi
-app.get('/groups/:groupId/athletes', authenticateToken, async (req, res) => {
+app.get('/api/groups/:groupId/athletes', authenticateToken, async (req, res) => {
   const { groupId } = req.params;
   try {
     const query = `
@@ -333,7 +310,7 @@ app.get('/groups/:groupId/athletes', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodelu/ažuriranje sportista u grupi (za trenere)
-app.post('/groups/:groupId/athletes', authenticateToken, isTrener, async (req, res) => {
+app.post('/api/groups/:groupId/athletes', authenticateToken, isTrener, async (req, res) => {
   const { groupId } = req.params;
   const { athlete_ids } = req.body; // Očekuje se niz ID-jeva sportista
   let connection;
@@ -372,7 +349,7 @@ app.post('/groups/:groupId/athletes', authenticateToken, isTrener, async (req, r
 
 
 // Ruta za brisanje sportiste po ID-u
-app.delete('/athletes/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/api/athletes/:id', authenticateToken, isTrener, async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await dbPool.query('SELECT user_id FROM athletes WHERE id = ?', [id]);
@@ -396,7 +373,7 @@ app.delete('/athletes/:id', authenticateToken, isTrener, async (req, res) => {
   }
 });
 
-app.put('/athletes/:athleteId', authenticateToken, async (req, res) => {
+app.put('/api/athletes/:athleteId', authenticateToken, async (req, res) => {
   const { athleteId } = req.params;
   const {
     ime,
@@ -487,7 +464,7 @@ app.put('/athletes/:athleteId', authenticateToken, async (req, res) => {
 });
 
 // Ruta za ažuriranje lokacije
-app.put('/locations/:id', authenticateToken, isTrener, async (req, res) => {
+app.put('/api/locations/:id', authenticateToken, isTrener, async (req, res) => {
   const { id } = req.params;
   const { naziv, adresa, mesto } = req.body;
   if (!naziv || !adresa || !mesto) {
@@ -503,7 +480,7 @@ app.put('/locations/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za brisanje lokacije
-app.delete('/locations/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/api/locations/:id', authenticateToken, isTrener, async (req, res) => {
   const { id } = req.params;
   try {
     await dbPool.query('DELETE FROM locations WHERE id = ?', [id]);
@@ -515,9 +492,9 @@ app.delete('/locations/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih grupa
-app.get('/groups', authenticateToken, async (req, res) => {
+app.get('/api/groups', authenticateToken, async (req, res) => {
   try {
-    const [rows] = await dbPool.query('SELECT * FROM groups ORDER BY naziv ASC');
+    const [rows] = await dbPool.query('SELECT * FROM `groups` ORDER BY naziv ASC');
     res.json(rows);
   } catch (error) {
     console.error('Greška pri dobijanju grupa:', error);
@@ -526,13 +503,13 @@ app.get('/groups', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodavanje nove grupe
-app.post('/groups', authenticateToken, async (req, res) => {
+app.post('/api/groups', authenticateToken, async (req, res) => {
   const { naziv, opis } = req.body;
   if (!naziv) {
     return res.status(400).send('Naziv grupe je obavezan.');
   }
   try {
-    const [result] = await dbPool.query('INSERT INTO groups (naziv, opis) VALUES (?, ?)', [naziv, opis]);
+    const [result] = await dbPool.query('INSERT INTO `groups` (naziv, opis) VALUES (?, ?)', [naziv, opis]);
     res.status(201).send({ id: result.insertId, naziv, opis });
   } catch (error) {
     console.error('Greška pri dodavanju grupe:', error);
@@ -541,14 +518,14 @@ app.post('/groups', authenticateToken, async (req, res) => {
 });
 
 // Ruta za ažuriranje grupe
-app.put('/groups/:id', authenticateToken, async (req, res) => {
+app.put('/api/groups/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis } = req.body;
   if (!naziv) {
     return res.status(400).send('Naziv grupe je obavezan.');
   }
   try {
-    await dbPool.query('UPDATE groups SET naziv = ?, opis = ? WHERE id = ?', [naziv, opis, id]);
+    await dbPool.query('UPDATE `groups` SET naziv = ?, opis = ? WHERE id = ?', [naziv, opis, id]);
     res.send('Grupa uspešno ažurirana.');
   } catch (error) {
     console.error('Greška pri ažuriranju grupe:', error);
@@ -557,7 +534,7 @@ app.put('/groups/:id', authenticateToken, async (req, res) => {
 });
 
 // Ruta za brisanje grupe
-app.delete('/groups/:id', authenticateToken, async (req, res) => {
+app.delete('/api/groups/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const connection = await dbPool.getConnection();
   try {
@@ -565,7 +542,7 @@ app.delete('/groups/:id', authenticateToken, async (req, res) => {
     // Brisanje članova grupe prvo
     await connection.query('DELETE FROM group_memberships WHERE group_id = ?', [id]);
     // Brisanje same grupe
-    await connection.query('DELETE FROM groups WHERE id = ?', [id]);
+    await connection.query('DELETE FROM `groups` WHERE id = ?', [id]);
     await connection.commit();
     res.send('Grupa uspešno obrisana.');
   } catch (error) {
@@ -578,7 +555,7 @@ app.delete('/groups/:id', authenticateToken, async (req, res) => {
 });
 
 // Nova ruta za dobijanje spiska SVIH sportista bez informacija o grupi
-app.get('/all-athletes', authenticateToken, async (req, res) => {
+app.get('/api/all-athletes', authenticateToken, async (req, res) => {
   try {
     const [rows] = await dbPool.query(`
       SELECT 
@@ -594,7 +571,7 @@ app.get('/all-athletes', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dobijanje svih kategorija vežbi
-app.get('/exercise-categories', authenticateToken, async (req, res) => {
+app.get('/api/exercise-categories', authenticateToken, async (req, res) => {
   try {
     const [rows] = await dbPool.query('SELECT * FROM exercise_categories ORDER BY naziv ASC');
     res.json(rows);
@@ -605,7 +582,7 @@ app.get('/exercise-categories', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodavanje nove kategorije vežbi
-app.post('/exercise-categories', authenticateToken, async (req, res) => {
+app.post('/api/exercise-categories', authenticateToken, async (req, res) => {
   const { naziv, opis } = req.body;
   if (!naziv) {
     return res.status(400).send('Naziv kategorije je obavezan.');
@@ -620,7 +597,7 @@ app.post('/exercise-categories', authenticateToken, async (req, res) => {
 });
 
 // Ruta za ažuriranje kategorije vežbi
-app.put('/exercise-categories/:id', authenticateToken, async (req, res) => {
+app.put('/api/exercise-categories/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis } = req.body;
   if (!naziv) {
@@ -636,7 +613,7 @@ app.put('/exercise-categories/:id', authenticateToken, async (req, res) => {
 });
 
 // Ruta za brisanje kategorije vežbi
-app.delete('/exercise-categories/:id', authenticateToken, async (req, res) => {
+app.delete('/api/exercise-categories/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     // Ovde bi trebalo da dodate proveru da li je kategorija u upotrebi pre brisanja
@@ -649,7 +626,7 @@ app.delete('/exercise-categories/:id', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dobijanje svih mišićnih grupa
-app.get('/muscle-groups', authenticateToken, isTrener, async (req, res) => {
+app.get('/api/muscle-groups', authenticateToken, isTrener, async (req, res) => {
   try {
     const [rows] = await dbPool.query('SELECT * FROM muscle_groups ORDER BY naziv ASC');
     res.json(rows);
@@ -660,7 +637,7 @@ app.get('/muscle-groups', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih vežbi sa informacijama o mišićnim grupama i kategorijama
-app.get('/exercises', authenticateToken, async (req, res) => {
+app.get('/api/exercises', authenticateToken, async (req, res) => {
   try {
     const query = `
       SELECT 
@@ -684,7 +661,7 @@ app.get('/exercises', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodavanje nove vežbe
-app.post('/exercises', authenticateToken, async (req, res) => {
+app.post('/api/exercises', authenticateToken, async (req, res) => {
   const { naziv, opis, muscle_group_id, exercise_category_id, other_muscle_group_id, oprema, unilateral, video_link, slika } = req.body;
   if (!naziv || !muscle_group_id || !exercise_category_id) {
     return res.status(400).send('Naziv vežbe, mišićna grupa, kategorija i vrsta unosa su obavezni.');
@@ -702,7 +679,7 @@ app.post('/exercises', authenticateToken, async (req, res) => {
 });
 
 // Ruta za ažuriranje vežbe
-app.put('/exercises/:id', authenticateToken, async (req, res) => {
+app.put('/api/exercises/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis, muscle_group_id, exercise_category_id, other_muscle_group_id, oprema, unilateral, video_link, slika } = req.body;
   if (!naziv || !muscle_group_id || !exercise_category_id || !vrsta_unosa) {
@@ -721,7 +698,7 @@ app.put('/exercises/:id', authenticateToken, async (req, res) => {
 });
 
 // Ruta za brisanje vežbe
-app.delete('/exercises/:id', authenticateToken, async (req, res) => {
+app.delete('/api/exercises/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await dbPool.query('DELETE FROM exercises WHERE id = ?', [id]);
@@ -733,7 +710,7 @@ app.delete('/exercises/:id', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dobijanje svih trenera
-app.get('/coaches', authenticateToken, async (req, res) => {
+app.get('/api/coaches', authenticateToken, async (req, res) => {
     try {
         const [coaches] = await dbPool.query(
             `
@@ -748,7 +725,7 @@ app.get('/coaches', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dobijanje svih takmičara
-app.get('/allathletes', authenticateToken, async (req, res) => {
+app.get('/api/allathletes', authenticateToken, async (req, res) => {
     try {
         const [coaches] = await dbPool.query(
             `
@@ -763,7 +740,7 @@ app.get('/allathletes', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dobijanje svih programa
-app.get('/programs', authenticateToken, async (req, res) => {
+app.get('/api/programs', authenticateToken, async (req, res) => {
   const userRole = req.user.role;
   const userId = req.user.id;
 
@@ -789,7 +766,7 @@ app.get('/programs', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodavanje novog programa
-app.post('/programs', authenticateToken, async (req, res) => {
+app.post('/api/programs', authenticateToken, async (req, res) => {
   const { naziv, opis } = req.body;
   const userId = req.user.id; // Pretpostavka da token sadrži ID korisnika
 
@@ -807,7 +784,7 @@ app.post('/programs', authenticateToken, async (req, res) => {
 });
 
 // Ruta za ažuriranje programa
-app.put('/programs/:id', authenticateToken, async (req, res) => {
+app.put('/api/programs/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis } = req.body;
   const userId = req.user.id;
@@ -845,7 +822,7 @@ app.put('/programs/:id', authenticateToken, async (req, res) => {
 });
 
 // Ruta za brisanje programa
-app.delete('/programs/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/api/programs/:id', authenticateToken, isTrener, async (req, res) => {
   const { id } = req.params;
   try {
     await dbPool.query('DELETE FROM programs WHERE id = ?', [id]);
@@ -857,7 +834,7 @@ app.delete('/programs/:id', authenticateToken, isTrener, async (req, res) => {
 });
 
 // Ruta za dobijanje svih treninga za određeni program, uključujući vežbe
-app.get('/programs/:programId/trainings', authenticateToken, isTrener, async (req, res) => {
+app.get('/api/programs/:programId/trainings', authenticateToken, isTrener, async (req, res) => {
   const { programId } = req.params;
   try {
     // Dobijanje osnovnih informacija o treninzima
@@ -893,7 +870,7 @@ app.get('/programs/:programId/trainings', authenticateToken, isTrener, async (re
 });
 
 // Ruta za dodavanje novog treninga u program
-app.post('/programs/:programId/trainings', authenticateToken, isTrener, async (req, res) => {
+app.post('/api/programs/:programId/trainings', authenticateToken, isTrener, async (req, res) => {
   const { programId } = req.params;
   const { opis, datum, vreme, predicted_duration_minutes, location_id, exercises } = req.body;
   
@@ -937,7 +914,7 @@ app.post('/programs/:programId/trainings', authenticateToken, isTrener, async (r
 });
 
 // Ruta za ažuriranje postojećeg treninga
-app.put('/trainings/:trainingId', authenticateToken, isTrener, async (req, res) => {
+app.put('/api/trainings/:trainingId', authenticateToken, isTrener, async (req, res) => {
     const { trainingId } = req.params;
     const { opis, datum, vreme, predicted_duration_minutes, location_id, exercises } = req.body;
 
@@ -1034,7 +1011,7 @@ app.put('/trainings/:trainingId', authenticateToken, isTrener, async (req, res) 
 });
 
 // Ruta za brisanje treninga
-app.delete('/trainings/:trainingId', authenticateToken, isTrener, async (req, res) => {
+app.delete('/api/trainings/:trainingId', authenticateToken, isTrener, async (req, res) => {
   const { trainingId } = req.params;
   try {
     await dbPool.query('DELETE FROM trainings WHERE id = ?', [trainingId]);
@@ -1046,7 +1023,7 @@ app.delete('/trainings/:trainingId', authenticateToken, isTrener, async (req, re
 });
 
 // POST ruta za dodelu programa grupi
-app.post('/assign-program/group', authenticateToken, async (req, res) => {
+app.post('/api/assign-program/group', authenticateToken, async (req, res) => {
     const { programId, groupId } = req.body;
     const assignedByUserId = req.user.id;
 
@@ -1063,7 +1040,7 @@ app.post('/assign-program/group', authenticateToken, async (req, res) => {
 });
 
 // POST ruta za dodelu programa pojedinačnom sportisti
-app.post('/assign-program/athlete', authenticateToken, async (req, res) => {
+app.post('/api/assign-program/athlete', authenticateToken, async (req, res) => {
     const { programId, athleteId } = req.body;
     const assignedByUserId = req.user.id;
 
@@ -1080,7 +1057,7 @@ app.post('/assign-program/athlete', authenticateToken, async (req, res) => {
 });
 
 // PUT ruta za azuriranje dodele programa grupi
-app.put('/assign-program/group', authenticateToken, async (req, res) => {
+app.put('/api/assign-program/group', authenticateToken, async (req, res) => {
     const { programId, groupId } = req.body;
     const assignedByUserId = req.user.id;
 
@@ -1109,7 +1086,7 @@ app.put('/assign-program/group', authenticateToken, async (req, res) => {
 });
 
 // PUT ruta za azuriranje dodele programa pojedinačnom sportisti
-app.put('/assign-program/athlete', authenticateToken, async (req, res) => {
+app.put('/api/assign-program/athlete', authenticateToken, async (req, res) => {
     const { programId, athleteId } = req.body;
     const assignedByUserId = req.user.id;
 
@@ -1138,7 +1115,7 @@ app.put('/assign-program/athlete', authenticateToken, async (req, res) => {
 });
 
 // DELETE ruta za brisanje dodele programa grupi
-app.delete('/assign-program/group/:id', authenticateToken, async (req, res) => {
+app.delete('/api/assign-program/group/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
   const userRole = req.user.role;
@@ -1171,7 +1148,7 @@ app.delete('/assign-program/group/:id', authenticateToken, async (req, res) => {
 });
 
 // DELETE ruta za brisanje dodele programa sportisti
-app.delete('/assign-program/athlete/:id', authenticateToken, async (req, res) => {
+app.delete('/api/assign-program/athlete/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
   const userRole = req.user.role;
@@ -1204,20 +1181,13 @@ app.delete('/assign-program/athlete/:id', authenticateToken, async (req, res) =>
 });
 
 // GET ruta za dobijanje dodeljenih programa za grupe
-app.get('/assigned-programs/groups', authenticateToken, async (req, res) => {
+app.get('/api/assigned-programs/groups', authenticateToken, async (req, res) => {
   const userRole = req.user.role;
   const userId = req.user.id;
 
   try {
-    let query = `
-      SELECT 
-        pg.id AS assignment_id,
-        p.naziv AS program_naziv,
-        g.naziv AS group_naziv
-      FROM program_group_assignments pg
-      JOIN programs p ON pg.program_id = p.id
-      JOIN groups g ON pg.group_id = g.id
-    `;
+    let query = 
+      'SELECT pg.id AS assignment_id, p.naziv AS program_naziv, g.naziv AS group_naziv FROM program_group_assignments pg JOIN programs p ON pg.program_id = p.id JOIN `groups` g ON pg.group_id = g.id';
     let params = [];
 
     if (userRole !== 'admin') {
@@ -1239,7 +1209,7 @@ app.get('/assigned-programs/groups', authenticateToken, async (req, res) => {
 });
 
 // GET ruta za dobijanje dodeljenih programa za sportiste
-app.get('/assigned-programs/athletes', authenticateToken, async (req, res) => {
+app.get('/api/assigned-programs/athletes', authenticateToken, async (req, res) => {
   const userRole = req.user.role;
   const userId = req.user.id;
 
@@ -1275,7 +1245,7 @@ app.get('/assigned-programs/athletes', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dobijanje dodeljenih sportista za određenog trenera
-app.get('/coaches/:coachId/assigned-athletes', authenticateToken, async (req, res) => {
+app.get('/api/coaches/:coachId/assigned-athletes', authenticateToken, async (req, res) => {
     try {
         const { coachId } = req.params;
         const [athletes] = await dbPool.query(
@@ -1302,7 +1272,7 @@ app.get('/coaches/:coachId/assigned-athletes', authenticateToken, async (req, re
 });
 
 // Ruta za dobijanje dodeljenih grupa za određenog trenera
-app.get('/coaches/:coachId/assigned-groups', authenticateToken, async (req, res) => {
+app.get('/api/coaches/:coachId/assigned-groups', authenticateToken, async (req, res) => {
     try {
         const { coachId } = req.params;
         const [groups] = await dbPool.query(
@@ -1327,7 +1297,7 @@ app.get('/coaches/:coachId/assigned-groups', authenticateToken, async (req, res)
 });
 
 // Ruta za dobijanje dodeljenih sportista za određenog trenera na osnovu njegovog id usera
-app.get('/coaches/:userId/assigned-athletes-iduser', authenticateToken, async (req, res) => {
+app.get('/api/coaches/:userId/assigned-athletes-iduser', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
         const [athletes] = await dbPool.query(
@@ -1356,23 +1326,11 @@ app.get('/coaches/:userId/assigned-athletes-iduser', authenticateToken, async (r
 });
 
 // Ruta za dobijanje dodeljenih grupa za određenog trenera na osnovu njegovog id usera
-app.get('/coaches/:userId/assigned-groups-iduser', authenticateToken, async (req, res) => {
+app.get('/api/coaches/:userId/assigned-groups-iduser', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
         const [groups] = await dbPool.query(
-            `
-            SELECT
-                g.id,
-                g.naziv
-            FROM
-                groups g
-            JOIN
-                coach_group_assignments cga ON g.id = cga.group_id
-            JOIN
-                trainers tr ON tr.id = cga.coach_id
-            WHERE
-                tr.user_id = ?
-            `,
+            'SELECT g.id, g.naziv FROM `groups` g JOIN coach_group_assignments cga ON g.id = cga.group_id JOIN trainers tr ON tr.id = cga.coach_id WHERE tr.user_id = ? ',
             [userId]
         );
         res.status(200).json(groups);
@@ -1383,7 +1341,7 @@ app.get('/coaches/:userId/assigned-groups-iduser', authenticateToken, async (req
 });
 
 // PUT ruta za dodelu trenera sportisti (upsert logikom)
-app.put('/coach/assign-athlete', authenticateToken, async (req, res) => {
+app.put('/api/coach/assign-athlete', authenticateToken, async (req, res) => {
     const { athleteId } = req.body;
     const coachId = req.user.id;
 
@@ -1409,7 +1367,7 @@ app.put('/coach/assign-athlete', authenticateToken, async (req, res) => {
 });
 
 // PUT ruta za dodelu trenera grupi (upsert logikom)
-app.put('/coach/assign-group', authenticateToken, async (req, res) => {
+app.put('/api/coach/assign-group', authenticateToken, async (req, res) => {
     const { groupId } = req.body;
     const coachId = req.user.id;
 
@@ -1435,7 +1393,7 @@ app.put('/coach/assign-group', authenticateToken, async (req, res) => {
 });
 
 // Ruta za dodelu sportista i grupa treneru (sa administratorskim pristupom)
-app.post('/coaches/assign', authenticateToken, async (req, res) => {
+app.post('/api/coaches/assign', authenticateToken, async (req, res) => {
     const { coach_id, athlete_ids, group_ids } = req.body;
 
     // Provera da li je korisnik administrator
@@ -1494,7 +1452,7 @@ app.post('/coaches/assign', authenticateToken, async (req, res) => {
 });
 
 // DELETE ruta za uklanjanje dodele trenera sportisti
-app.delete('/coach/unassign-athlete/:athleteId', authenticateToken, async (req, res) => {
+app.delete('/api/coach/unassign-athlete/:athleteId', authenticateToken, async (req, res) => {
     const { athleteId } = req.params;
     const coachId = req.user.id;
 
@@ -1516,7 +1474,7 @@ app.delete('/coach/unassign-athlete/:athleteId', authenticateToken, async (req, 
 });
 
 // DELETE ruta za uklanjanje dodele trenera grupi
-app.delete('/coach/unassign-group/:groupId', authenticateToken, async (req, res) => {
+app.delete('/api/coach/unassign-group/:groupId', authenticateToken, async (req, res) => {
     const { groupId } = req.params;
     const coachId = req.user.id;
 
@@ -1538,7 +1496,7 @@ app.delete('/coach/unassign-group/:groupId', authenticateToken, async (req, res)
 });
 
 // GET ruta za dobijanje podataka o treneru na osnovu user_id
-app.get('/trainers/:userId', authenticateToken, async (req, res) => {
+app.get('/api/trainers/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
 
     try {
@@ -1559,7 +1517,7 @@ app.get('/trainers/:userId', authenticateToken, async (req, res) => {
 });
 
 // PUT ruta za ažuriranje podataka o treneru
-app.put('/trainers/:userId', authenticateToken, async (req, res) => {
+app.put('/api/trainers/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
     const { ime, prezime, datum_rodenja, adresa_stanovanja, mesto, telefon, broj_licence, datum_isticanja } = req.body;
     
@@ -1598,7 +1556,7 @@ app.put('/trainers/:userId', authenticateToken, async (req, res) => {
 });
 
 // DELETE ruta za brisanje trenera
-app.delete('/trainers/:userId', authenticateToken, async (req, res) => {
+app.delete('/api/trainers/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
 
     // Primer: samo administrator ili sam korisnik može da se obriše
@@ -1624,7 +1582,7 @@ app.delete('/trainers/:userId', authenticateToken, async (req, res) => {
 });
 
 // GET ruta za dobijanje prisutnosti na treningu
-app.get('/trainings/:id/attendance', authenticateToken, async (req, res) => {
+app.get('/api/trainings/:id/attendance', authenticateToken, async (req, res) => {
     const { id: trainingId } = req.params;
     const userId = req.user.id;
     const userRole = req.user.role;
@@ -1681,7 +1639,7 @@ app.get('/trainings/:id/attendance', authenticateToken, async (req, res) => {
 });
 
 // POST ruta za evidentiranje prisutnosti
-app.post('/attendance', authenticateToken, async (req, res) => {
+app.post('/api/attendance', authenticateToken, async (req, res) => {
     const { training_id, attendance_records } = req.body;
     const userId = req.user.id;
     const userRole = req.user.role;
