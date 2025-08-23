@@ -1583,111 +1583,154 @@ app.delete('/api/trainers/:userId', authenticateToken, async (req, res) => {
 
 // GET ruta za dobijanje prisutnosti na treningu
 app.get('/api/trainings/:id/attendance', authenticateToken, async (req, res) => {
-    const { id: trainingId } = req.params;
+    const { id: trainingIdParam } = req.params;
     const userId = req.user.id;
     const userRole = req.user.role;
+    const trainingId = parseInt(trainingIdParam, 10);
+
+    // Početni log
+    console.log('Primljen zahtev za evidenciju prisutnosti za trening ID:', trainingIdParam);
+
+    if (isNaN(trainingId)) {
+        console.error('INVALID TRAINING ID:', trainingIdParam);
+        return res.status(400).json({ message: "ID treninga nije validan." });
+    }
 
     try {
-        let query = `
-            SELECT
-                a.id AS athlete_id,
-                a.ime,
-                a.prezime,
-                ta.status,
-                ta.napomena
-            FROM
-                trainings t
-            JOIN
-                programs p ON t.program_id = p.id
-            LEFT JOIN
-                program_group_assignments pga ON p.id = pga.program_id
-            LEFT JOIN
-                program_athlete_assignments paa ON p.id = paa.program_id
-            JOIN
-                athletes a ON a.id = pga.athlete_id OR a.id = paa.athlete_id
-            LEFT JOIN
-                training_attendance ta ON a.id = ta.athlete_id AND t.id = ta.training_id
-            WHERE
-                t.id = ? AND (pga.program_id IS NOT NULL OR paa.program_id IS NOT NULL)
+        const query = `
+            -- Dohvatanje sportista dodeljenih preko grupa
+            (
+                SELECT
+                    a.id AS athlete_id,
+                    a.ime,
+                    a.prezime,
+                    ta.status,
+                    ta.napomena
+                FROM
+                    trainings t
+                JOIN
+                    programs p ON t.program_id = p.id
+                JOIN
+                    program_group_assignments pga ON p.id = pga.program_id
+                JOIN
+                    group_memberships gm ON pga.group_id = gm.group_id
+                JOIN
+                    athletes a ON gm.athlete_id = a.id
+                LEFT JOIN
+                    training_attendance ta ON a.id = ta.athlete_id AND ta.training_id = t.id
+                WHERE
+                    t.id = ?
+                    AND (
+                        ? = 'admin' OR 
+                        pga.group_id IN (SELECT group_id FROM coach_group_assignments WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?))
+                    )
+            )
+            UNION
+            -- Dohvatanje sportista dodeljenih pojedinačno
+            (
+                SELECT
+                    a.id AS athlete_id,
+                    a.ime,
+                    a.prezime,
+                    ta.status,
+                    ta.napomena
+                FROM
+                    trainings t
+                JOIN
+                    programs p ON t.program_id = p.id
+                JOIN
+                    program_athlete_assignments paa ON p.id = paa.program_id
+                JOIN
+                    athletes a ON paa.athlete_id = a.id
+                LEFT JOIN
+                    training_attendance ta ON a.id = ta.athlete_id AND ta.training_id = t.id
+                WHERE
+                    t.id = ?
+                    AND (
+                        ? = 'admin' OR
+                        paa.athlete_id IN (SELECT athlete_id FROM coach_athlete_assignments WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?))
+                    )
+            )
         `;
-        const params = [trainingId];
         
-        // Logika za kontrolu pristupa za trenere
-        if (userRole !== 'admin') {
-            query += `
-                AND (
-                    pga.group_id IN (SELECT group_id FROM coach_group_assignments WHERE coach_id = ?)
-                    OR paa.athlete_id IN (SELECT athlete_id FROM coach_athlete_assignments WHERE coach_id = ?)
-                )
-            `;
-            params.push(userId, userId);
-        }
-
+        const params = [trainingId, userRole, userId, trainingId, userRole, userId];
+        
+        // Log za dijagnostiku
+        console.log('SQL parametri za upit:', params);
+        console.log('Tip trainingId:', typeof trainingId, 'Vrednost:', trainingId);
+        console.log('Tip userRole:', typeof userRole, 'Vrednost:', userRole);
+        console.log('Tip userId:', typeof userId, 'Vrednost:', userId);
+        
         const [results] = await dbPool.query(query, params);
 
-        // Uklanjanje duplikata jer je sportista mogao biti dodeljen i preko grupe i pojedinačno
+        // Log za uspeh
+        console.log('Upit uspešno izvršen. Broj vraćenih redova:', results.length);
+        
+        // Uklanjanje duplikata
         const uniqueResults = Object.values(results.reduce((acc, current) => {
             acc[current.athlete_id] = current;
             return acc;
         }, {}));
 
+        console.log('Broj jedinstvenih sportista za prikaz:', uniqueResults.length);
+        
         res.status(200).json(uniqueResults);
     } catch (error) {
-        console.error('Greška pri dobijanju prisutnosti:', error);
-        res.status(500).send('Došlo je do greške na serveru.');
+        // Detaljni log greške
+        console.error('GREŠKA pri dobijanju prisutnosti:', error);
+        res.status(500).json({ message: 'Došlo je do greške na serveru.' });
     }
 });
 
-// POST ruta za evidentiranje prisutnosti
-app.post('/api/attendance', authenticateToken, async (req, res) => {
-    const { training_id, attendance_records } = req.body;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+// POST ruta za upisivanje novih unosa o prisutnosti
+app.post('/api/trainings/:id/attendance', authenticateToken, async (req, res) => {
+    const { id: trainingIdParam } = req.params;
+    const trainingId = parseInt(trainingIdParam, 10);
+    const attendanceRecords = req.body;
 
-    // Provera dozvola
-    // Može se proveriti da li je trener odgovoran za grupu/sportiste na ovom treningu
+    if (isNaN(trainingId) || !Array.isArray(attendanceRecords)) {
+        return res.status(400).json({ message: "Invalid request data." });
+    }
+
     try {
-        let isAuthorized = false;
-        if (userRole === 'admin') {
-            isAuthorized = true;
-        } else {
-            const [trainings] = await dbPool.query(
-                `SELECT group_id FROM trainings WHERE id = ?`,
-                [training_id]
+        const connection = await dbPool.getConnection();
+        await connection.beginTransaction();
+
+        for (const record of attendanceRecords) {
+            const { athlete_id, status, napomena } = record;
+
+            // Provera da li unos već postoji
+            const [existingRecord] = await connection.query(
+                `SELECT id FROM training_attendance WHERE training_id = ? AND athlete_id = ?`,
+                [trainingId, athlete_id]
             );
-            if (trainings.length > 0) {
-                const groupId = trainings[0].group_id;
-                const [assignments] = await dbPool.query(
-                    `SELECT COUNT(*) AS count FROM coach_group_assignments WHERE coach_id = ? AND group_id = ?`,
-                    [userId, groupId]
+
+            if (existingRecord.length > 0) {
+                // Ako postoji, izvrši UPDATE
+                await connection.query(
+                    `UPDATE training_attendance SET status = ?, napomena = ? WHERE id = ?`,
+                    [status, napomena, existingRecord[0].id]
                 );
-                if (assignments[0].count > 0) {
-                    isAuthorized = true;
-                }
+            } else {
+                // Ako ne postoji, izvrši INSERT
+                await connection.query(
+                    `INSERT INTO training_attendance (training_id, athlete_id, status, napomena) VALUES (?, ?, ?, ?)`,
+                    [trainingId, athlete_id, status, napomena]
+                );
             }
         }
 
-        if (!isAuthorized) {
-            return res.status(403).json({ message: 'Nemate dozvolu da evidentirate prisutnost za ovaj trening.' });
-        }
+        await connection.commit();
+        connection.release();
+        res.status(200).json({ message: 'Attendance records saved successfully.' });
 
-        // Evidencija prisutnosti
-        for (const record of attendance_records) {
-            const { athlete_id, status, napomena } = record;
-            const date = new Date().toISOString().slice(0, 10);
-
-            await dbPool.query(
-                `INSERT INTO training_attendance (training_id, athlete_id, status, date, napomena) 
-                 VALUES (?, ?, ?, ?, ?)
-                 ON DUPLICATE KEY UPDATE status = VALUES(status), napomena = VALUES(napomena)`,
-                [training_id, athlete_id, status, date, napomena || null]
-            );
-        }
-
-        res.status(201).json({ message: 'Prisutnost uspešno evidentirana.' });
     } catch (error) {
-        console.error('Greška pri evidentiranju prisutnosti:', error);
-        res.status(500).json({ message: 'Greška pri evidentiranju prisutnosti.' });
+        if (connection) {
+            await connection.rollback();
+            connection.release();
+        }
+        console.error('Error saving attendance records:', error);
+        res.status(500).json({ message: 'An error occurred on the server.' });
     }
 });
 
