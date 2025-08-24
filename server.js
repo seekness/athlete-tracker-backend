@@ -283,48 +283,84 @@ app.get('/api/locations', authenticateToken, async (req, res) => {
 
 // Ruta za dodavanje novog sportiste (za trenere)
 app.post('/api/athletes', authenticateToken, async (req, res) => {
-  const { 
-    ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
-    mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
-    broj_telefona, email, aktivan , broj_knjizice, datum_poslednjeg_sportskog_pregleda
-  } = req.body;
-  
-  if (!username) {
-    return res.status(400).send('Korisničko ime sportiste je obavezno.');
-  }
-  if (jmbg && jmbg.length !== 13) {
-      return res.status(400).send('JMBG mora da ima tačno 13 cifara.');
-  }
-
-  try {
-    const query = `
-      INSERT INTO athletes (ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, mesto_rodenja, adresa_stanovanja, mesto_stanovanja, broj_telefona, email, aktivan, broj_knjizice, datum_poslednjeg_sportskog_pregleda) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    await dbPool.query(query, [
-      ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
-      mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
-      broj_telefona, email, aktivan
-    ]);
-    res.status(201).send('Sportista je uspešno dodat.');
-  } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(409).send('Korisničko ime već postoji.');
+    const { 
+        ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
+        mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
+        broj_telefona, email, aktivan, broj_knjizice, 
+        datum_poslednjeg_sportskog_pregleda,
+        is_paying_member, // Novo polje
+        payment_start_date // Novo polje
+    } = req.body;
+    
+    if (!username) {
+        return res.status(400).send('Korisničko ime sportiste je obavezno.');
     }
-    console.error('Greška pri dodavanju sportiste:', error);
-    res.status(500).send('Došlo je do greške na serveru.');
-  }
+    if (jmbg && jmbg.length !== 13) {
+        return res.status(400).send('JMBG mora da ima tačno 13 cifara.');
+    }
+
+    try {
+        const query = `
+            INSERT INTO athletes (
+                ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
+                mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
+                broj_telefona, email, aktivan, broj_knjizice, 
+                datum_poslednjeg_sportskog_pregleda, is_paying_member, 
+                payment_start_date
+            ) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        await dbPool.query(query, [
+            ime, prezime, username, ime_roditelja, jmbg, datum_rodenja, 
+            mesto_rodenja, adresa_stanovanja, mesto_stanovanja, 
+            broj_telefona, email, aktivan, broj_knjizice, 
+            datum_poslednjeg_sportskog_pregleda, is_paying_member,
+            payment_start_date
+        ]);
+        res.status(201).send('Sportista je uspešno dodat.');
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).send('Korisničko ime već postoji.');
+        }
+        console.error('Greška pri dodavanju sportiste:', error);
+        res.status(500).send('Došlo je do greške na serveru.');
+    }
 });
 
 app.get('/api/athletes', authenticateToken, async (req, res) => {
-  try {
-    const query = 'SELECT a.id, a.ime, a.prezime, a.datum_rodenja, a.broj_telefona, a.ime_roditelja, a.jmbg, a.mesto_rodenja, a.adresa_stanovanja, a.mesto_stanovanja, a.email, a.aktivan, a.broj_knjizice, a.datum_poslednjeg_sportskog_pregleda, u.username, g.naziv AS group_name FROM athletes a LEFT JOIN users u ON a.user_id = u.id LEFT JOIN group_memberships gm ON a.id = gm.athlete_id LEFT JOIN `groups` g ON gm.group_id = g.id ORDER BY a.prezime ASC';
-    const [rows] = await dbPool.query(query);
-    res.json(rows);
-  } catch (error) {
-    console.error('Greška pri dobijanju sportista:', error);
-    res.status(500).send('Došlo je do greške na serveru.');
-  }
+    try {
+        const query = `
+            SELECT
+                a.id,
+                a.ime,
+                a.prezime,
+                a.datum_rodenja,
+                a.broj_telefona,
+                a.ime_roditelja,
+                a.jmbg,
+                a.mesto_rodenja,
+                a.adresa_stanovanja,
+                a.mesto_stanovanja,
+                a.email,
+                a.aktivan,
+                a.broj_knjizice,
+                a.datum_poslednjeg_sportskog_pregleda,
+                a.is_paying_member,       -- Dodato novo polje
+                a.payment_start_date,     -- Dodato novo polje
+                a.created_at,             -- Dodato novo polje
+                a.username,
+                g.naziv AS group_name
+            FROM athletes a
+            LEFT JOIN group_memberships gm ON a.id = gm.athlete_id
+            LEFT JOIN \`groups\` g ON gm.group_id = g.id
+            ORDER BY a.prezime ASC
+        `;
+        const [rows] = await dbPool.query(query);
+        res.json(rows);
+    } catch (error) {
+        console.error('Greška pri dobijanju sportista:', error);
+        res.status(500).send('Došlo je do greške na serveru.');
+    }
 });
 
 app.get('/api/athletes/:athleteId/groups', authenticateToken, async (req, res) => {
@@ -378,7 +414,7 @@ app.get('/api/groups/:groupId/athletes', authenticateToken, async (req, res) => 
 });
 
 // Ruta za dodelu/ažuriranje sportista u grupi (za trenere)
-app.post('/api/groups/:groupId/athletes', authenticateToken, isTrener, async (req, res) => {
+app.post('/api/groups/:groupId/athletes', authenticateToken, async (req, res) => {
   const { groupId } = req.params;
   const { athlete_ids } = req.body; // Očekuje se niz ID-jeva sportista
   let connection;
@@ -442,93 +478,92 @@ app.delete('/api/athletes/:id', authenticateToken, isTrener, async (req, res) =>
 });
 
 app.put('/api/athletes/:athleteId', authenticateToken, async (req, res) => {
-  const { athleteId } = req.params;
-  const {
-    ime,
-    prezime,
-    username,
-    datum_rodenja,
-    broj_knjizice,
-    datum_poslednjeg_sportskog_pregleda,
-    broj_telefona,
-    ime_roditelja,
-    jmbg,
-    mesto_rodenja,
-    adresa_stanovanja,
-    mesto_stanovanja,
-    email,
-    aktivan,
-    group_ids // KLJUČNA LINIJA: Izdvajanje niza group_ids
-  } = req.body;
+    const { athleteId } = req.params;
+    const {
+        ime,
+        prezime,
+        username,
+        datum_rodenja,
+        broj_knjizice,
+        datum_poslednjeg_sportskog_pregleda,
+        broj_telefona,
+        ime_roditelja,
+        jmbg,
+        mesto_rodenja,
+        adresa_stanovanja,
+        mesto_stanovanja,
+        email,
+        aktivan,
+        is_paying_member, // Dodato novo polje
+        payment_start_date, // Dodato novo polje
+        group_ids
+    } = req.body;
 
-  try {
-    // Pokretanje transakcije radi sigurnosti
-    await dbPool.query('START TRANSACTION');
+    try {
+        await dbPool.query('START TRANSACTION');
 
-    // 1. Ažuriranje podataka u tabeli `athletes`
-    const updateAthleteQuery = `
-      UPDATE athletes
-      SET
-        ime = ?,
-        prezime = ?,
-        username = ?,
-        datum_rodenja = ?,
-        broj_knjizice = ?,
-        datum_poslednjeg_sportskog_pregleda = ?,
-        broj_telefona = ?,
-        ime_roditelja = ?,
-        jmbg = ?,
-        mesto_rodenja = ?,
-        adresa_stanovanja = ?,
-        mesto_stanovanja = ?,
-        email = ?,
-        aktivan = ?
-      WHERE id = ?;
-    `;
-    await dbPool.query(updateAthleteQuery, [
-      ime,
-      prezime,
-      username,
-      datum_rodenja,
-      broj_knjizice,
-      datum_poslednjeg_sportskog_pregleda,
-      broj_telefona,
-      ime_roditelja,
-      jmbg,
-      mesto_rodenja,
-      adresa_stanovanja,
-      mesto_stanovanja,
-      email,
-      aktivan,
-      athleteId,
-    ]);
+        const updateAthleteQuery = `
+            UPDATE athletes
+            SET
+                ime = ?,
+                prezime = ?,
+                username = ?,
+                datum_rodenja = ?,
+                broj_knjizice = ?,
+                datum_poslednjeg_sportskog_pregleda = ?,
+                broj_telefona = ?,
+                ime_roditelja = ?,
+                jmbg = ?,
+                mesto_rodenja = ?,
+                adresa_stanovanja = ?,
+                mesto_stanovanja = ?,
+                email = ?,
+                aktivan = ?,
+                is_paying_member = ?,       -- Dodato u SET listu
+                payment_start_date = ?      -- Dodato u SET listu
+            WHERE id = ?;
+        `;
+        await dbPool.query(updateAthleteQuery, [
+            ime,
+            prezime,
+            username,
+            datum_rodenja,
+            broj_knjizice,
+            datum_poslednjeg_sportskog_pregleda,
+            broj_telefona,
+            ime_roditelja,
+            jmbg,
+            mesto_rodenja,
+            adresa_stanovanja,
+            mesto_stanovanja,
+            email,
+            aktivan,
+            is_paying_member,       // Dodato u niz vrednosti
+            payment_start_date,     // Dodato u niz vrednosti
+            athleteId,
+        ]);
 
-    // 2. Brisanje starih grupa za tog sportistu iz tabele `group_memberships`
-    const deleteGroupsQuery = `
-      DELETE FROM group_memberships WHERE athlete_id = ?;
-    `;
-    await dbPool.query(deleteGroupsQuery, [athleteId]);
+        const deleteGroupsQuery = `
+            DELETE FROM group_memberships WHERE athlete_id = ?;
+        `;
+        await dbPool.query(deleteGroupsQuery, [athleteId]);
 
-    // 3. Dodavanje novih grupa
-    if (group_ids && group_ids.length > 0) {
-      const insertGroupValues = group_ids.map(groupId => [athleteId, groupId]);
-      const insertGroupsQuery = `
-        INSERT INTO group_memberships (athlete_id, group_id) VALUES ?;
-      `;
-      // Koristi se placeholder za više redova, što je efikasnije
-      await dbPool.query(insertGroupsQuery, [insertGroupValues]);
+        if (group_ids && group_ids.length > 0) {
+            const insertGroupValues = group_ids.map(groupId => [athleteId, groupId]);
+            const insertGroupsQuery = `
+                INSERT INTO group_memberships (athlete_id, group_id) VALUES ?;
+            `;
+            await dbPool.query(insertGroupsQuery, [insertGroupValues]);
+        }
+
+        await dbPool.query('COMMIT');
+
+        res.status(200).json({ message: 'Sportista je uspešno ažuriran.' });
+    } catch (error) {
+        await dbPool.query('ROLLBACK');
+        console.error('Greška pri ažuriranju sportiste:', error);
+        res.status(500).send('Došlo je do greške na serveru.');
     }
-
-    // Završetak transakcije
-    await dbPool.query('COMMIT');
-
-    res.status(200).json({ message: 'Sportista je uspešno ažuriran.' });
-  } catch (error) {
-    // Vraćanje transakcije u slučaju greške
-    await dbPool.query('ROLLBACK');
-    console.error('Greška pri ažuriranju sportiste:', error);
-    res.status(500).send('Došlo je do greške na serveru.');
-  }
 });
 
 // Ruta za ažuriranje lokacije
@@ -1832,6 +1867,26 @@ app.get('/api/membership/fees', authenticateToken, async (req, res) => {
     }
 });
 
+// Ruta za dobijanje poslednjih važećih cena članarina
+app.get('/api/membership/fees/current', authenticateToken, async (req, res) => {
+    try {
+        // Dobijanje poslednjeg unosa iz tabele membership_fees po datumu kreiranja
+        const [fees] = await dbPool.query(
+            `SELECT * FROM membership_fees ORDER BY valid_from DESC LIMIT 1`
+        );
+
+        if (fees.length > 0) {
+            res.status(200).json(fees[0]);
+        } else {
+            // Ako nema definisanih cena, šalje se prazan odgovor
+            res.status(200).json({});
+        }
+    } catch (error) {
+        console.error('Greška pri dobijanju cena članarina:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
 // PUT /api/admin/membership/fees/:id
 app.put('/api/admin/membership/fees/:id', authenticateToken, checkRole('admin'), async (req, res) => {
     const { id } = req.params;
@@ -2012,55 +2067,71 @@ app.post('/api/membership/payments', authenticateToken, async (req, res) => {
     }
 });
 
-// GET /api/membership/athletes-status
 app.get('/api/membership/athletes-status', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const userRole = req.user.role;
 
     try {
-        // Dohvatanje ID-a sportista povezanih sa trenerom
-        const [trainerAthletes] = await dbPool.query(`
-            (
-                SELECT DISTINCT a.id AS athlete_id
-                FROM athletes a
-                JOIN group_memberships gm ON a.id = gm.athlete_id
-                JOIN program_group_assignments pga ON gm.group_id = pga.group_id
-                JOIN coach_group_assignments cga ON pga.group_id = cga.group_id
-                WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
-            )
-            UNION
-            (
-                SELECT DISTINCT a.id AS athlete_id
-                FROM athletes a
-                JOIN program_athlete_assignments paa ON a.id = paa.athlete_id
-                JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
-                WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
-            )
-        `, [userId, userId]);
+        let athletes;
+        if (userRole === 'admin') {
+            // Administrator vidi sve aktivne sportiste koji plaćaju članarinu
+            [athletes] = await dbPool.query(`
+                SELECT
+                    a.id AS athlete_id,
+                    a.ime,
+                    a.prezime,
+                    a.payment_start_date,
+                    (SELECT payment_month FROM membership_payments WHERE athlete_id = a.id ORDER BY payment_month DESC LIMIT 1) AS last_paid_month
+                FROM
+                    athletes a
+                WHERE
+                    a.aktivan = 1 AND a.is_paying_member = 1
+                ORDER BY
+                    a.prezime, a.ime
+            `);
+        } else {
+            // Trener vidi samo svoje sportiste koji su aktivni i plaćaju
+            const [trainerAthletes] = await dbPool.query(`
+                (
+                    SELECT DISTINCT a.id AS athlete_id
+                    FROM athletes a
+                    JOIN group_memberships gm ON a.id = gm.athlete_id
+                    JOIN program_group_assignments pga ON gm.group_id = pga.group_id
+                    JOIN coach_group_assignments cga ON pga.group_id = cga.group_id
+                    WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+                )
+                UNION
+                (
+                    SELECT DISTINCT a.id AS athlete_id
+                    FROM athletes a
+                    JOIN program_athlete_assignments paa ON a.id = paa.athlete_id
+                    JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
+                    WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+                )
+            `, [userId, userId]);
 
-        const athleteIds = trainerAthletes.map(a => a.athlete_id);
+            const athleteIds = trainerAthletes.map(a => a.athlete_id);
 
-        if (athleteIds.length === 0 && userRole !== 'admin') {
-            return res.status(200).json([]);
+            if (athleteIds.length === 0) {
+                return res.status(200).json([]);
+            }
+
+            const placeholders = athleteIds.map(() => '?').join(',');
+            [athletes] = await dbPool.query(`
+                SELECT
+                    a.id AS athlete_id,
+                    a.ime,
+                    a.prezime,
+                    a.payment_start_date,
+                    (SELECT payment_month FROM membership_payments WHERE athlete_id = a.id ORDER BY payment_month DESC LIMIT 1) AS last_paid_month
+                FROM
+                    athletes a
+                WHERE
+                    a.id IN (${placeholders}) AND a.aktivan = 1 AND a.is_paying_member = 1
+                ORDER BY
+                    a.prezime, a.ime
+            `, [...athleteIds]);
         }
-
-        const placeholders = athleteIds.map(() => '?').join(',');
-        const params = userRole === 'admin' ? [] : athleteIds;
-
-        // Dobijanje podataka o sportistima i njihovoj poslednjoj uplati
-        const [athletes] = await dbPool.query(`
-            SELECT
-                a.id AS athlete_id,
-                a.ime,
-                a.prezime,
-                (SELECT payment_month FROM membership_payments WHERE athlete_id = a.id ORDER BY payment_month DESC LIMIT 1) AS last_paid_month
-            FROM
-                athletes a
-            WHERE
-                ? = 'admin' OR a.id IN (${placeholders})
-            ORDER BY
-                a.prezime, a.ime
-        `, [userRole, ...params]);
 
         res.status(200).json(athletes);
     } catch (error) {
