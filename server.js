@@ -23,6 +23,17 @@ const dbPool = mysql.createPool({
   database: process.env.DB_NAME
 });
 
+// U server.js, pre ruta
+const checkRole = (role) => {
+    return (req, res, next) => {
+        if (req.user && req.user.role === role) {
+            next();
+        } else {
+            res.status(403).json({ message: 'Pristup zabranjen: Nemate potrebne privilegije.' });
+        }
+    };
+};
+
 // Dalje u kodu
 const app = express();
 //const port = 5000;
@@ -1790,6 +1801,271 @@ app.post('/api/trainings/:id/attendance', authenticateToken, async (req, res) =>
         }
         console.error('Error saving attendance records:', error);
         res.status(500).json({ message: 'An error occurred on the server.' });
+    }
+});
+
+// POST /api/admin/membership/fees
+app.post('/api/admin/membership/fees', authenticateToken, checkRole('admin'), async (req, res) => {
+    const { amount_first, amount_second, amount_third, valid_from } = req.body;
+    try {
+        const [result] = await dbPool.query(
+            `INSERT INTO membership_fees (amount_first, amount_second, amount_third, valid_from) VALUES (?, ?, ?, ?)`,
+            [amount_first, amount_second, amount_third, valid_from]
+        );
+        res.status(201).json({ message: 'Nova visina članarine uspešno definisana.', feeId: result.insertId });
+    } catch (error) {
+        console.error('Greška pri definisanju članarine:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// GET /api/membership/fees - Ruta za dobijanje svih članarina (za trenere i admine)
+app.get('/api/membership/fees', authenticateToken, async (req, res) => {
+    try {
+        const [fees] = await dbPool.query(
+            `SELECT id, amount_first, amount_second, amount_third, valid_from FROM membership_fees ORDER BY valid_from DESC`
+        );
+        res.status(200).json(fees);
+    } catch (error) {
+        console.error('Greška pri dobijanju svih članarina:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// PUT /api/admin/membership/fees/:id
+app.put('/api/admin/membership/fees/:id', authenticateToken, checkRole('admin'), async (req, res) => {
+    const { id } = req.params;
+    const { amount_first, amount_second, amount_third, valid_from } = req.body;
+    try {
+        await dbPool.query(
+            `UPDATE membership_fees SET amount_first = ?, amount_second = ?, amount_third = ?, valid_from = ? WHERE id = ?`,
+            [amount_first, amount_second, amount_third, valid_from, id]
+        );
+        res.status(200).json({ message: 'Članarina uspešno izmenjena.' });
+    } catch (error) {
+        console.error('Greška pri izmeni članarine:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// DELETE /api/admin/membership/fees/:id
+app.delete('/api/admin/membership/fees/:id', authenticateToken, checkRole('admin'), async (req, res) => {
+    const { id } = req.params;
+    try {
+        await dbPool.query(`DELETE FROM membership_fees WHERE id = ?`, [id]);
+        res.status(200).json({ message: 'Članarina uspešno obrisana.' });
+    } catch (error) {
+        console.error('Greška pri brisanju članarine:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// GET /api/membership/athletes
+app.get('/api/membership/athletes', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    try {
+        const query = `
+            -- Dohvatanje sportista dodeljenih preko grupa
+            (
+                SELECT DISTINCT
+                    a.id AS athlete_id,
+                    a.ime,
+                    a.prezime,
+                    a.datum_rodenja
+                FROM
+                    athletes a
+                JOIN
+                    group_memberships gm ON a.id = gm.athlete_id
+                JOIN
+                    program_group_assignments pga ON gm.group_id = pga.group_id
+                WHERE
+                    ? = 'admin' OR 
+                    pga.group_id IN (SELECT group_id FROM coach_group_assignments WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?))
+            )
+            UNION
+            -- Dohvatanje sportista dodeljenih pojedinačno
+            (
+                SELECT DISTINCT
+                    a.id AS athlete_id,
+                    a.ime,
+                    a.prezime,
+                    a.datum_rodenja
+                FROM
+                    athletes a
+                JOIN
+                    program_athlete_assignments paa ON a.id = paa.athlete_id
+                WHERE
+                    ? = 'admin' OR 
+                    paa.athlete_id IN (SELECT athlete_id FROM coach_athlete_assignments WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?))
+            )
+            ORDER BY prezime, ime
+        `;
+        const params = [userRole, userId, userRole, userId];
+        const [results] = await dbPool.query(query, params);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Greška pri dobijanju liste sportista za članarinu:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// GET /api/membership/payments/monthly
+app.get('/api/membership/payments/monthly', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    try {
+        const query = `
+            SELECT
+                a.id AS athlete_id,
+                a.ime,
+                a.prezime,
+                mp.payment_date,
+                mp.amount_paid,
+                mp.child_order,
+                mp.note
+            FROM
+                athletes a
+            JOIN
+                membership_payments mp ON a.id = mp.athlete_id
+            WHERE
+                -- Filtriranje na osnovu trenera (grupe ili individualni sportisti)
+                (
+                    ? = 'admin' OR
+                    a.id IN (
+                        SELECT gm.athlete_id
+                        FROM group_memberships gm
+                        JOIN coach_group_assignments cga ON gm.group_id = cga.group_id
+                        WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+                    ) OR
+                    a.id IN (
+                        SELECT paa.athlete_id
+                        FROM program_athlete_assignments paa
+                        JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
+                        WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+                    )
+                )
+            ORDER BY
+                a.prezime, a.ime, mp.payment_date DESC;
+        `;
+        const params = [userRole, userId, userId, userId];
+
+        const [results] = await dbPool.query(query, params);
+
+        // Agregacija podataka na serveru
+        const monthlyPayments = results.reduce((acc, current) => {
+            const date = new Date(current.payment_date);
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const monthKey = `${year}-${month.toString().padStart(2, '0')}`;
+
+            const athleteId = current.athlete_id;
+            const athleteName = `${current.ime} ${current.prezime}`;
+
+            if (!acc[athleteId]) {
+                acc[athleteId] = {
+                    id: athleteId,
+                    name: athleteName,
+                    payments: {}
+                };
+            }
+
+            if (!acc[athleteId].payments[monthKey]) {
+                acc[athleteId].payments[monthKey] = [];
+            }
+
+            acc[athleteId].payments[monthKey].push({
+                date: current.payment_date,
+                amount: current.amount_paid,
+                child_order: current.child_order,
+                note: current.note
+            });
+
+            return acc;
+        }, {});
+        
+        // Konvertovanje objekta u niz za lakši prikaz na frontendu
+        const formattedPayments = Object.values(monthlyPayments);
+
+        res.status(200).json(formattedPayments);
+
+    } catch (error) {
+        console.error('Greška pri dobijanju mesečnih uplata:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// POST /api/membership/payments
+app.post('/api/membership/payments', authenticateToken, async (req, res) => {
+    const { athlete_id, amount_paid, child_order, note, payment_month } = req.body;
+    try {
+        const [result] = await dbPool.query(
+            `INSERT INTO membership_payments (athlete_id, payment_date, amount_paid, child_order, note, payment_month) VALUES (?, CURDATE(), ?, ?, ?, ?)`,
+            [athlete_id, amount_paid, child_order, note, payment_month]
+        );
+        res.status(201).json({ message: 'Uplata uspešno zabeležena.', paymentId: result.insertId });
+    } catch (error) {
+        console.error('Greška pri snimanju uplate:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
+    }
+});
+
+// GET /api/membership/athletes-status
+app.get('/api/membership/athletes-status', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    try {
+        // Dohvatanje ID-a sportista povezanih sa trenerom
+        const [trainerAthletes] = await dbPool.query(`
+            (
+                SELECT DISTINCT a.id AS athlete_id
+                FROM athletes a
+                JOIN group_memberships gm ON a.id = gm.athlete_id
+                JOIN program_group_assignments pga ON gm.group_id = pga.group_id
+                JOIN coach_group_assignments cga ON pga.group_id = cga.group_id
+                WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+            )
+            UNION
+            (
+                SELECT DISTINCT a.id AS athlete_id
+                FROM athletes a
+                JOIN program_athlete_assignments paa ON a.id = paa.athlete_id
+                JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
+                WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+            )
+        `, [userId, userId]);
+
+        const athleteIds = trainerAthletes.map(a => a.athlete_id);
+
+        if (athleteIds.length === 0 && userRole !== 'admin') {
+            return res.status(200).json([]);
+        }
+
+        const placeholders = athleteIds.map(() => '?').join(',');
+        const params = userRole === 'admin' ? [] : athleteIds;
+
+        // Dobijanje podataka o sportistima i njihovoj poslednjoj uplati
+        const [athletes] = await dbPool.query(`
+            SELECT
+                a.id AS athlete_id,
+                a.ime,
+                a.prezime,
+                (SELECT payment_month FROM membership_payments WHERE athlete_id = a.id ORDER BY payment_month DESC LIMIT 1) AS last_paid_month
+            FROM
+                athletes a
+            WHERE
+                ? = 'admin' OR a.id IN (${placeholders})
+            ORDER BY
+                a.prezime, a.ime
+        `, [userRole, ...params]);
+
+        res.status(200).json(athletes);
+    } catch (error) {
+        console.error('Greška pri dobijanju liste sportista za članarinu:', error);
+        res.status(500).json({ message: 'Greška na serveru.' });
     }
 });
 
