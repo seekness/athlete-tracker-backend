@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 23, 2025 at 02:14 PM
+-- Generation Time: Aug 24, 2025 at 11:17 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -43,17 +43,21 @@ CREATE TABLE `athletes` (
   `email` varchar(255) DEFAULT NULL,
   `aktivan` tinyint(1) DEFAULT 1,
   `broj_knjizice` varchar(255) DEFAULT NULL,
-  `datum_poslednjeg_sportskog_pregleda` date DEFAULT NULL
+  `datum_poslednjeg_sportskog_pregleda` date DEFAULT NULL,
+  `is_paying_member` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Da li sportista placa clanarinu',
+  `payment_start_date` date DEFAULT NULL COMMENT 'Datum od kada pocinje da placa clanarinu',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Vreme kreiranja sloga'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
 -- Dumping data for table `athletes`
 --
 
-INSERT INTO `athletes` (`id`, `ime`, `prezime`, `username`, `datum_rodenja`, `broj_telefona`, `user_id`, `ime_roditelja`, `jmbg`, `mesto_rodenja`, `adresa_stanovanja`, `mesto_stanovanja`, `email`, `aktivan`, `broj_knjizice`, `datum_poslednjeg_sportskog_pregleda`) VALUES
-(1, 'Zoran', 'Kosanović', 'seekness', '1982-11-07', '063468056', 1, 'Marija', '1111982110017', '', '', '', '', 1, NULL, NULL),
-(2, 'Zoran', 'Kosanović', 'miner', '2007-11-06', '063468056', 2, 'Mile', '1111982110017', NULL, 'Banatska 2v', 'Sombor', 'seekness@gmail.com', 1, 'aaaa', '1916-06-06'),
-(3, 'Antonija', 'Mala', 'amala', '2013-06-04', '00192290201', 3, 'Perica', '1212121212111', NULL, 'Banatska 2v', 'Sombor', 'nesto@hhaa.zu', 1, '', '2025-08-12');
+INSERT INTO `athletes` (`id`, `ime`, `prezime`, `username`, `datum_rodenja`, `broj_telefona`, `user_id`, `ime_roditelja`, `jmbg`, `mesto_rodenja`, `adresa_stanovanja`, `mesto_stanovanja`, `email`, `aktivan`, `broj_knjizice`, `datum_poslednjeg_sportskog_pregleda`, `is_paying_member`, `payment_start_date`, `created_at`) VALUES
+(1, 'Zoran', 'Kosanović', 'seekness', '1982-11-02', '063468056', 1, 'Marija', '1111982110017', NULL, '', '', '', 1, '', '1899-11-26', 1, '2025-01-01', '2025-08-24 20:03:07'),
+(2, 'Zoran', 'Kosanović', 'miner', '2007-10-31', '063468056', 2, 'Mile', '1111982110017', NULL, 'Banatska 2v', 'Sombor', 'seekness@gmail.com', 1, 'aaaa', '1916-05-31', 0, '2024-12-31', '2025-08-24 20:03:07'),
+(3, 'Antonija', 'Mala', 'amala', '2013-06-01', '00192290201', 3, 'Perica', '1212121212111', NULL, 'Banatska 2v', 'Sombor', 'nesto@hhaa.zu', 1, '', '2025-08-09', 1, '2025-01-01', '2025-08-24 20:03:07'),
+(4, 'Ognjen', 'Kosanović', 'ogilic', '2016-07-23', '', NULL, 'Zoran', '2507016111000', NULL, 'Banatska 2v', 'Sombor', '', 1, '', '1899-11-28', 1, '2024-12-30', '2025-08-24 20:03:07');
 
 -- --------------------------------------------------------
 
@@ -94,7 +98,8 @@ CREATE TABLE `coach_group_assignments` (
 --
 
 INSERT INTO `coach_group_assignments` (`id`, `coach_id`, `group_id`, `assigned_at`) VALUES
-(1, 4, 1, '2025-08-12 15:11:27');
+(1, 4, 1, '2025-08-12 15:11:27'),
+(2, 4, 2, '2025-08-23 14:10:35');
 
 -- --------------------------------------------------------
 
@@ -179,9 +184,8 @@ CREATE TABLE `group_memberships` (
 --
 
 INSERT INTO `group_memberships` (`id`, `group_id`, `athlete_id`) VALUES
-(10, 1, 1),
-(16, 2, 2),
-(14, 2, 3);
+(19, 1, 2),
+(22, 2, 3);
 
 -- --------------------------------------------------------
 
@@ -205,6 +209,50 @@ INSERT INTO `locations` (`id`, `naziv`, `adresa`, `mesto`) VALUES
 (2, 'Kajak klub - teretana', 'Apatinski put b', 'Sombor'),
 (3, 'Mostonga - teretana', 'Apatinski put bb', 'Sombor'),
 (5, 'Mostonga - trim staza', 'Apatinski put bb', 'Sombor');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `membership_fees`
+--
+
+CREATE TABLE `membership_fees` (
+  `id` int(11) NOT NULL,
+  `amount_first` decimal(10,2) NOT NULL COMMENT 'Iznos za prvo dete',
+  `amount_second` decimal(10,2) NOT NULL COMMENT 'Iznos za drugo dete',
+  `amount_third` decimal(10,2) NOT NULL COMMENT 'Iznos za trece dete',
+  `valid_from` date NOT NULL COMMENT 'Datum od kada cena vazi'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `membership_fees`
+--
+
+INSERT INTO `membership_fees` (`id`, `amount_first`, `amount_second`, `amount_third`, `valid_from`) VALUES
+(1, 2500.00, 1500.00, 800.00, '2024-12-31');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `membership_payments`
+--
+
+CREATE TABLE `membership_payments` (
+  `id` int(11) NOT NULL,
+  `athlete_id` int(11) NOT NULL,
+  `payment_date` date NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `child_order` int(11) NOT NULL COMMENT 'Redni broj deteta (1, 2, 3)',
+  `note` text DEFAULT NULL,
+  `payment_month` date NOT NULL COMMENT 'Mjesec za koji je placena clanarina'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `membership_payments`
+--
+
+INSERT INTO `membership_payments` (`id`, `athlete_id`, `payment_date`, `amount_paid`, `child_order`, `note`, `payment_month`) VALUES
+(1, 3, '2025-08-24', 2500.00, 1, '', '2025-01-01');
 
 -- --------------------------------------------------------
 
@@ -366,6 +414,15 @@ CREATE TABLE `training_attendance` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
+--
+-- Dumping data for table `training_attendance`
+--
+
+INSERT INTO `training_attendance` (`id`, `training_id`, `athlete_id`, `status`, `date`, `napomena`, `created_at`) VALUES
+(1, 6, 1, 'prisutan', '0000-00-00', '', '2025-08-24 10:57:55'),
+(2, 6, 2, 'odsutan', '0000-00-00', 'na kupanju', '2025-08-24 10:57:55'),
+(3, 6, 3, 'prisutan', '0000-00-00', '', '2025-08-24 10:57:55');
+
 -- --------------------------------------------------------
 
 --
@@ -489,6 +546,19 @@ ALTER TABLE `locations`
   ADD UNIQUE KEY `naziv` (`naziv`);
 
 --
+-- Indexes for table `membership_fees`
+--
+ALTER TABLE `membership_fees`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `membership_payments`
+--
+ALTER TABLE `membership_payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_payment_athlete` (`athlete_id`);
+
+--
 -- Indexes for table `muscle_groups`
 --
 ALTER TABLE `muscle_groups`
@@ -567,7 +637,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `athletes`
 --
 ALTER TABLE `athletes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `coach_athlete_assignments`
@@ -579,7 +649,7 @@ ALTER TABLE `coach_athlete_assignments`
 -- AUTO_INCREMENT for table `coach_group_assignments`
 --
 ALTER TABLE `coach_group_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `exercises`
@@ -603,13 +673,25 @@ ALTER TABLE `groups`
 -- AUTO_INCREMENT for table `group_memberships`
 --
 ALTER TABLE `group_memberships`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `locations`
 --
 ALTER TABLE `locations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `membership_fees`
+--
+ALTER TABLE `membership_fees`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `membership_payments`
+--
+ALTER TABLE `membership_payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `muscle_groups`
@@ -651,7 +733,7 @@ ALTER TABLE `trainings`
 -- AUTO_INCREMENT for table `training_attendance`
 --
 ALTER TABLE `training_attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `training_exercises`
@@ -703,6 +785,12 @@ ALTER TABLE `exercises`
 ALTER TABLE `group_memberships`
   ADD CONSTRAINT `group_memberships_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `group_memberships_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `membership_payments`
+--
+ALTER TABLE `membership_payments`
+  ADD CONSTRAINT `fk_payment_athlete` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `program_athlete_assignments`
