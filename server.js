@@ -180,6 +180,63 @@ function isTrener(req, res, next) {
 //   }
 // });
 
+// GET ruta za dohvaćanje svih treninga
+app.get('/api/trainings', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    try {
+        const query = `
+            -- Dohvatanje treninga dodeljenih preko grupa
+            (
+                SELECT DISTINCT
+                    t.id,
+                    t.opis,
+                    t.datum,
+                    t.vreme,
+                    p.naziv AS program_naziv
+                FROM
+                    trainings t
+                JOIN
+                    programs p ON t.program_id = p.id
+                JOIN
+                    program_group_assignments pga ON p.id = pga.program_id
+                WHERE
+                    ? = 'admin' OR 
+                    pga.group_id IN (SELECT group_id FROM coach_group_assignments WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?))
+            )
+            UNION
+            -- Dohvatanje treninga dodeljenih pojedinačno
+            (
+                SELECT DISTINCT
+                    t.id,
+                    t.opis,
+                    t.datum,
+                    t.vreme,
+                    p.naziv AS program_naziv
+                FROM
+                    trainings t
+                JOIN
+                    programs p ON t.program_id = p.id
+                JOIN
+                    program_athlete_assignments paa ON p.id = paa.program_id
+                WHERE
+                    ? = 'admin' OR 
+                    paa.athlete_id IN (SELECT athlete_id FROM coach_athlete_assignments WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?))
+            )
+            ORDER BY datum DESC
+        `;
+
+        const params = [userRole, userId, userRole, userId];
+        const [results] = await dbPool.query(query, params);
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Greška pri dobijanju liste treninga:', error);
+        res.status(500).json({ message: 'Došlo je do greške na serveru.' });
+    }
+});
+
 
 //--- RUTAS ZA LOKACIJE ---
 
@@ -1604,6 +1661,7 @@ app.get('/api/trainings/:id/attendance', authenticateToken, async (req, res) => 
                     a.id AS athlete_id,
                     a.ime,
                     a.prezime,
+                    a.datum_rodenja,
                     ta.status,
                     ta.napomena
                 FROM
@@ -1632,6 +1690,7 @@ app.get('/api/trainings/:id/attendance', authenticateToken, async (req, res) => 
                     a.id AS athlete_id,
                     a.ime,
                     a.prezime,
+                    a.datum_rodenja,
                     ta.status,
                     ta.napomena
                 FROM
