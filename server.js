@@ -54,6 +54,7 @@ app.get('/', (req, res) => {
 
 app.post('/api/register', async (req, res) => {
   const { username, display_name, password, role } = req.body;
+  
   let connection;
 
   if (!username || !password || !role) {
@@ -453,7 +454,7 @@ app.post('/api/groups/:groupId/athletes', authenticateToken, async (req, res) =>
 
 
 // Ruta za brisanje sportiste po ID-u
-app.delete('/api/athletes/:id', authenticateToken, isTrener, async (req, res) => {
+app.delete('/api/athletes/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await dbPool.query('SELECT user_id FROM athletes WHERE id = ?', [id]);
@@ -729,7 +730,7 @@ app.delete('/api/exercise-categories/:id', authenticateToken, async (req, res) =
 });
 
 // Ruta za dobijanje svih mišićnih grupa
-app.get('/api/muscle-groups', authenticateToken, isTrener, async (req, res) => {
+app.get('/api/muscle-groups', authenticateToken, async (req, res) => {
   try {
     const [rows] = await dbPool.query('SELECT * FROM muscle_groups ORDER BY naziv ASC');
     res.json(rows);
@@ -785,7 +786,7 @@ app.post('/api/exercises', authenticateToken, async (req, res) => {
 app.put('/api/exercises/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { naziv, opis, muscle_group_id, exercise_category_id, other_muscle_group_id, oprema, unilateral, video_link, slika } = req.body;
-  if (!naziv || !muscle_group_id || !exercise_category_id || !vrsta_unosa) {
+  if (!naziv || !muscle_group_id || !exercise_category_id) {
     return res.status(400).send('Naziv vežbe, mišićna grupa, kategorija i vrsta unosa su obavezni.');
   }
   try {
@@ -1760,12 +1761,6 @@ app.get('/api/trainings/:id/attendance', authenticateToken, async (req, res) => 
         
         const params = [trainingId, userRole, userId, trainingId, userRole, userId];
         
-        // Log za dijagnostiku
-        console.log('SQL parametri za upit:', params);
-        console.log('Tip trainingId:', typeof trainingId, 'Vrednost:', trainingId);
-        console.log('Tip userRole:', typeof userRole, 'Vrednost:', userRole);
-        console.log('Tip userId:', typeof userId, 'Vrednost:', userId);
-        
         const [results] = await dbPool.query(query, params);
 
         // Log za uspeh
@@ -1978,6 +1973,7 @@ app.get('/api/membership/payments/monthly', authenticateToken, async (req, res) 
                 a.ime,
                 a.prezime,
                 mp.payment_date,
+                mp.payment_month,
                 mp.amount_paid,
                 mp.child_order,
                 mp.note
@@ -1993,17 +1989,17 @@ app.get('/api/membership/payments/monthly', authenticateToken, async (req, res) 
                         SELECT gm.athlete_id
                         FROM group_memberships gm
                         JOIN coach_group_assignments cga ON gm.group_id = cga.group_id
-                        WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+                        WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?) AND a.aktivan = 1 AND a.is_paying_member = 1
                     ) OR
                     a.id IN (
                         SELECT paa.athlete_id
                         FROM program_athlete_assignments paa
                         JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
-                        WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+                        WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?) AND a.aktivan = 1 AND a.is_paying_member = 1
                     )
                 )
             ORDER BY
-                a.prezime, a.ime, mp.payment_date DESC;
+                a.prezime, a.ime, mp.payment_month DESC;
         `;
         const params = [userRole, userId, userId, userId];
 
@@ -2011,7 +2007,7 @@ app.get('/api/membership/payments/monthly', authenticateToken, async (req, res) 
 
         // Agregacija podataka na serveru
         const monthlyPayments = results.reduce((acc, current) => {
-            const date = new Date(current.payment_date);
+            const date = new Date(current.payment_month);
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
             const monthKey = `${year}-${month.toString().padStart(2, '0')}`;
