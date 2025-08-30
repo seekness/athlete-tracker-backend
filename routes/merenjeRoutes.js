@@ -32,5 +32,7 @@ router.delete('/merenje/:id', merenjeController.obrisiMerenje);
 
 router.put('/merenje/:id', merenjeController.izmeniMerenje);
 
+router.get('/merenje/:athlete_id/:datum', merenjeController.getMerenjeZaDatum);
+
 module.exports = router;
 

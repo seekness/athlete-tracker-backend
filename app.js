@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const merenjeRoutes = require('./routes/merenjeRoutes');
+const cors = require('cors');
+app.use(cors());
 
 app.use(express.json());
 app.use('/api', merenjeRoutes);
