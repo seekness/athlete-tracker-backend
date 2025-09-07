@@ -15,22 +15,34 @@ const adminRoutes = require("./routes/adminRoutes");
 const merenjeRoutes = require('./routes/merenjeRoutes');
 const locationRoutes = require("./routes/locationRoutes");
 const groupRoutes = require("./routes/groupRoutes");
+const groupMembershipRoutes = require("./routes/groupMembershipRoutes");
 const exerciseCategoryRoutes = require("./routes/exerciseCategoryRoutes");
 const exerciseRoutes = require("./routes/exerciseRoutes");
 const trainerRoutes = require("./routes/trainerRoutes");
 const muscleGroupRoutes = require("./routes/muscleGroupRoutes");
+const athleteRoutes = require("./routes/athleteRoutes");
+const membershipFeeRoutes = require("./routes/membershipFeeRoutes"); // za definisanje cena
+const membershipPaymentRoutes = require("./routes/membershipPaymentRoutes"); // za uplate
+const coachAssignmentRoutes = require("./routes/coachAssignmentRoutes");
+const programRoutes = require("./routes/programRoutes");
 
 app.use(cors());
 app.use(express.json());
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api', merenjeRoutes);
+app.use('/api/merenje', merenjeRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/groups-membership", groupMembershipRoutes);
 app.use("/api/exercise-categories", exerciseCategoryRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/trainers", trainerRoutes);
 app.use("/api/muscle-groups", muscleGroupRoutes);
+app.use("/api/athletes", athleteRoutes);
+app.use("/api/membership/fees", membershipFeeRoutes);
+app.use("/api/membership/payments", membershipPaymentRoutes);
+app.use("/api/coaches", coachAssignmentRoutes);
+app.use("/api/programs", programRoutes);
 
 // Služi statičke fajlove - slike vežbi
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
@@ -40,6 +52,10 @@ const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server radi na portu ${PORT}`);
 });
+
+
+
+app.use("/api/programs", programRoutes);
 
 
 

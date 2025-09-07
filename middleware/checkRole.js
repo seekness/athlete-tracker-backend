@@ -10,4 +10,14 @@ function checkRole(role) {
   };
 }
 
-module.exports = { checkRole };
+function isTrener(req, res, next) {
+  if (req.user.role !== "trener") {
+    return res.status(403).json({ error: "Pristup dozvoljen samo trenerima." });
+  }
+  next();
+}
+
+module.exports = {
+  isTrener,
+  checkRole
+};

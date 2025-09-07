@@ -5,6 +5,8 @@ const {
   deleteGroupWithMembers
 } = require("../models/groupModel");
 
+const dbPool = require("../db/pool");
+
 async function getAllGroups(req, res) {
   try {
     const groups = await getGroups();
@@ -20,9 +22,35 @@ async function createGroup(req, res) {
   if (!naziv) {
     return res.status(400).json({ error: "Naziv grupe je obavezan." });
   }
+  
   try {
-    const id = await insertGroup({ naziv, opis });
-    res.status(201).json({ id, naziv, opis });
+    const groupId = await insertGroup({ naziv, opis });
+    
+    // Ako je korisnik trener, automatski dodeli grupu treneru
+    if (req.user && req.user.role === 'trener') {
+      try {
+        // Pronađi trainer_id na osnovu user_id
+        const [trainer] = await dbPool.query(
+          "SELECT id FROM trainers WHERE user_id = ?",
+          [req.user.id]
+        );
+        
+        if (trainer.length > 0) {
+          const trainerId = trainer[0].id;
+          
+          // Dodeli grupu treneru
+          await dbPool.query(
+            "INSERT INTO coach_group_assignments (coach_id, group_id) VALUES (?, ?)",
+            [trainerId, groupId]
+          );
+        }
+      } catch (assignError) {
+        console.error("Greška pri automatskom dodeljivanju grupe treneru:", assignError);
+        // Ne prekidamo proces ako dodeljivanje ne uspe, grupa je već kreirana
+      }
+    }
+    
+    res.status(201).json({ id: groupId, naziv, opis });
   } catch (error) {
     console.error("Greška pri dodavanju grupe:", error);
     res.status(500).json({ error: "Greška na serveru." });
