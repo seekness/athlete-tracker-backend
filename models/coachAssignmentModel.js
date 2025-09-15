@@ -13,10 +13,7 @@ async function getAthletesByCoachId(coachId) {
 
 async function getGroupsByCoachId(coachId) {
   const [rows] = await dbPool.query(
-    `SELECT g.id, g.naziv
-     FROM groups g
-     JOIN coach_group_assignments cga ON g.id = cga.group_id
-     WHERE cga.coach_id = ?`,
+    'SELECT g.id, g.naziv FROM `groups` g JOIN coach_group_assignments cga ON g.id = cga.group_id WHERE cga.coach_id = ?',
     [coachId]
   );
   return rows;
@@ -36,11 +33,7 @@ async function getAthletesByUserId(userId) {
 
 async function getGroupsByUserId(userId) {
   const [rows] = await dbPool.query(
-    `SELECT g.id, g.naziv
-     FROM groups g
-     JOIN coach_group_assignments cga ON g.id = cga.group_id
-     JOIN trainers tr ON tr.id = cga.coach_id
-     WHERE tr.user_id = ?`,
+    'SELECT g.id, g.naziv FROM `groups` g JOIN coach_group_assignments cga ON g.id = cga.group_id JOIN trainers tr ON tr.id = cga.coach_id WHERE tr.user_id = ?',
     [userId]
   );
   return rows;

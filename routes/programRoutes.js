@@ -9,7 +9,9 @@ const {
   updateProgram,
   deleteProgram,
   getProgramTrainings,
-  addTrainingToProgram
+  addTrainingToProgram,
+  getWeeklySchedule,
+  generateWeeklySchedulePDF
 } = require("../controllers/programController");
 
 router.get("/", authenticateToken, getAllPrograms);
@@ -19,5 +21,7 @@ router.delete("/:id", authenticateToken, isTrener, deleteProgram);
 
 router.get("/:programId/trainings", authenticateToken, isTrener, getProgramTrainings);
 router.post("/:programId/trainings", authenticateToken, isTrener, addTrainingToProgram);
+router.get("/:programId/weekly-schedule", authenticateToken, isTrener, getWeeklySchedule);
+router.get("/:programId/weekly-schedule/pdf", authenticateToken, isTrener, generateWeeklySchedulePDF);
 
 module.exports = router;

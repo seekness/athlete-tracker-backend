@@ -3,6 +3,9 @@ const {
   fetchMonthlyPayments,
   insertPayment,
   deletePaymentById,
+  fetchMembershipStatusForAdmin,
+  fetchTrainerAthleteIds,
+  fetchMembershipStatusForTrainer,
   fetchPaymentById
 } = require("../models/membershipPaymentModel");
 
@@ -61,6 +64,32 @@ async function createPayment(req, res) {
   }
 }
 
+async function getAthletesMembershipStatus(req, res) {
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
+  try {
+    let athletes;
+
+    if (userRole === "admin") {
+      athletes = await fetchMembershipStatusForAdmin();
+    } else {
+      const athleteIds = await fetchTrainerAthleteIds(userId);
+
+      if (athleteIds.length === 0) {
+        return res.status(200).json([]);
+      }
+
+      athletes = await fetchMembershipStatusForTrainer(athleteIds);
+    }
+
+    res.status(200).json(athletes);
+  } catch (error) {
+    console.error("Greška pri dobijanju liste sportista za članarinu:", error);
+    res.status(500).json({ message: "Greška na serveru." });
+  }
+}
+
 async function deletePayment(req, res) {
   const { id } = req.params;
 
@@ -82,5 +111,6 @@ module.exports = {
   getEligibleAthletes,
   getMonthlyPayments,
   createPayment,
-  deletePayment
+  deletePayment,
+  getAthletesMembershipStatus
 };

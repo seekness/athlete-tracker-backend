@@ -25,6 +25,9 @@ const membershipFeeRoutes = require("./routes/membershipFeeRoutes"); // za defin
 const membershipPaymentRoutes = require("./routes/membershipPaymentRoutes"); // za uplate
 const coachAssignmentRoutes = require("./routes/coachAssignmentRoutes");
 const programRoutes = require("./routes/programRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
+const trainingRoutes = require("./routes/trainingRoutes");
+const programAssignmentRoutes = require("./routes/programAssignmentRoutes");
 
 app.use(cors());
 app.use(express.json());
@@ -43,19 +46,22 @@ app.use("/api/membership/fees", membershipFeeRoutes);
 app.use("/api/membership/payments", membershipPaymentRoutes);
 app.use("/api/coaches", coachAssignmentRoutes);
 app.use("/api/programs", programRoutes);
+app.use("/api", attendanceRoutes);
+app.use("/api/trainings", trainingRoutes);
+app.use("/api/assigned-programs", programAssignmentRoutes);
 
 // Služi statičke fajlove - slike vežbi
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
 
-//const PORT = process.env.PORT || 5001;
-const PORT = 5001;
+const PORT = process.env.PORT || 5000;
+console.log("🚀 Backend je aktivan i spreman da prima zahteve");
 app.listen(PORT, () => {
   console.log(`Server radi na portu ${PORT}`);
 });
 
 
 
-app.use("/api/programs", programRoutes);
+
 
 
 

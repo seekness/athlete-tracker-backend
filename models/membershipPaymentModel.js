@@ -94,11 +94,87 @@ async function deletePaymentById(id) {
   await dbPool.query("DELETE FROM membership_payments WHERE id = ?", [id]);
 }
 
+async function fetchMembershipStatusForAdmin() {
+  const [rows] = await dbPool.query(`
+    SELECT
+      a.id AS athlete_id,
+      a.ime,
+      a.prezime,
+      a.payment_start_date,
+      (
+        SELECT payment_month
+        FROM membership_payments
+        WHERE athlete_id = a.id
+        ORDER BY payment_month DESC
+        LIMIT 1
+      ) AS last_paid_month
+    FROM athletes a
+    WHERE a.aktivan = 1 AND a.is_paying_member = 1
+    ORDER BY a.prezime, a.ime
+  `);
+  return rows;
+}
+
+async function fetchTrainerAthleteIds(userId) {
+  const [rows] = await dbPool.query(
+    `
+    (
+      SELECT DISTINCT a.id AS athlete_id
+      FROM athletes a
+      JOIN group_memberships gm ON a.id = gm.athlete_id
+      JOIN program_group_assignments pga ON gm.group_id = pga.group_id
+      JOIN coach_group_assignments cga ON pga.group_id = cga.group_id
+      WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+    )
+    UNION
+    (
+      SELECT DISTINCT a.id AS athlete_id
+      FROM athletes a
+      JOIN program_athlete_assignments paa ON a.id = paa.athlete_id
+      JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
+      WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+    )
+    `,
+    [userId, userId]
+  );
+
+  return rows.map((a) => a.athlete_id);
+}
+
+async function fetchMembershipStatusForTrainer(athleteIds) {
+  const placeholders = athleteIds.map(() => "?").join(",");
+  const [rows] = await dbPool.query(
+    `
+    SELECT
+      a.id AS athlete_id,
+      a.ime,
+      a.prezime,
+      a.payment_start_date,
+      (
+        SELECT payment_month
+        FROM membership_payments
+        WHERE athlete_id = a.id
+        ORDER BY payment_month DESC
+        LIMIT 1
+      ) AS last_paid_month
+    FROM athletes a
+    WHERE a.id IN (${placeholders}) AND a.aktivan = 1 AND a.is_paying_member = 1
+    ORDER BY a.prezime, a.ime
+    `,
+    [...athleteIds]
+  );
+  return rows;
+}
+
+
 module.exports = {
   fetchEligibleAthletes,
   fetchMonthlyPayments,
   insertPayment,
   deletePaymentById,
-  fetchPaymentById
+  fetchPaymentById,
+  fetchMembershipStatusForAdmin,
+  fetchMembershipStatusForTrainer,
+  fetchTrainerAthleteIds
 };
   
