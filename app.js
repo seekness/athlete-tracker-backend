@@ -29,7 +29,12 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const trainingRoutes = require("./routes/trainingRoutes");
 const programAssignmentRoutes = require("./routes/programAssignmentRoutes");
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://app.somborkayak.club',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
