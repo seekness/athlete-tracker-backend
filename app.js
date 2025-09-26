@@ -4,6 +4,10 @@ const cors = require('cors');
 const path = require("path");
 const fs = require('fs');
 
+
+app.use(express.json());
+
+
 // Kreiraj uploads direktorijum ako ne postoji
 const uploadsDir = path.join(__dirname, 'uploads', 'exercises');
 if (!fs.existsSync(uploadsDir)) {
@@ -35,7 +39,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-app.use(express.json());
+
+app.options('*', cors()); // ⬅️ ovo je ključno za preflight
+
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/merenje', merenjeRoutes);
