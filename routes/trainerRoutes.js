@@ -5,7 +5,8 @@ const {
   getAllTrainers,
   getTrainerByUserId,
   updateTrainer,
-  deleteTrainer
+  deleteTrainer,
+  getTestsByTrener
 } = require("../controllers/trainerController");
 const { authenticateToken } = require("../middleware/authenticateToken");
 
@@ -14,5 +15,6 @@ router.get("/", authenticateToken, getAllTrainers);
 router.get("/:userId", authenticateToken, getTrainerByUserId);
 router.put("/:userId", authenticateToken, updateTrainer);
 router.delete("/:userId", authenticateToken, deleteTrainer);
+router.get('/:trener_id/tests', authenticateToken, getTestsByTrener);
 
 module.exports = router;

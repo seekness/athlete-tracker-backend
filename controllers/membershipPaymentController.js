@@ -41,6 +41,7 @@ function aggregatePayments(results) {
     if (!acc[athleteId].payments[key]) acc[athleteId].payments[key] = [];
 
     acc[athleteId].payments[key].push({
+      payment_id: current.payment_id,
       date: current.payment_date,
       amount: current.amount_paid,
       child_order: current.child_order,

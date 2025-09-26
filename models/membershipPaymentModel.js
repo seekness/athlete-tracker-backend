@@ -39,7 +39,8 @@ async function fetchMonthlyPayments(userId, role) {
       a.id AS athlete_id,
       a.ime,
       a.prezime,
-      mp.payment_date,
+  mp.id AS payment_id,
+  mp.payment_date,
       mp.payment_month,
       mp.amount_paid,
       mp.child_order,
@@ -122,16 +123,14 @@ async function fetchTrainerAthleteIds(userId) {
       SELECT DISTINCT a.id AS athlete_id
       FROM athletes a
       JOIN group_memberships gm ON a.id = gm.athlete_id
-      JOIN program_group_assignments pga ON gm.group_id = pga.group_id
-      JOIN coach_group_assignments cga ON pga.group_id = cga.group_id
+      JOIN coach_group_assignments cga ON gm.group_id = cga.group_id
       WHERE cga.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
     )
     UNION
     (
       SELECT DISTINCT a.id AS athlete_id
       FROM athletes a
-      JOIN program_athlete_assignments paa ON a.id = paa.athlete_id
-      JOIN coach_athlete_assignments caa ON paa.athlete_id = caa.athlete_id
+      JOIN coach_athlete_assignments caa ON a.id  = caa.athlete_id
       WHERE caa.coach_id = (SELECT id FROM trainers WHERE user_id = ?)
     )
     `,

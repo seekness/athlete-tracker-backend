@@ -128,10 +128,40 @@ async function deleteTrainer(req, res) {
   }
 }
 
+async function getTestsByTrener(req, res) {
+  const { trener_id } = req.params;
+
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT
+        t.id AS test_id,
+        t.naziv,
+        t.datum,
+        COUNT(DISTINCT te.id) AS broj_vezbi,
+        COUNT(DISTINCT tr.sportista_id) AS broj_sportista
+      FROM tests t
+      LEFT JOIN test_exercises te ON te.test_id = t.id
+      LEFT JOIN test_results tr ON tr.test_id = t.id
+      WHERE t.trener_id = ?
+      GROUP BY t.id
+      ORDER BY t.datum DESC
+      `,
+      [trener_id]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Greška pri dohvaćanju testova trenera' });
+  }
+}
+
 module.exports = {
   createTrainer,
   getAllTrainers,
   getTrainerByUserId,
   updateTrainer,
-  deleteTrainer
+  deleteTrainer,
+  getTestsByTrener
 };

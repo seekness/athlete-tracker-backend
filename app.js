@@ -54,10 +54,13 @@ app.use("/api/assigned-programs", programAssignmentRoutes);
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
 
 const PORT = process.env.PORT || 5000;
-console.log("🚀 Backend je aktivan i spreman da prima zahteve");
-app.listen(PORT, () => {
-  console.log(`Server radi na portu ${PORT}`);
-});
+
+if (require.main === module) {
+  console.log("🚀 Backend je aktivan i spreman da prima zahteve");
+  app.listen(PORT, () => {
+    console.log(`Server radi na portu ${PORT}`);
+  });
+}
 
 
 
