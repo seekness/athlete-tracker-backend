@@ -1,3 +1,4 @@
+require('dotenv').config(); //Dodato zbog coolify
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -33,14 +34,17 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const trainingRoutes = require("./routes/trainingRoutes");
 const programAssignmentRoutes = require("./routes/programAssignmentRoutes");
 
+//app.use(cors()); 
+
+//Zbog coolify
 app.use(cors({
-  origin: 'http://app.somborkayak.club',
+  origin: process.env.ALLOWED_ORIGIN || '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
-app.options('*', cors()); // ⬅️ ovo je ključno za preflight
+app.options('*', cors()); // preflight support
 
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -64,7 +68,12 @@ app.use("/api/assigned-programs", programAssignmentRoutes);
 // Služi statičke fajlove - slike vežbi
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
 
-const PORT = process.env.PORT || 5000;
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ message: 'pong' });
+});
+
+//const PORT = process.env.PORT || 5000;
+const PORT = process.env.APP_PORT || 5050;//Zbog coolify
 
 if (require.main === module) {
   console.log("🚀 Backend je aktivan i spreman da prima zahteve");
