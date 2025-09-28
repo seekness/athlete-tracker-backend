@@ -17,7 +17,7 @@
     "dayjs": "^1.11.18",
     "dotenv": "^17.2.1",
     "expo-checkbox": "^4.1.4",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
