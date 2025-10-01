@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 16, 2025 at 12:25 AM
+-- Generation Time: Oct 01, 2025 at 01:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -57,7 +57,8 @@ INSERT INTO `athletes` (`id`, `ime`, `prezime`, `username`, `datum_rodenja`, `br
 (1, 'Zoran', 'Kosanović', 'seekness', '1982-11-02', '063468056', 1, 'Marija', '1111982110017', NULL, '', '', '', 1, '', '1899-11-26', 1, '2025-01-01', '2025-08-24 20:03:07'),
 (2, 'Zoran', 'Kosanović', 'miner', '2007-10-27', '063468056', 2, 'Mile', '1111982110017', NULL, 'Banatska 2v', 'Sombor', 'seekness@gmail.com', 1, 'aaaa', '2025-05-01', 0, '2024-12-27', '2025-08-24 20:03:07'),
 (3, 'Antonija', 'Mala', 'amala', '2013-05-13', '00192290201', 3, 'Perica', '1212121212111', NULL, 'Banatska 2v', 'Sombor', 'nesto@hhaa.zu', 1, '', '2025-08-08', 1, '2024-12-29', '2025-08-24 20:03:07'),
-(4, 'Ognjen', 'Kosanović', 'ogilic', '2016-07-22', '', NULL, 'Zoran', '2507016111000', NULL, 'Banatska 2v', 'Sombor', '', 1, '', '1899-11-27', 1, '2024-12-29', '2025-08-24 20:03:07');
+(4, 'Ognjen', 'Kosanović', 'ogilic', '2016-07-21', '', NULL, 'Zoran', '2507016111000', NULL, 'Banatska 2v', 'Sombor', '', 1, '', '1899-11-26', 1, '2024-12-31', '2025-08-24 20:03:07'),
+(5, 'Test', 'Dodavanje', 'testd', '2010-04-06', '', NULL, '', '', NULL, '', '', '', 1, '', NULL, 1, '2025-08-31', '2025-09-25 21:28:18');
 
 -- --------------------------------------------------------
 
@@ -80,7 +81,8 @@ INSERT INTO `coach_athlete_assignments` (`id`, `coach_id`, `athlete_id`, `assign
 (1, 4, 2, '2025-08-12 15:11:27'),
 (2, 4, 3, '2025-08-12 15:14:30'),
 (14, 6, 4, '2025-09-06 10:11:26'),
-(15, 6, 3, '2025-09-06 10:11:34');
+(15, 6, 3, '2025-09-06 10:11:34'),
+(16, 6, 5, '2025-09-25 21:29:09');
 
 -- --------------------------------------------------------
 
@@ -230,7 +232,8 @@ INSERT INTO `group_memberships` (`id`, `group_id`, `athlete_id`) VALUES
 (35, 1, 2),
 (40, 1, 3),
 (41, 2, 3),
-(38, 2, 4);
+(42, 2, 4),
+(43, 2, 5);
 
 -- --------------------------------------------------------
 
@@ -301,9 +304,14 @@ INSERT INTO `membership_payments` (`id`, `athlete_id`, `payment_date`, `amount_p
 (2, 3, '2025-08-27', 800.00, 3, '', '2025-02-01'),
 (10, 3, '2025-08-27', 2500.00, 1, '', '2025-03-01'),
 (11, 3, '2025-08-27', 2500.00, 1, '', '2025-04-01'),
-(12, 3, '2025-08-27', 1500.00, 2, '', '2025-05-01'),
 (13, 1, '2025-09-08', 2500.00, 1, '', '2025-05-01'),
-(14, 1, '2025-09-08', 2500.00, 1, '', '2025-06-01');
+(14, 1, '2025-09-08', 2500.00, 1, '', '2025-06-01'),
+(17, 4, '2025-09-25', 2500.00, 1, '', '2024-12-31'),
+(18, 4, '2025-09-25', 2500.00, 1, '', '2025-01-01'),
+(19, 1, '2025-09-25', 2500.00, 1, '', '2025-07-01'),
+(20, 1, '2025-09-25', 2500.00, 1, '', '2025-08-01'),
+(21, 1, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+(22, 1, '2025-09-25', 2500.00, 1, '', '2025-10-01');
 
 -- --------------------------------------------------------
 
@@ -426,6 +434,54 @@ INSERT INTO `program_group_assignments` (`id`, `program_id`, `group_id`, `assign
 (4, 4, 2, 1, '2025-08-17 21:44:28'),
 (6, 4, 1, 1, '2025-08-17 21:45:15'),
 (7, 5, 1, 1, '2025-09-15 20:21:33');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tests`
+--
+
+CREATE TABLE `tests` (
+  `id` int(11) NOT NULL,
+  `naziv` text NOT NULL,
+  `datum` date NOT NULL,
+  `trener_id` int(11) DEFAULT NULL,
+  `napomena` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `test_exercises`
+--
+
+CREATE TABLE `test_exercises` (
+  `id` int(11) NOT NULL,
+  `test_id` int(11) NOT NULL,
+  `vezba_id` int(11) NOT NULL,
+  `vrsta_unosa` varchar(50) NOT NULL,
+  `jedinica` varchar(10) NOT NULL,
+  `broj_serija` int(11) DEFAULT NULL,
+  `broj_ponavljanja` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `test_results`
+--
+
+CREATE TABLE `test_results` (
+  `id` int(11) NOT NULL,
+  `test_id` int(11) NOT NULL,
+  `sportista_id` int(11) NOT NULL,
+  `test_exercise_id` int(11) NOT NULL,
+  `vrednost` text NOT NULL,
+  `napomena` text DEFAULT NULL,
+  `timestamp` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- --------------------------------------------------------
 
@@ -697,6 +753,30 @@ ALTER TABLE `program_group_assignments`
   ADD KEY `assigned_by_user_id` (`assigned_by_user_id`);
 
 --
+-- Indexes for table `tests`
+--
+ALTER TABLE `tests`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `trener_id` (`trener_id`);
+
+--
+-- Indexes for table `test_exercises`
+--
+ALTER TABLE `test_exercises`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `test_id` (`test_id`),
+  ADD KEY `vezba_id` (`vezba_id`);
+
+--
+-- Indexes for table `test_results`
+--
+ALTER TABLE `test_results`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `test_id` (`test_id`),
+  ADD KEY `sportista_id` (`sportista_id`),
+  ADD KEY `test_exercise_id` (`test_exercise_id`);
+
+--
 -- Indexes for table `trainers`
 --
 ALTER TABLE `trainers`
@@ -742,13 +822,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `athletes`
 --
 ALTER TABLE `athletes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `coach_athlete_assignments`
 --
 ALTER TABLE `coach_athlete_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `coach_group_assignments`
@@ -784,7 +864,7 @@ ALTER TABLE `groups`
 -- AUTO_INCREMENT for table `group_memberships`
 --
 ALTER TABLE `group_memberships`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -802,7 +882,7 @@ ALTER TABLE `membership_fees`
 -- AUTO_INCREMENT for table `membership_payments`
 --
 ALTER TABLE `membership_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `muscle_groups`
@@ -833,6 +913,24 @@ ALTER TABLE `program_athlete_assignments`
 --
 ALTER TABLE `program_group_assignments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `tests`
+--
+ALTER TABLE `tests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `test_exercises`
+--
+ALTER TABLE `test_exercises`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `test_results`
+--
+ALTER TABLE `test_results`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `trainers`
@@ -936,6 +1034,27 @@ ALTER TABLE `program_group_assignments`
   ADD CONSTRAINT `program_group_assignments_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `program_group_assignments_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `program_group_assignments_ibfk_3` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `tests`
+--
+ALTER TABLE `tests`
+  ADD CONSTRAINT `tests_ibfk_1` FOREIGN KEY (`trener_id`) REFERENCES `trainers` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `test_exercises`
+--
+ALTER TABLE `test_exercises`
+  ADD CONSTRAINT `test_exercises_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `test_exercises_ibfk_2` FOREIGN KEY (`vezba_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `test_results`
+--
+ALTER TABLE `test_results`
+  ADD CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `test_results_ibfk_2` FOREIGN KEY (`sportista_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `test_results_ibfk_3` FOREIGN KEY (`test_exercise_id`) REFERENCES `test_exercises` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `trainers`

@@ -33,6 +33,9 @@ const programRoutes = require("./routes/programRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const trainingRoutes = require("./routes/trainingRoutes");
 const programAssignmentRoutes = require("./routes/programAssignmentRoutes");
+const testsRoutes = require("./routes/testsRoutes");
+const testExercisesRoutes = require("./routes/testExercisesRoutes");
+const testResultsRoutes = require("./routes/testResultsRoutes");
 
 //app.use(cors()); 
 
@@ -64,6 +67,9 @@ app.use("/api/programs", programRoutes);
 app.use("/api", attendanceRoutes);
 app.use("/api/trainings", trainingRoutes);
 app.use("/api/assigned-programs", programAssignmentRoutes);
+app.use("/api/tests", testsRoutes);
+app.use("/api/test-exercises", testExercisesRoutes);
+app.use("/api/test-results", testResultsRoutes);
 
 // Služi statičke fajlove - slike vežbi
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
