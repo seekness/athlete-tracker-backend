@@ -24,10 +24,12 @@ async function getAllTests(req, res) {
           t.napomena,
           t.created_at,
           COUNT(DISTINCT te.id) AS exercise_count,
-          COUNT(DISTINCT tr.id) AS result_count
+          COUNT(DISTINCT tr.id) AS result_count,
+          COUNT(DISTINCT trv.id) AS value_count
         FROM tests t
         LEFT JOIN test_exercises te ON te.test_id = t.id
-        LEFT JOIN test_results tr ON tr.test_id = t.id
+        LEFT JOIN test_results tr ON tr.test_exercises_id = te.id
+        LEFT JOIN test_results_values trv ON trv.test_result_id = tr.id
         ${whereClause}
         GROUP BY t.id
         ORDER BY t.datum DESC, t.id DESC
@@ -136,34 +138,40 @@ async function deleteTest(req, res) {
 
 async function getTestResultsBySportista(req, res) {
   const { test_id } = req.params;
-  const { sportista_id } = req.query;
+  const athleteId = req.query.athlete_id ?? req.query.sportista_id;
 
-  if (!sportista_id) {
-    return res.status(400).json({ error: "sportista_id je obavezan" });
+  if (!athleteId) {
+    return res.status(400).json({ error: "athlete_id je obavezan" });
   }
 
   try {
     const [rows] = await dbPool.query(
       `
         SELECT
-          tr.id AS rezultat_id,
-          tr.test_id,
-          tr.sportista_id,
-          tr.test_exercise_id,
-          tr.vrednost,
+          tr.id AS test_result_id,
+          tr.athlete_id,
+          tr.test_exercises_id,
           tr.napomena,
-          tr.timestamp,
-          e.naziv AS vezba
+          te.test_id,
+          te.vrsta_unosa,
+          te.zadata_vrednost_unosa,
+          e.naziv AS vezba,
+          trv.id AS value_id,
+          trv.vrsta_rezultata,
+          trv.rezultat,
+          trv.jedinica_mere,
+          trv.timestamp
         FROM test_results tr
-        JOIN test_exercises te ON tr.test_exercise_id = te.id
-        JOIN exercises e ON te.vezba_id = e.id
-        WHERE tr.test_id = ? AND tr.sportista_id = ?
-        ORDER BY tr.timestamp ASC
+        JOIN test_exercises te ON tr.test_exercises_id = te.id
+        JOIN exercises e ON te.exercises_id = e.id
+        LEFT JOIN test_results_values trv ON trv.test_result_id = tr.id
+        WHERE te.test_id = ? AND tr.athlete_id = ?
+        ORDER BY te.id, trv.timestamp ASC, trv.id ASC
       `,
-      [test_id, sportista_id]
+      [test_id, athleteId]
     );
 
-    res.json(rows);
+    res.json(mapResultsWithValues(rows));
   } catch (error) {
     console.error("Greška pri dohvaćanju rezultata:", error);
     res.status(500).json({ error: "Greška pri dohvaćanju rezultata" });
@@ -177,26 +185,33 @@ async function getGroupResultsForTest(req, res) {
     const [rows] = await dbPool.query(
       `
         SELECT
-          tr.id AS rezultat_id,
-          tr.sportista_id,
+          tr.id AS test_result_id,
+          tr.athlete_id,
           a.ime,
           a.prezime,
-          tr.test_exercise_id,
-          e.naziv AS vezba,
-          tr.vrednost,
+          tr.test_exercises_id,
           tr.napomena,
-          tr.timestamp
+          te.test_id,
+          te.vrsta_unosa,
+          te.zadata_vrednost_unosa,
+          e.naziv AS vezba,
+          trv.id AS value_id,
+          trv.vrsta_rezultata,
+          trv.rezultat,
+          trv.jedinica_mere,
+          trv.timestamp
         FROM test_results tr
-        JOIN athletes a ON tr.sportista_id = a.id
-        JOIN test_exercises te ON tr.test_exercise_id = te.id
-        JOIN exercises e ON te.vezba_id = e.id
-        WHERE tr.test_id = ?
-        ORDER BY tr.sportista_id, te.id
+        JOIN athletes a ON tr.athlete_id = a.id
+        JOIN test_exercises te ON tr.test_exercises_id = te.id
+        JOIN exercises e ON te.exercises_id = e.id
+        LEFT JOIN test_results_values trv ON trv.test_result_id = tr.id
+        WHERE te.test_id = ?
+        ORDER BY a.prezime, a.ime, te.id, trv.timestamp ASC, trv.id ASC
       `,
       [test_id]
     );
 
-    res.json(rows);
+    res.json(mapResultsWithValues(rows, { includeAthlete: true }));
   } catch (error) {
     console.error("Greška pri dohvaćanju grupnih rezultata:", error);
     res.status(500).json({ error: "Greška pri dohvaćanju grupnih rezultata" });
@@ -212,15 +227,12 @@ async function getExercisesForTest(req, res) {
         SELECT
           te.id AS test_exercise_id,
           te.test_id,
-          te.vezba_id,
+          te.exercises_id,
           e.naziv AS vezba,
           te.vrsta_unosa,
-          te.jedinica,
-          te.broj_serija,
-          te.broj_ponavljanja,
-          te.created_at
+          te.zadata_vrednost_unosa
         FROM test_exercises te
-        JOIN exercises e ON te.vezba_id = e.id
+        JOIN exercises e ON te.exercises_id = e.id
         WHERE te.test_id = ?
         ORDER BY te.id
       `,
@@ -244,3 +256,45 @@ module.exports = {
   getGroupResultsForTest,
   getExercisesForTest,
 };
+
+function mapResultsWithValues(rows, options = {}) {
+  const { includeAthlete = false } = options;
+  const results = new Map();
+
+  for (const row of rows) {
+    if (!results.has(row.test_result_id)) {
+      results.set(row.test_result_id, {
+        test_result_id: row.test_result_id,
+        athlete_id: row.athlete_id,
+        test_exercises_id: row.test_exercises_id,
+        test_id: row.test_id,
+        vezba: row.vezba,
+        vrsta_unosa: row.vrsta_unosa,
+        zadata_vrednost_unosa: row.zadata_vrednost_unosa,
+        napomena: row.napomena,
+        values: [],
+        ...(includeAthlete
+          ? {
+              athlete: {
+                id: row.athlete_id,
+                ime: row.ime,
+                prezime: row.prezime,
+              },
+            }
+          : {}),
+      });
+    }
+
+    if (row.value_id) {
+      results.get(row.test_result_id).values.push({
+        id: row.value_id,
+        vrsta_rezultata: row.vrsta_rezultata,
+        rezultat: row.rezultat,
+        jedinica_mere: row.jedinica_mere,
+        timestamp: row.timestamp,
+      });
+    }
+  }
+
+  return Array.from(results.values());
+}

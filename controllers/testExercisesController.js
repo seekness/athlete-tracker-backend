@@ -1,26 +1,46 @@
 const dbPool = require("../db/pool");
 
-async function createTestExercise(req, res) {
-  const { test_id, vezba_id, vrsta_unosa, jedinica, broj_serija, broj_ponavljanja } = req.body;
+const VALID_INPUT_TYPES = new Set([
+  "tezina-vreme",
+  "duzina-vreme",
+  "vreme-duzina",
+  "vreme-ponavljanje",
+  "vreme-duzina,ponavljanje",
+  "ponavljanje",
+  "ponavljanje-max",
+]);
 
-  if (!test_id || !vezba_id || !vrsta_unosa || !jedinica) {
-    return res.status(400).json({ error: "test_id, vezba_id, vrsta_unosa i jedinica su obavezni" });
+async function createTestExercise(req, res) {
+  const {
+    test_id,
+    exercises_id,
+    exercise_id,
+    vezba_id,
+    vrsta_unosa,
+    zadata_vrednost_unosa,
+  } = req.body;
+
+  const exerciseId = exercises_id ?? exercise_id ?? vezba_id;
+
+  if (!test_id || !exerciseId || !vrsta_unosa) {
+    return res
+      .status(400)
+      .json({ error: "test_id, exercises_id i vrsta_unosa su obavezni" });
+  }
+
+  if (!VALID_INPUT_TYPES.has(vrsta_unosa)) {
+    return res.status(400).json({
+      error: `vrsta_unosa mora biti jedna od: ${Array.from(VALID_INPUT_TYPES).join(", ")}`,
+    });
   }
 
   try {
     const [result] = await dbPool.query(
       `
-        INSERT INTO test_exercises (test_id, vezba_id, vrsta_unosa, jedinica, broj_serija, broj_ponavljanja)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO test_exercises (test_id, exercises_id, vrsta_unosa, zadata_vrednost_unosa)
+        VALUES (?, ?, ?, ?)
       `,
-      [
-        test_id,
-        vezba_id,
-        vrsta_unosa,
-        jedinica,
-        typeof broj_serija !== "undefined" ? broj_serija : null,
-        typeof broj_ponavljanja !== "undefined" ? broj_ponavljanja : null,
-      ]
+      [test_id, exerciseId, vrsta_unosa, zadata_vrednost_unosa ?? null]
     );
 
     res.status(201).json({

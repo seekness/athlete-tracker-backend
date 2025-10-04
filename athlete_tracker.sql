@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 01, 2025 at 01:31 PM
+-- Generation Time: Oct 02, 2025 at 12:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -459,12 +459,9 @@ CREATE TABLE `tests` (
 CREATE TABLE `test_exercises` (
   `id` int(11) NOT NULL,
   `test_id` int(11) NOT NULL,
-  `vezba_id` int(11) NOT NULL,
-  `vrsta_unosa` varchar(50) NOT NULL,
-  `jedinica` varchar(10) NOT NULL,
-  `broj_serija` int(11) DEFAULT NULL,
-  `broj_ponavljanja` int(11) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `exercises_id` int(11) NOT NULL,
+  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','ponavljanje','ponavljanje-max') NOT NULL,
+  `zadata_vrednost_unosa` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- --------------------------------------------------------
@@ -475,11 +472,23 @@ CREATE TABLE `test_exercises` (
 
 CREATE TABLE `test_results` (
   `id` int(11) NOT NULL,
-  `test_id` int(11) NOT NULL,
-  `sportista_id` int(11) NOT NULL,
-  `test_exercise_id` int(11) NOT NULL,
-  `vrednost` text NOT NULL,
-  `napomena` text DEFAULT NULL,
+  `athlete_id` int(11) NOT NULL,
+  `test_exercises_id` int(11) NOT NULL,
+  `napomena` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `test_results_values`
+--
+
+CREATE TABLE `test_results_values` (
+  `id` int(11) NOT NULL,
+  `test_result_id` int(11) NOT NULL,
+  `vrsta_rezultata` varchar(50) DEFAULT NULL,
+  `rezultat` varchar(255) NOT NULL,
+  `jedinica_mere` varchar(20) DEFAULT NULL,
   `timestamp` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -765,16 +774,22 @@ ALTER TABLE `tests`
 ALTER TABLE `test_exercises`
   ADD PRIMARY KEY (`id`),
   ADD KEY `test_id` (`test_id`),
-  ADD KEY `vezba_id` (`vezba_id`);
+  ADD KEY `exercises_id` (`exercises_id`);
 
 --
 -- Indexes for table `test_results`
 --
 ALTER TABLE `test_results`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `test_id` (`test_id`),
-  ADD KEY `sportista_id` (`sportista_id`),
-  ADD KEY `test_exercise_id` (`test_exercise_id`);
+  ADD KEY `athlete_id` (`athlete_id`),
+  ADD KEY `test_exercises_id` (`test_exercises_id`);
+
+--
+-- Indexes for table `test_results_values`
+--
+ALTER TABLE `test_results_values`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `test_result_id` (`test_result_id`);
 
 --
 -- Indexes for table `trainers`
@@ -933,6 +948,12 @@ ALTER TABLE `test_results`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `test_results_values`
+--
+ALTER TABLE `test_results_values`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `trainers`
 --
 ALTER TABLE `trainers`
@@ -1046,15 +1067,20 @@ ALTER TABLE `tests`
 --
 ALTER TABLE `test_exercises`
   ADD CONSTRAINT `test_exercises_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `test_exercises_ibfk_2` FOREIGN KEY (`vezba_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `test_exercises_ibfk_2` FOREIGN KEY (`exercises_id`) REFERENCES `exercises` (`id`);
 
 --
 -- Constraints for table `test_results`
 --
 ALTER TABLE `test_results`
-  ADD CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `test_results_ibfk_2` FOREIGN KEY (`sportista_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `test_results_ibfk_3` FOREIGN KEY (`test_exercise_id`) REFERENCES `test_exercises` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `test_results_ibfk_2` FOREIGN KEY (`test_exercises_id`) REFERENCES `test_exercises` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `test_results_values`
+--
+ALTER TABLE `test_results_values`
+  ADD CONSTRAINT `test_results_values_ibfk_1` FOREIGN KEY (`test_result_id`) REFERENCES `test_results` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `trainers`
