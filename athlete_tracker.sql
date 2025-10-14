@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2025 at 12:43 AM
+-- Generation Time: Oct 12, 2025 at 06:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -460,7 +460,7 @@ CREATE TABLE `test_exercises` (
   `id` int(11) NOT NULL,
   `test_id` int(11) NOT NULL,
   `exercises_id` int(11) NOT NULL,
-  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','ponavljanje','ponavljanje-max') NOT NULL,
+  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','vreme-tezina,ponavljanje','tezina-ponavljanje','ponavljanje','ponavljanje-max') NOT NULL,
   `zadata_vrednost_unosa` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -486,9 +486,12 @@ CREATE TABLE `test_results` (
 CREATE TABLE `test_results_values` (
   `id` int(11) NOT NULL,
   `test_result_id` int(11) NOT NULL,
-  `vrsta_rezultata` varchar(50) DEFAULT NULL,
-  `rezultat` varchar(255) NOT NULL,
-  `jedinica_mere` varchar(20) DEFAULT NULL,
+  `vrsta_rezultata_1` varchar(50) DEFAULT NULL,
+  `rezultat_1` varchar(50) DEFAULT NULL,
+  `jedinica_mere_1` varchar(20) DEFAULT NULL,
+  `vrsta_rezultata_2` varchar(50) NOT NULL,
+  `rezultat_2` varchar(50) NOT NULL,
+  `jedinica_mere_2` varchar(20) NOT NULL,
   `timestamp` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -933,19 +936,19 @@ ALTER TABLE `program_group_assignments`
 -- AUTO_INCREMENT for table `tests`
 --
 ALTER TABLE `tests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `test_exercises`
 --
 ALTER TABLE `test_exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `test_results`
 --
 ALTER TABLE `test_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `test_results_values`
@@ -1073,7 +1076,7 @@ ALTER TABLE `test_exercises`
 -- Constraints for table `test_results`
 --
 ALTER TABLE `test_results`
-  ADD CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`),
   ADD CONSTRAINT `test_results_ibfk_2` FOREIGN KEY (`test_exercises_id`) REFERENCES `test_exercises` (`id`) ON DELETE CASCADE;
 
 --

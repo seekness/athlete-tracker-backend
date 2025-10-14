@@ -238,7 +238,12 @@ async function updateTestResult(req, res) {
       }
     }
 
-    if (typeof providedValues !== "undefined" || typeof fallbackValue.rezultat !== "undefined") {
+    if (
+      typeof providedValues !== "undefined" ||
+      typeof fallbackValue.rezultat !== "undefined" ||
+      typeof fallbackValue.rezultat_1 !== "undefined" ||
+      typeof fallbackValue.rezultat_2 !== "undefined"
+    ) {
       await connection.query(`DELETE FROM test_results_values WHERE test_result_id = ?`, [id]);
 
       if (values && values.length) {
@@ -317,7 +322,11 @@ function normalizeValues(rawValues, fallback = {}) {
 
   if (Array.isArray(rawValues) && rawValues.length) {
     sourceValues = rawValues;
-  } else if (typeof fallback.rezultat !== "undefined") {
+  } else if (
+    typeof fallback.rezultat !== "undefined" ||
+    typeof fallback.rezultat_1 !== "undefined" ||
+    typeof fallback.rezultat_2 !== "undefined"
+  ) {
     sourceValues = [fallback];
   }
 
@@ -328,18 +337,43 @@ function normalizeValues(rawValues, fallback = {}) {
   const normalized = [];
 
   for (const value of sourceValues) {
-    const rezultat =
-      value?.rezultat ?? value?.value ?? value?.vrednost ?? fallback?.rezultat;
+    const rezultat1 =
+      value?.rezultat_1 ??
+      value?.rezultat ??
+      value?.value ??
+      value?.vrednost ??
+      fallback?.rezultat_1 ??
+      fallback?.rezultat ??
+      null;
 
-    if (rezultat === undefined || rezultat === null || rezultat === "") {
-      return { error: "Svaka vrednost mora sadržati rezultat" };
+    if (rezultat1 === undefined || rezultat1 === null || rezultat1 === "") {
+      return { error: "Vrednost rezultata je obavezna" };
     }
 
+    const rezultat2 =
+      value?.rezultat_2 ??
+      fallback?.rezultat_2 ??
+      "";
+
     normalized.push({
-      vrsta_rezultata:
-        value?.vrsta_rezultata ?? fallback?.vrsta_rezultata ?? null,
-      rezultat,
-      jedinica_mere: value?.jedinica_mere ?? fallback?.jedinica_mere ?? null,
+      vrsta_rezultata_1:
+        value?.vrsta_rezultata_1 ??
+        value?.vrsta_rezultata ??
+        fallback?.vrsta_rezultata_1 ??
+        fallback?.vrsta_rezultata ??
+        null,
+      rezultat_1: rezultat1,
+      jedinica_mere_1:
+        value?.jedinica_mere_1 ??
+        value?.jedinica_mere ??
+        fallback?.jedinica_mere_1 ??
+        fallback?.jedinica_mere ??
+        null,
+      vrsta_rezultata_2:
+        value?.vrsta_rezultata_2 ?? fallback?.vrsta_rezultata_2 ?? "",
+      rezultat_2: rezultat2 ?? "",
+      jedinica_mere_2:
+        value?.jedinica_mere_2 ?? fallback?.jedinica_mere_2 ?? "",
       timestamp: value?.timestamp ?? fallback?.timestamp ?? null,
     });
   }
@@ -358,13 +392,25 @@ async function insertResultValues(connection, testResultId, values = []) {
     }
 
     const [result] = await connection.query(
-      `INSERT INTO test_results_values (test_result_id, vrsta_rezultata, rezultat, jedinica_mere, timestamp)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO test_results_values (
+         test_result_id,
+         vrsta_rezultata_1,
+         rezultat_1,
+         jedinica_mere_1,
+         vrsta_rezultata_2,
+         rezultat_2,
+         jedinica_mere_2,
+         timestamp
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         testResultId,
-        value.vrsta_rezultata ?? null,
-        value.rezultat,
-        value.jedinica_mere ?? null,
+        value.vrsta_rezultata_1 ?? null,
+        value.rezultat_1,
+        value.jedinica_mere_1 ?? null,
+        value.vrsta_rezultata_2 ?? "",
+        value.rezultat_2 ?? "",
+        value.jedinica_mere_2 ?? "",
         timestamp,
       ]
     );
@@ -380,18 +426,46 @@ function buildFallbackValue(payload = {}) {
 
   if (typeof payload.vrednost !== "undefined") {
     fallback.rezultat = payload.vrednost;
+    fallback.rezultat_1 = payload.vrednost;
   }
 
   if (typeof payload.rezultat !== "undefined") {
     fallback.rezultat = payload.rezultat;
+    fallback.rezultat_1 = payload.rezultat;
+  }
+
+  if (typeof payload.rezultat_1 !== "undefined") {
+    fallback.rezultat_1 = payload.rezultat_1;
+  }
+
+  if (typeof payload.rezultat_2 !== "undefined") {
+    fallback.rezultat_2 = payload.rezultat_2;
   }
 
   if (typeof payload.vrsta_rezultata !== "undefined") {
     fallback.vrsta_rezultata = payload.vrsta_rezultata;
+    fallback.vrsta_rezultata_1 = payload.vrsta_rezultata;
+  }
+
+  if (typeof payload.vrsta_rezultata_1 !== "undefined") {
+    fallback.vrsta_rezultata_1 = payload.vrsta_rezultata_1;
+  }
+
+  if (typeof payload.vrsta_rezultata_2 !== "undefined") {
+    fallback.vrsta_rezultata_2 = payload.vrsta_rezultata_2;
   }
 
   if (typeof payload.jedinica_mere !== "undefined") {
     fallback.jedinica_mere = payload.jedinica_mere;
+    fallback.jedinica_mere_1 = payload.jedinica_mere;
+  }
+
+  if (typeof payload.jedinica_mere_1 !== "undefined") {
+    fallback.jedinica_mere_1 = payload.jedinica_mere_1;
+  }
+
+  if (typeof payload.jedinica_mere_2 !== "undefined") {
+    fallback.jedinica_mere_2 = payload.jedinica_mere_2;
   }
 
   if (typeof payload.timestamp !== "undefined") {

@@ -157,9 +157,12 @@ async function getTestResultsBySportista(req, res) {
           te.zadata_vrednost_unosa,
           e.naziv AS vezba,
           trv.id AS value_id,
-          trv.vrsta_rezultata,
-          trv.rezultat,
-          trv.jedinica_mere,
+          trv.vrsta_rezultata_1,
+          trv.rezultat_1,
+          trv.jedinica_mere_1,
+          trv.vrsta_rezultata_2,
+          trv.rezultat_2,
+          trv.jedinica_mere_2,
           trv.timestamp
         FROM test_results tr
         JOIN test_exercises te ON tr.test_exercises_id = te.id
@@ -196,9 +199,12 @@ async function getGroupResultsForTest(req, res) {
           te.zadata_vrednost_unosa,
           e.naziv AS vezba,
           trv.id AS value_id,
-          trv.vrsta_rezultata,
-          trv.rezultat,
-          trv.jedinica_mere,
+          trv.vrsta_rezultata_1,
+          trv.rezultat_1,
+          trv.jedinica_mere_1,
+          trv.vrsta_rezultata_2,
+          trv.rezultat_2,
+          trv.jedinica_mere_2,
           trv.timestamp
         FROM test_results tr
         JOIN athletes a ON tr.athlete_id = a.id
@@ -288,9 +294,12 @@ function mapResultsWithValues(rows, options = {}) {
     if (row.value_id) {
       results.get(row.test_result_id).values.push({
         id: row.value_id,
-        vrsta_rezultata: row.vrsta_rezultata,
-        rezultat: row.rezultat,
-        jedinica_mere: row.jedinica_mere,
+        vrsta_rezultata_1: row.vrsta_rezultata_1,
+        rezultat_1: row.rezultat_1,
+        jedinica_mere_1: row.jedinica_mere_1,
+        vrsta_rezultata_2: row.vrsta_rezultata_2,
+        rezultat_2: row.rezultat_2,
+        jedinica_mere_2: row.jedinica_mere_2,
         timestamp: row.timestamp,
       });
     }
