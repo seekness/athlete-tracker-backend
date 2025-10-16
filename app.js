@@ -40,8 +40,20 @@ const testResultsRoutes = require("./routes/testResultsRoutes");
 //app.use(cors()); 
 
 //Zbog coolify
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://app.somborkayak.club',
+  'http://ec8w08kgos00sg804soss8s8.89.216.28.170.sslip.io'
+];
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || '*',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
