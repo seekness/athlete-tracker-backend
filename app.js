@@ -49,6 +49,11 @@ const allowedOrigins = [
   'http://ec8w08kgos00sg804soss8s8.89.216.28.170.sslip.io'
 ];
 
+app.use((req, res, next) => {
+  console.log("🕵️ Origin:", req.headers.origin);
+  next();
+});
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -62,7 +67,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('*', cors()); // preflight support
+//app.options('*', cors()); // preflight support
 
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
