@@ -60,6 +60,9 @@ async function registerUser(req, res) {
 }
 
 async function loginUser(req, res) {
+    console.log("🧪 Login ruta pozvana");
+  console.log("🧪 Body:", req.body);
+
   const { username, password } = req.body;
 
   if (!username || !password) {
