@@ -37,37 +37,64 @@ const testsRoutes = require("./routes/testsRoutes");
 const testExercisesRoutes = require("./routes/testExercisesRoutes");
 const testResultsRoutes = require("./routes/testResultsRoutes");
 
-//app.use(cors()); 
-
-//Zbog coolify
-const allowedOrigins = [
+const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:19006',
+  'http://127.0.0.1:19006',
   'https://app.somborkayak.club',
   'http://app.somborkayak.club',
-  'https://ec8w08kgos00sg804soss8s8.89.216.28.170.sslip.io',
-  'http://ec8w08kgos00sg804soss8s8.89.216.28.170.sslip.io'
+  '*.sslip.io'
 ];
+
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',')
+  : DEFAULT_ALLOWED_ORIGINS
+).map((origin) => origin.trim()).filter(Boolean);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // same-origin / mobile clients
+  return allowedOrigins.some((allowed) => {
+    if (allowed === '*') {
+      return true;
+    }
+    if (allowed.startsWith('*.')) {
+      const domain = allowed.slice(2);
+      return origin.endsWith(domain);
+    }
+    return allowed === origin;
+  });
+};
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`🚫 CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
 
 app.use((req, res, next) => {
   console.log("🕵️ Origin:", req.headers.origin);
   next();
 });
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+app.use((req, res, next) => {
+  res.header('Vary', 'Origin');
+  next();
+});
 
-//app.options('*', cors()); // preflight support
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // preflight support
 
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
