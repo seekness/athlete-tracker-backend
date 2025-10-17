@@ -49,10 +49,16 @@ const DEFAULT_ALLOWED_ORIGINS = [
   '*.sslip.io'
 ];
 
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS
-  ? process.env.CORS_ALLOWED_ORIGINS.split(',')
-  : DEFAULT_ALLOWED_ORIGINS
-).map((origin) => origin.trim()).filter(Boolean);
+const envOrigins = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : [];
+
+const allowedOrigins = Array.from(
+  new Set([
+    ...DEFAULT_ALLOWED_ORIGINS,
+    ...envOrigins,
+  ])
+);
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true; // same-origin / mobile clients
@@ -99,6 +105,8 @@ const mirrorAllowedOrigin = (req, res, next) => {
 
   next();
 };
+
+console.log("✅ Allowed CORS origins:", allowedOrigins.join(', '));
 
 app.use((req, res, next) => {
   console.log("🕵️ Origin:", req.headers.origin);
