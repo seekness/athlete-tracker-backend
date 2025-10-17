@@ -83,18 +83,30 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
+const mirrorAllowedOrigin = (req, res, next) => {
+  res.header('Vary', 'Origin');
+  const origin = req.headers.origin;
+  if (isOriginAllowed(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+};
+
 app.use((req, res, next) => {
   console.log("🕵️ Origin:", req.headers.origin);
   next();
 });
 
-app.use((req, res, next) => {
-  res.header('Vary', 'Origin');
-  next();
-});
-
+app.use(mirrorAllowedOrigin);
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // preflight support
 
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
