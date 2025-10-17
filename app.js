@@ -6,9 +6,6 @@ const path = require("path");
 const fs = require('fs');
 
 
-app.use(express.json());
-
-
 // Kreiraj uploads direktorijum ako ne postoji
 const uploadsDir = path.join(__dirname, 'uploads', 'exercises');
 if (!fs.existsSync(uploadsDir)) {
@@ -115,6 +112,7 @@ app.use((req, res, next) => {
 
 app.use(mirrorAllowedOrigin);
 app.use(cors(corsOptions));
+app.use(express.json());
 
 app.use("/api", authRoutes);
 app.use('/api/admin', adminRoutes);
