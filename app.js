@@ -71,14 +71,14 @@ const isOriginAllowed = (origin) => {
 const corsOptions = {
   origin(origin, callback) {
     if (isOriginAllowed(origin)) {
-      callback(null, true);
+      callback(null, origin || true);
     } else {
       console.warn(`🚫 CORS blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 204,
 };
