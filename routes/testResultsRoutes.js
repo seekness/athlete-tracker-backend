@@ -4,6 +4,7 @@ const { authenticateToken } = require("../middleware/authenticateToken");
 const { isTrener } = require("../middleware/checkRole");
 
 const {
+  getTestResultsByTest,
   createTestResult,
   createBulkTestResults,
   createGroupTestResults,
@@ -11,6 +12,7 @@ const {
   deleteTestResult,
 } = require("../controllers/testResultsController");
 
+router.get("/by-test/:test_id", authenticateToken, isTrener, getTestResultsByTest);
 router.post("/", authenticateToken, isTrener, createTestResult);
 router.post("/bulk", authenticateToken, isTrener, createBulkTestResults);
 router.post("/group", authenticateToken, isTrener, createGroupTestResults);

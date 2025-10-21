@@ -310,6 +310,7 @@ async function deleteTestResult(req, res) {
 }
 
 module.exports = {
+  getTestResultsByTest,
   createTestResult,
   createBulkTestResults,
   createGroupTestResults,
@@ -473,4 +474,87 @@ function buildFallbackValue(payload = {}) {
   }
 
   return fallback;
+}
+
+async function getTestResultsByTest(req, res) {
+  const { test_id: testId } = req.params;
+
+  try {
+    const [rows] = await dbPool.query(
+      `
+        SELECT
+          tr.id AS test_result_id,
+          tr.athlete_id,
+          a.ime,
+          a.prezime,
+          tr.test_exercises_id,
+          tr.napomena,
+          te.test_id,
+          te.vrsta_unosa,
+          te.zadata_vrednost_unosa,
+          e.naziv AS vezba,
+          trv.id AS value_id,
+          trv.vrsta_rezultata_1,
+          trv.rezultat_1,
+          trv.jedinica_mere_1,
+          trv.vrsta_rezultata_2,
+          trv.rezultat_2,
+          trv.jedinica_mere_2,
+          trv.timestamp
+        FROM test_results tr
+        JOIN athletes a ON tr.athlete_id = a.id
+        JOIN test_exercises te ON tr.test_exercises_id = te.id
+        JOIN exercises e ON te.exercises_id = e.id
+        LEFT JOIN test_results_values trv ON trv.test_result_id = tr.id
+        WHERE te.test_id = ?
+        ORDER BY a.prezime, a.ime, te.id, trv.timestamp ASC, trv.id ASC
+      `,
+      [testId]
+    );
+
+    res.json(mapResultsForGroup(rows));
+  } catch (error) {
+    console.error("Greška pri dohvaćanju rezultata testa:", error);
+    res.status(500).json({ error: "Greška pri dohvaćanju rezultata testa" });
+  }
+}
+
+function mapResultsForGroup(rows = []) {
+  const results = new Map();
+
+  for (const row of rows) {
+    if (!results.has(row.test_result_id)) {
+      results.set(row.test_result_id, {
+        test_result_id: row.test_result_id,
+        athlete_id: row.athlete_id,
+        test_exercises_id: row.test_exercises_id,
+        test_id: row.test_id,
+        vezba: row.vezba,
+        vrsta_unosa: row.vrsta_unosa,
+        zadata_vrednost_unosa: row.zadata_vrednost_unosa,
+        napomena: row.napomena,
+        values: [],
+        athlete: {
+          id: row.athlete_id,
+          ime: row.ime,
+          prezime: row.prezime,
+        },
+      });
+    }
+
+    if (row.value_id) {
+      results.get(row.test_result_id).values.push({
+        id: row.value_id,
+        vrsta_rezultata_1: row.vrsta_rezultata_1,
+        rezultat_1: row.rezultat_1,
+        jedinica_mere_1: row.jedinica_mere_1,
+        vrsta_rezultata_2: row.vrsta_rezultata_2,
+        rezultat_2: row.rezultat_2,
+        jedinica_mere_2: row.jedinica_mere_2,
+        timestamp: row.timestamp,
+      });
+    }
+  }
+
+  return Array.from(results.values());
 }
