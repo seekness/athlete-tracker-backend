@@ -1,5 +1,6 @@
 const {
   fetchTrainingsForUser,
+  fetchTrainingDetailsById,
   insertTrainingWithExercises,
   updateTrainingWithExercises,
   deleteTrainingById
@@ -72,9 +73,25 @@ async function deleteTraining(req, res) {
   }
 }
 
+async function getTrainingDetails(req, res) {
+  const { trainingId } = req.params;
+
+  try {
+    const training = await fetchTrainingDetailsById(trainingId);
+    if (!training) {
+      return res.status(404).json({ message: "Trening nije pronađen." });
+    }
+    res.status(200).json(training);
+  } catch (error) {
+    console.error("Greška pri dobijanju detalja treninga:", error);
+    res.status(500).json({ message: "Došlo je do greške na serveru." });
+  }
+}
+
 module.exports = {
   getAvailableTrainings,
   createTraining,
+  getTrainingDetails,
   updateTraining,
   deleteTraining
 };

@@ -30,6 +30,44 @@ async function fetchTrainingsForUser(role, userId) {
   return rows;
 }
 
+async function fetchTrainingDetailsById(trainingId) {
+  const [trainingRows] = await dbPool.query(
+    `SELECT t.id, t.opis, t.datum, t.vreme, t.predicted_duration_minutes,
+            t.location_id, p.naziv AS program_naziv,
+            l.naziv AS location_name, l.mesto AS location_city
+     FROM trainings t
+     JOIN programs p ON t.program_id = p.id
+     LEFT JOIN locations l ON t.location_id = l.id
+     WHERE t.id = ?
+     LIMIT 1`,
+    [trainingId]
+  );
+
+  if (trainingRows.length === 0) {
+    return null;
+  }
+
+  const training = trainingRows[0];
+
+  const [exerciseRows] = await dbPool.query(
+    `SELECT te.id, te.exercise_id, te.broj_serija, te.tezina_kg, te.vreme_sekunde,
+            te.duzina_metri, te.broj_ponavljanja, te.rest_duration_seconds,
+            te.rest_after_exercise_seconds, te.jacina_izvodjenja, te.vrsta_unosa,
+            te.superset, te.sort_order,
+            e.naziv AS exercise_name, e.opis AS exercise_description,
+            e.slika AS exercise_image
+     FROM training_exercises te
+     JOIN exercises e ON te.exercise_id = e.id
+     WHERE te.training_id = ?
+     ORDER BY te.sort_order ASC, te.id ASC`,
+    [trainingId]
+  );
+
+  training.exercises = exerciseRows;
+
+  return training;
+}
+
 async function insertTrainingWithExercises(data) {
   const {
     program_id,
@@ -179,6 +217,7 @@ async function deleteTrainingById(trainingId) {
 
 module.exports = {
   fetchTrainingsForUser,
+  fetchTrainingDetailsById,
   insertTrainingWithExercises,
   updateTrainingWithExercises,
   deleteTrainingById
