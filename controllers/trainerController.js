@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+const dbPool = require("../db/pool");
 const {
   insertTrainer,
   fetchAllTrainers,
@@ -5,6 +7,13 @@ const {
   updateTrainerByUserId,
   deleteTrainerByUserId
 } = require("../models/trainerModel");
+const {
+  createUser,
+  findUserByUsername,
+  findUserById,
+  updateUserCore,
+  updateUserPassword
+} = require("../models/authModel");
 
 async function createTrainer(req, res) {
   const {
@@ -45,6 +54,16 @@ async function createTrainer(req, res) {
     console.error("Greška pri dodavanju trenera:", error);
     res.status(500).json({ error: "Greška na serveru." });
   }
+}
+
+function normalizeOptional(value) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  if (typeof value === "string" && value.trim() === "") {
+    return null;
+  }
+  return value;
 }
 
 async function getAllTrainers(req, res) {
@@ -157,11 +176,207 @@ async function getTestsByTrener(req, res) {
   }
 }
 
+async function createTrainerAccount(req, res) {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ error: "Nemate dozvolu za ovu akciju." });
+  }
+
+  const {
+    username,
+    password,
+    display_name,
+    ime,
+    prezime,
+    datum_rodenja,
+    adresa_stanovanja,
+    mesto,
+    telefon,
+    mail,
+    broj_licence,
+    datum_isticanja
+  } = req.body || {};
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Korisničko ime i lozinka su obavezni." });
+  }
+
+  if (!ime || !prezime) {
+    return res.status(400).json({ error: "Ime i prezime su obavezni." });
+  }
+
+  let connection;
+
+  try {
+    connection = await dbPool.getConnection();
+    await connection.beginTransaction();
+
+    const existingUser = await findUserByUsername(username.trim(), connection);
+    if (existingUser) {
+      await connection.rollback();
+      return res.status(409).json({ error: "Korisničko ime već postoji." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const displayNameValue = display_name && display_name.trim().length > 0
+      ? display_name.trim()
+      : `${ime} ${prezime}`.trim();
+
+    const newUserId = await createUser(
+      {
+        username: username.trim(),
+        display_name: displayNameValue,
+        hashedPassword,
+        role: "trener"
+      },
+      connection
+    );
+
+    await insertTrainer(
+      {
+        ime,
+        prezime,
+        datum_rodenja: normalizeOptional(datum_rodenja),
+        adresa_stanovanja: normalizeOptional(adresa_stanovanja),
+        mesto: normalizeOptional(mesto),
+        telefon: normalizeOptional(telefon),
+        mail: normalizeOptional(mail),
+        broj_licence: normalizeOptional(broj_licence),
+        datum_isticanja: normalizeOptional(datum_isticanja),
+        korisnik_id: newUserId
+      },
+      connection
+    );
+
+    await connection.commit();
+
+    const trainer = await fetchTrainerByUserId(newUserId);
+    res.status(201).json({
+      message: "Trenerski nalog je uspešno kreiran.",
+      trainer
+    });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error("Greška pri kreiranju trenerskog naloga:", error);
+    res.status(500).json({ error: "Greška na serveru." });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+}
+
+async function updateTrainerAccount(req, res) {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ error: "Nemate dozvolu za ovu akciju." });
+  }
+
+  const { userId } = req.params;
+  const {
+    username,
+    password,
+    display_name,
+    ime,
+    prezime,
+    datum_rodenja,
+    adresa_stanovanja,
+    mesto,
+    telefon,
+    mail,
+    broj_licence,
+    datum_isticanja
+  } = req.body || {};
+
+  let connection;
+
+  try {
+    connection = await dbPool.getConnection();
+    await connection.beginTransaction();
+
+    const existingUser = await findUserById(userId, connection);
+    if (!existingUser) {
+      await connection.rollback();
+      return res.status(404).json({ error: "Korisnik nije pronađen." });
+    }
+
+    if (username && username.trim() !== existingUser.username) {
+      const duplicate = await findUserByUsername(username.trim(), connection);
+      if (duplicate && duplicate.id !== existingUser.id) {
+        await connection.rollback();
+        return res.status(409).json({ error: "Korisničko ime već postoji." });
+      }
+    }
+
+    if (!ime || !prezime) {
+      await connection.rollback();
+      return res.status(400).json({ error: "Ime i prezime su obavezni." });
+    }
+
+    await updateUserCore(
+      {
+        id: existingUser.id,
+        username: username ? username.trim() : existingUser.username,
+        display_name: display_name && display_name.trim().length > 0
+          ? display_name.trim()
+          : existingUser.display_name
+      },
+      connection
+    );
+
+    if (password && password.trim().length > 0) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await updateUserPassword(existingUser.id, hashedPassword, connection);
+    }
+
+    const updated = await updateTrainerByUserId(
+      existingUser.id,
+      {
+        ime,
+        prezime,
+        datum_rodenja: normalizeOptional(datum_rodenja),
+        adresa_stanovanja: normalizeOptional(adresa_stanovanja),
+        mesto: normalizeOptional(mesto),
+        telefon: normalizeOptional(telefon),
+        mail: normalizeOptional(mail),
+        broj_licence: normalizeOptional(broj_licence),
+        datum_isticanja: normalizeOptional(datum_isticanja)
+      },
+      connection
+    );
+
+    if (!updated) {
+      await connection.rollback();
+      return res.status(404).json({ error: "Trener nije pronađen za ažuriranje." });
+    }
+
+    await connection.commit();
+
+    const trainer = await fetchTrainerByUserId(existingUser.id);
+    res.status(200).json({
+      message: "Podaci o treneru su uspešno ažurirani.",
+      trainer
+    });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error("Greška pri ažuriranju trenerskog naloga:", error);
+    res.status(500).json({ error: "Greška na serveru." });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+}
+
 module.exports = {
   createTrainer,
   getAllTrainers,
   getTrainerByUserId,
   updateTrainer,
   deleteTrainer,
-  getTestsByTrener
+  getTestsByTrener,
+  createTrainerAccount,
+  updateTrainerAccount
 };

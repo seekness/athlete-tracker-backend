@@ -23,6 +23,7 @@ const exerciseRoutes = require("./routes/exerciseRoutes");
 const trainerRoutes = require("./routes/trainerRoutes");
 const muscleGroupRoutes = require("./routes/muscleGroupRoutes");
 const athleteRoutes = require("./routes/athleteRoutes");
+const individualRoutes = require("./routes/individualRoutes");
 const membershipFeeRoutes = require("./routes/membershipFeeRoutes"); // za definisanje cena
 const membershipPaymentRoutes = require("./routes/membershipPaymentRoutes"); // za uplate
 const coachAssignmentRoutes = require("./routes/coachAssignmentRoutes");
@@ -105,10 +106,7 @@ const mirrorAllowedOrigin = (req, res, next) => {
   next();
 };
 
-console.log("✅ Allowed CORS origins:", allowedOrigins.join(', '));
-
 app.use((req, res, next) => {
-  console.log("🕵️ Origin:", req.headers.origin);
   next();
 });
 
@@ -127,6 +125,7 @@ app.use("/api/exercises", exerciseRoutes);
 app.use("/api/trainers", trainerRoutes);
 app.use("/api/muscle-groups", muscleGroupRoutes);
 app.use("/api/athletes", athleteRoutes);
+app.use("/api/individuals", individualRoutes);
 app.use("/api/membership/fees", membershipFeeRoutes);
 app.use("/api/membership/payments", membershipPaymentRoutes);
 app.use("/api/coaches", coachAssignmentRoutes);

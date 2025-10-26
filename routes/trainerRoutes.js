@@ -6,12 +6,16 @@ const {
   getTrainerByUserId,
   updateTrainer,
   deleteTrainer,
-  getTestsByTrener
+  getTestsByTrener,
+  createTrainerAccount,
+  updateTrainerAccount
 } = require("../controllers/trainerController");
 const { authenticateToken } = require("../middleware/authenticateToken");
 
 router.post("/", authenticateToken, createTrainer);
 router.get("/", authenticateToken, getAllTrainers);
+router.post("/admin", authenticateToken, createTrainerAccount);
+router.put("/admin/:userId", authenticateToken, updateTrainerAccount);
 router.get("/:userId", authenticateToken, getTrainerByUserId);
 router.put("/:userId", authenticateToken, updateTrainer);
 router.delete("/:userId", authenticateToken, deleteTrainer);
