@@ -6,11 +6,13 @@ const path = require("path");
 const fs = require('fs');
 
 
-// Kreiraj uploads direktorijum ako ne postoji
-const uploadsDir = path.join(__dirname, 'uploads', 'exercises');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Kreiraj uploads direktorijume ako ne postoje
+['exercises', 'muscle-groups'].forEach((dir) => {
+  const target = path.join(__dirname, 'uploads', dir);
+  if (!fs.existsSync(target)) {
+    fs.mkdirSync(target, { recursive: true });
+  }
+});
 
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -137,8 +139,9 @@ app.use("/api/tests", testsRoutes);
 app.use("/api/test-exercises", testExercisesRoutes);
 app.use("/api/test-results", testResultsRoutes);
 
-// Služi statičke fajlove - slike vežbi
+// Služi statičke fajlove - slike vežbi i ikonice grupa
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
+app.use("/uploads/muscle-groups", express.static(path.join(__dirname, "uploads/muscle-groups")));
 
 app.get('/api/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
