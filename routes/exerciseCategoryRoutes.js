@@ -7,10 +7,11 @@ const {
   deleteExerciseCategory
 } = require("../controllers/exerciseCategoryController");
 const { authenticateToken } = require("../middleware/authenticateToken");
+const uploadCategoryIcon = require("../middleware/uploadExerciseCategoryIcon");
 
 router.get("/", authenticateToken, getAllExerciseCategories);
-router.post("/", authenticateToken, createExerciseCategory);
-router.put("/:id", authenticateToken, updateExerciseCategory);
+router.post("/", authenticateToken, uploadCategoryIcon.single("ikonica"), createExerciseCategory);
+router.put("/:id", authenticateToken, uploadCategoryIcon.single("ikonica"), updateExerciseCategory);
 router.delete("/:id", authenticateToken, deleteExerciseCategory);
 
 module.exports = router;

@@ -146,16 +146,17 @@ INSERT INTO `exercises` (`id`, `naziv`, `opis`, `muscle_group_id`, `oprema`, `un
 CREATE TABLE `exercise_categories` (
   `id` int(11) NOT NULL,
   `naziv` varchar(255) NOT NULL,
-  `opis` text DEFAULT NULL
+  `opis` text DEFAULT NULL,
+  `ikonica` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
 -- Dumping data for table `exercise_categories`
 --
 
-INSERT INTO `exercise_categories` (`id`, `naziv`, `opis`) VALUES
-(1, 'Veslanje', 'Veslanje na otovrenom'),
-(2, 'Teretana', 'Rad na snazi');
+INSERT INTO `exercise_categories` (`id`, `naziv`, `opis`, `ikonica`) VALUES
+(1, 'Veslanje', 'Veslanje na otovrenom', NULL),
+(2, 'Teretana', 'Rad na snazi', NULL);
 
 -- --------------------------------------------------------
 

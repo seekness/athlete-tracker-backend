@@ -7,7 +7,7 @@ const fs = require('fs');
 
 
 // Kreiraj uploads direktorijume ako ne postoje
-['exercises', 'muscle-groups'].forEach((dir) => {
+['exercises', 'muscle-groups', 'exercise-categories'].forEach((dir) => {
   const target = path.join(__dirname, 'uploads', dir);
   if (!fs.existsSync(target)) {
     fs.mkdirSync(target, { recursive: true });
@@ -139,9 +139,10 @@ app.use("/api/tests", testsRoutes);
 app.use("/api/test-exercises", testExercisesRoutes);
 app.use("/api/test-results", testResultsRoutes);
 
-// Služi statičke fajlove - slike vežbi i ikonice grupa
+// Služi statičke fajlove - slike vežbi, mišićnih grupa i kategorija
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
 app.use("/uploads/muscle-groups", express.static(path.join(__dirname, "uploads/muscle-groups")));
+app.use("/uploads/exercise-categories", express.static(path.join(__dirname, "uploads/exercise-categories")));
 
 app.get('/api/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
