@@ -356,6 +356,11 @@ function normalizeValues(rawValues, fallback = {}) {
       fallback?.rezultat_2 ??
       "";
 
+    const rezultat3 =
+      value?.rezultat_3 ??
+      fallback?.rezultat_3 ??
+      "";
+
     normalized.push({
       vrsta_rezultata_1:
         value?.vrsta_rezultata_1 ??
@@ -375,6 +380,11 @@ function normalizeValues(rawValues, fallback = {}) {
       rezultat_2: rezultat2 ?? "",
       jedinica_mere_2:
         value?.jedinica_mere_2 ?? fallback?.jedinica_mere_2 ?? "",
+      vrsta_rezultata_3:
+        value?.vrsta_rezultata_3 ?? fallback?.vrsta_rezultata_3 ?? "",
+      rezultat_3: rezultat3 ?? "",
+      jedinica_mere_3:
+        value?.jedinica_mere_3 ?? fallback?.jedinica_mere_3 ?? "",
       timestamp: value?.timestamp ?? fallback?.timestamp ?? null,
     });
   }
@@ -401,9 +411,12 @@ async function insertResultValues(connection, testResultId, values = []) {
          vrsta_rezultata_2,
          rezultat_2,
          jedinica_mere_2,
+         vrsta_rezultata_3,
+         rezultat_3,
+         jedinica_mere_3,
          timestamp
        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         testResultId,
         value.vrsta_rezultata_1 ?? null,
@@ -412,6 +425,9 @@ async function insertResultValues(connection, testResultId, values = []) {
         value.vrsta_rezultata_2 ?? "",
         value.rezultat_2 ?? "",
         value.jedinica_mere_2 ?? "",
+        value.vrsta_rezultata_3 ?? "",
+        value.rezultat_3 ?? "",
+        value.jedinica_mere_3 ?? "",
         timestamp,
       ]
     );
@@ -443,6 +459,10 @@ function buildFallbackValue(payload = {}) {
     fallback.rezultat_2 = payload.rezultat_2;
   }
 
+  if (typeof payload.rezultat_3 !== "undefined") {
+    fallback.rezultat_3 = payload.rezultat_3;
+  }
+
   if (typeof payload.vrsta_rezultata !== "undefined") {
     fallback.vrsta_rezultata = payload.vrsta_rezultata;
     fallback.vrsta_rezultata_1 = payload.vrsta_rezultata;
@@ -456,6 +476,10 @@ function buildFallbackValue(payload = {}) {
     fallback.vrsta_rezultata_2 = payload.vrsta_rezultata_2;
   }
 
+  if (typeof payload.vrsta_rezultata_3 !== "undefined") {
+    fallback.vrsta_rezultata_3 = payload.vrsta_rezultata_3;
+  }
+
   if (typeof payload.jedinica_mere !== "undefined") {
     fallback.jedinica_mere = payload.jedinica_mere;
     fallback.jedinica_mere_1 = payload.jedinica_mere;
@@ -467,6 +491,10 @@ function buildFallbackValue(payload = {}) {
 
   if (typeof payload.jedinica_mere_2 !== "undefined") {
     fallback.jedinica_mere_2 = payload.jedinica_mere_2;
+  }
+
+  if (typeof payload.jedinica_mere_3 !== "undefined") {
+    fallback.jedinica_mere_3 = payload.jedinica_mere_3;
   }
 
   if (typeof payload.timestamp !== "undefined") {
@@ -491,7 +519,6 @@ async function getTestResultsByTest(req, res) {
           tr.napomena,
           te.test_id,
           te.vrsta_unosa,
-          te.zadata_vrednost_unosa,
           e.naziv AS vezba,
           trv.id AS value_id,
           trv.vrsta_rezultata_1,
@@ -500,6 +527,9 @@ async function getTestResultsByTest(req, res) {
           trv.vrsta_rezultata_2,
           trv.rezultat_2,
           trv.jedinica_mere_2,
+          trv.vrsta_rezultata_3,
+          trv.rezultat_3,
+          trv.jedinica_mere_3,
           trv.timestamp
         FROM test_results tr
         JOIN athletes a ON tr.athlete_id = a.id
@@ -531,7 +561,6 @@ function mapResultsForGroup(rows = []) {
         test_id: row.test_id,
         vezba: row.vezba,
         vrsta_unosa: row.vrsta_unosa,
-        zadata_vrednost_unosa: row.zadata_vrednost_unosa,
         napomena: row.napomena,
         values: [],
         athlete: {
@@ -551,6 +580,9 @@ function mapResultsForGroup(rows = []) {
         vrsta_rezultata_2: row.vrsta_rezultata_2,
         rezultat_2: row.rezultat_2,
         jedinica_mere_2: row.jedinica_mere_2,
+        vrsta_rezultata_3: row.vrsta_rezultata_3,
+        rezultat_3: row.rezultat_3,
+        jedinica_mere_3: row.jedinica_mere_3,
         timestamp: row.timestamp,
       });
     }

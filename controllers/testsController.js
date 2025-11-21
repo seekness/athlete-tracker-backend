@@ -24,7 +24,7 @@ async function getAllTests(req, res) {
           t.napomena,
           t.created_at,
           COUNT(DISTINCT te.id) AS exercise_count,
-          COUNT(DISTINCT tr.id) AS result_count,
+          COUNT(DISTINCT tr.athlete_id) AS athlete_count,
           COUNT(DISTINCT trv.id) AS value_count
         FROM tests t
         LEFT JOIN test_exercises te ON te.test_id = t.id
@@ -154,7 +154,6 @@ async function getTestResultsBySportista(req, res) {
           tr.napomena,
           te.test_id,
           te.vrsta_unosa,
-          te.zadata_vrednost_unosa,
           e.naziv AS vezba,
           trv.id AS value_id,
           trv.vrsta_rezultata_1,
@@ -163,6 +162,9 @@ async function getTestResultsBySportista(req, res) {
           trv.vrsta_rezultata_2,
           trv.rezultat_2,
           trv.jedinica_mere_2,
+          trv.vrsta_rezultata_3,
+          trv.rezultat_3,
+          trv.jedinica_mere_3,
           trv.timestamp
         FROM test_results tr
         JOIN test_exercises te ON tr.test_exercises_id = te.id
@@ -196,7 +198,6 @@ async function getGroupResultsForTest(req, res) {
           tr.napomena,
           te.test_id,
           te.vrsta_unosa,
-          te.zadata_vrednost_unosa,
           e.naziv AS vezba,
           trv.id AS value_id,
           trv.vrsta_rezultata_1,
@@ -205,6 +206,9 @@ async function getGroupResultsForTest(req, res) {
           trv.vrsta_rezultata_2,
           trv.rezultat_2,
           trv.jedinica_mere_2,
+          trv.vrsta_rezultata_3,
+          trv.rezultat_3,
+          trv.jedinica_mere_3,
           trv.timestamp
         FROM test_results tr
         JOIN athletes a ON tr.athlete_id = a.id
@@ -235,8 +239,7 @@ async function getExercisesForTest(req, res) {
           te.test_id,
           te.exercises_id,
           e.naziv AS vezba,
-          te.vrsta_unosa,
-          te.zadata_vrednost_unosa
+          te.vrsta_unosa
         FROM test_exercises te
         JOIN exercises e ON te.exercises_id = e.id
         WHERE te.test_id = ?
@@ -276,7 +279,6 @@ function mapResultsWithValues(rows, options = {}) {
         test_id: row.test_id,
         vezba: row.vezba,
         vrsta_unosa: row.vrsta_unosa,
-        zadata_vrednost_unosa: row.zadata_vrednost_unosa,
         napomena: row.napomena,
         values: [],
         ...(includeAthlete
@@ -300,6 +302,9 @@ function mapResultsWithValues(rows, options = {}) {
         vrsta_rezultata_2: row.vrsta_rezultata_2,
         rezultat_2: row.rezultat_2,
         jedinica_mere_2: row.jedinica_mere_2,
+        vrsta_rezultata_3: row.vrsta_rezultata_3,
+        rezultat_3: row.rezultat_3,
+        jedinica_mere_3: row.jedinica_mere_3,
         timestamp: row.timestamp,
       });
     }

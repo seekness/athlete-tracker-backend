@@ -75,7 +75,6 @@ async function createTestExercise(req, res) {
     exercise_id,
     vezba_id,
     vrsta_unosa,
-    zadata_vrednost_unosa,
   } = req.body;
 
   const exerciseId = exercises_id ?? exercise_id ?? vezba_id;
@@ -97,10 +96,10 @@ async function createTestExercise(req, res) {
   try {
     const [result] = await dbPool.query(
       `
-        INSERT INTO test_exercises (test_id, exercises_id, vrsta_unosa, zadata_vrednost_unosa)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO test_exercises (test_id, exercises_id, vrsta_unosa)
+        VALUES (?, ?, ?)
       `,
-      [test_id, exerciseId, vrsta_unosa, zadata_vrednost_unosa ?? null]
+      [test_id, exerciseId, vrsta_unosa]
     );
 
     res.status(201).json({

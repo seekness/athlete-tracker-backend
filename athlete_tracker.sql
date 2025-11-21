@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 12, 2025 at 06:55 PM
+-- Generation Time: Nov 21, 2025 at 02:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -239,6 +239,24 @@ INSERT INTO `group_memberships` (`id`, `group_id`, `athlete_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `individuals`
+--
+
+CREATE TABLE `individuals` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `ime` varchar(50) NOT NULL,
+  `prezime` varchar(50) NOT NULL,
+  `datum_rodjenja` date DEFAULT NULL,
+  `pol` enum('musko','zensko','drugo') DEFAULT NULL,
+  `cilj` text DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `locations`
 --
 
@@ -461,8 +479,7 @@ CREATE TABLE `test_exercises` (
   `id` int(11) NOT NULL,
   `test_id` int(11) NOT NULL,
   `exercises_id` int(11) NOT NULL,
-  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','vreme-tezina,ponavljanje','tezina-ponavljanje','ponavljanje','ponavljanje-max') NOT NULL,
-  `zadata_vrednost_unosa` varchar(50) DEFAULT NULL
+  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','vreme-tezina,ponavljanje','tezina-ponavljanje','ponavljanje','ponavljanje-max') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- --------------------------------------------------------
@@ -493,6 +510,9 @@ CREATE TABLE `test_results_values` (
   `vrsta_rezultata_2` varchar(50) NOT NULL,
   `rezultat_2` varchar(50) NOT NULL,
   `jedinica_mere_2` varchar(20) NOT NULL,
+  `vrsta_rezultata_3` varchar(50) NOT NULL,
+  `rezultat_3` varchar(50) NOT NULL,
+  `jedinica_mere_3` varchar(20) NOT NULL,
   `timestamp` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -633,11 +653,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `display_name`, `password`, `role`) VALUES
-(1, 'seekness', 'Zoran Kosanović', '$2b$10$8kC/eEzsQ5g2tjwMYuggAOINNjJZw99g1O14BsGJBtF/HtT4q0N1S', 'trener'),
-(2, 'miner', 'Sportista Miner', '$2b$10$78bWMOQQQ3vC2Q/inFUyievf4BsWivmzNQ50uJt/6ye3WwLsnnUS2', 'sportista'),
+(1, 'trener', 'Zoran Kosanović', '$2b$10$8kC/eEzsQ5g2tjwMYuggAOINNjJZw99g1O14BsGJBtF/HtT4q0N1S', 'trener'),
+(2, 'sportista', 'Sportista Miner', '$2b$10$78bWMOQQQ3vC2Q/inFUyievf4BsWivmzNQ50uJt/6ye3WwLsnnUS2', 'sportista'),
 (3, 'amala', 'Mala Antonija', '$2b$10$87fP20csTk.sQEGrs1VVGODa8iCUJDLgJdvY1GAPF/9Trr5lskEjm', 'sportista'),
-(4, 'zoran1', 'ZK', '$2b$10$rR4bPwO7F8rbhxmRwW2rNeRmZMBKSHlHvd45Zey1MGAF0LQoS7Uvu', 'admin'),
-(7, 'antonija', 'Antonija Nađ Kosanović', '$2b$10$Xdu0bTK33VD3FJyx2zyHWOMMTSzhqoefwF6yhxtm/9gBon29WFU3q', 'trener');
+(4, 'admin', 'ZK', '$2b$10$rR4bPwO7F8rbhxmRwW2rNeRmZMBKSHlHvd45Zey1MGAF0LQoS7Uvu', 'admin'),
+(7, 'antonija', 'Antonija Nađ Kosanović', '$2b$10$Xdu0bTK33VD3FJyx2zyHWOMMTSzhqoefwF6yhxtm/9gBon29WFU3q', 'trener'),
+(8, 'individual', 'Individual Test', '$2b$10$vPMcSmeOJDSF2YyGKdONN.YVJXgqh7KCWh.5CjMzKOZImAtff9atW', 'individual');
 
 --
 -- Indexes for dumped tables
@@ -705,6 +726,13 @@ ALTER TABLE `group_memberships`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `group_id` (`group_id`,`athlete_id`),
   ADD KEY `athlete_id` (`athlete_id`);
+
+--
+-- Indexes for table `individuals`
+--
+ALTER TABLE `individuals`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `locations`
@@ -886,6 +914,12 @@ ALTER TABLE `group_memberships`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
+-- AUTO_INCREMENT for table `individuals`
+--
+ALTER TABLE `individuals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `locations`
 --
 ALTER TABLE `locations`
@@ -985,7 +1019,7 @@ ALTER TABLE `training_exercises`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
@@ -1031,6 +1065,12 @@ ALTER TABLE `fizicke_mere`
 ALTER TABLE `group_memberships`
   ADD CONSTRAINT `group_memberships_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `group_memberships_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `individuals`
+--
+ALTER TABLE `individuals`
+  ADD CONSTRAINT `individuals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `membership_payments`
