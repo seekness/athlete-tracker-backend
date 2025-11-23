@@ -6,6 +6,7 @@ const {
   fetchTrainingsByProgramId,
   insertTrainingWithExercises,
   fetchProgramCreator,
+  fetchSchedulesByProgramId
 } = require("../models/programModel");
 
 const { generateWeeklyScheduleData } = require("../utils/scheduleFormatter");
@@ -88,10 +89,11 @@ async function getWeeklySchedule(req, res) {
   const { weekStart } = req.query; // format: YYYY-MM-DD
 
   try {
-    const allTrainings = await fetchTrainingsByProgramId(programId);
-    const structured = generateWeeklyScheduleData(allTrainings, weekStart);
+    const schedules = await fetchSchedulesByProgramId(programId);
+    const structured = generateWeeklyScheduleData(schedules, weekStart);
     res.status(200).json(structured);
   } catch (error) {
+    console.error("Greška pri dobijanju rasporeda:", error);
     res.status(500).json({ message: "Greška na serveru." });
   }
 }
@@ -102,9 +104,9 @@ async function generateWeeklySchedulePDF(req, res) {
   console.log("📥 Backend PDF ruta pozvana:", programId, weekStart);
 
   try {
-    const trainings = await fetchTrainingsByProgramId(programId);
+    const schedules = await fetchSchedulesByProgramId(programId);
     //console.log("Broj treninga:", trainings.length);
-    const schedule = generateWeeklyScheduleData(trainings, weekStart);
+    const schedule = generateWeeklyScheduleData(schedules, weekStart);
     //console.log("Schedule:", JSON.stringify(schedule, null, 2));
 
     const doc = new PDFDocument({
@@ -374,24 +376,18 @@ async function addTrainingToProgram(req, res) {
   const { programId } = req.params;
   const {
     opis,
-    datum,
-    vreme,
     predicted_duration_minutes,
-    location_id,
     exercises,
   } = req.body;
 
-  if (!opis || !datum || !vreme) {
-    return res.status(400).send("Opis, datum i vreme treninga su obavezni.");
+  if (!opis) {
+    return res.status(400).send("Opis treninga je obavezan.");
   }
 
   try {
     await insertTrainingWithExercises(programId, {
       opis,
-      datum,
-      vreme,
       predicted_duration_minutes,
-      location_id,
       exercises,
     });
     res.status(201).send("Trening uspešno dodat.");

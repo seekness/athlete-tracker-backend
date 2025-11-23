@@ -1,21 +1,21 @@
 const {
-  fetchAttendanceByTrainingId,
-  upsertAttendanceRecords
+  fetchAttendanceByScheduleId,
+  upsertScheduleAttendanceRecords
 } = require("../models/attendanceModel");
 
-async function getTrainingAttendance(req, res) {
-  const { id: trainingIdParam } = req.params;
+async function getScheduleAttendance(req, res) {
+  const { id: scheduleIdParam } = req.params;
   const userId = req.user.id;
   const userRole = req.user.role;
-  const trainingId = parseInt(trainingIdParam, 10);
+  const scheduleId = parseInt(scheduleIdParam, 10);
 
-  if (isNaN(trainingId)) {
-    console.error("INVALID TRAINING ID:", trainingIdParam);
-    return res.status(400).json({ message: "ID treninga nije validan." });
+  if (isNaN(scheduleId)) {
+    console.error("INVALID SCHEDULE ID:", scheduleIdParam);
+    return res.status(400).json({ message: "ID termina nije validan." });
   }
 
   try {
-    const results = await fetchAttendanceByTrainingId(trainingId, userRole, userId);
+    const results = await fetchAttendanceByScheduleId(scheduleId, userRole, userId);
 
     // Uklanjanje duplikata
     const uniqueResults = Object.values(
@@ -32,17 +32,17 @@ async function getTrainingAttendance(req, res) {
   }
 }
 
-async function saveTrainingAttendance(req, res) {
-  const { id: trainingIdParam } = req.params;
-  const trainingId = parseInt(trainingIdParam, 10);
+async function saveScheduleAttendance(req, res) {
+  const { id: scheduleIdParam } = req.params;
+  const scheduleId = parseInt(scheduleIdParam, 10);
   const attendanceRecords = req.body;
 
-  if (isNaN(trainingId) || !Array.isArray(attendanceRecords)) {
+  if (isNaN(scheduleId) || !Array.isArray(attendanceRecords)) {
     return res.status(400).json({ message: "Invalid request data." });
   }
 
   try {
-    await upsertAttendanceRecords(trainingId, attendanceRecords);
+    await upsertScheduleAttendanceRecords(scheduleId, attendanceRecords);
     res.status(200).json({ message: "Attendance records saved successfully." });
   } catch (error) {
     console.error("Error saving attendance records:", error);
@@ -51,6 +51,6 @@ async function saveTrainingAttendance(req, res) {
 }
 
 module.exports = {
-  getTrainingAttendance,
-  saveTrainingAttendance
+  getScheduleAttendance,
+  saveScheduleAttendance
 };

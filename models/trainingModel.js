@@ -3,8 +3,9 @@ const dbPool = require("../db/pool");
 async function fetchTrainingsForUser(role, userId) {
   const query = `
     (
-      SELECT DISTINCT t.id, t.opis, t.datum, t.vreme, p.naziv AS program_naziv
-      FROM trainings t
+      SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, ts.location_id
+      FROM training_schedules ts
+      JOIN trainings t ON ts.training_id = t.id
       JOIN programs p ON t.program_id = p.id
       JOIN program_group_assignments pga ON p.id = pga.program_id
       WHERE ? = 'admin' OR pga.group_id IN (
@@ -14,8 +15,9 @@ async function fetchTrainingsForUser(role, userId) {
     )
     UNION
     (
-      SELECT DISTINCT t.id, t.opis, t.datum, t.vreme, p.naziv AS program_naziv
-      FROM trainings t
+      SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, ts.location_id
+      FROM training_schedules ts
+      JOIN trainings t ON ts.training_id = t.id
       JOIN programs p ON t.program_id = p.id
       JOIN program_athlete_assignments paa ON p.id = paa.program_id
       WHERE ? = 'admin' OR paa.athlete_id IN (
@@ -30,24 +32,46 @@ async function fetchTrainingsForUser(role, userId) {
   return rows;
 }
 
-async function fetchTrainingDetailsById(trainingId) {
-  const [trainingRows] = await dbPool.query(
-    `SELECT t.id, t.opis, t.datum, t.vreme, t.predicted_duration_minutes,
-            t.location_id, p.naziv AS program_naziv,
+async function fetchTrainingDetailsById(scheduleId) {
+  // Try to find as a schedule first
+  const [scheduleRows] = await dbPool.query(
+    `SELECT ts.id, ts.training_id, ts.datum, ts.vreme, ts.location_id,
+            t.opis, t.predicted_duration_minutes, p.naziv AS program_naziv,
             l.naziv AS location_name, l.mesto AS location_city
-     FROM trainings t
+     FROM training_schedules ts
+     JOIN trainings t ON ts.training_id = t.id
      JOIN programs p ON t.program_id = p.id
-     LEFT JOIN locations l ON t.location_id = l.id
-     WHERE t.id = ?
+     LEFT JOIN locations l ON ts.location_id = l.id
+     WHERE ts.id = ?
      LIMIT 1`,
-    [trainingId]
+    [scheduleId]
   );
 
-  if (trainingRows.length === 0) {
-    return null;
-  }
+  let training;
+  let trainingId;
 
-  const training = trainingRows[0];
+  if (scheduleRows.length > 0) {
+    training = scheduleRows[0];
+    trainingId = training.training_id;
+  } else {
+    // Fallback: maybe it's a raw training ID (template)?
+    // This handles cases where we might be viewing a template directly
+    const [templateRows] = await dbPool.query(
+      `SELECT t.id, t.opis, t.predicted_duration_minutes, p.naziv AS program_naziv
+       FROM trainings t
+       JOIN programs p ON t.program_id = p.id
+       WHERE t.id = ?
+       LIMIT 1`,
+      [scheduleId]
+    );
+    
+    if (templateRows.length === 0) {
+      return null;
+    }
+    training = templateRows[0];
+    trainingId = training.id;
+    // No date/time/location for template
+  }
 
   const [exerciseRows] = await dbPool.query(
     `SELECT te.id, te.exercise_id, te.broj_serija, te.tezina_kg, te.vreme_sekunde,
@@ -72,17 +96,14 @@ async function insertTrainingWithExercises(data) {
   const {
     program_id,
     opis,
-    datum,
-    vreme,
     predicted_duration_minutes,
-    location_id,
     exercises
   } = data;
 
   const [result] = await dbPool.query(
-    `INSERT INTO trainings (program_id, opis, datum, vreme, predicted_duration_minutes, location_id)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [program_id, opis, datum, vreme, predicted_duration_minutes, location_id]
+    `INSERT INTO trainings (program_id, opis, predicted_duration_minutes)
+     VALUES (?, ?, ?)`,
+    [program_id, opis, predicted_duration_minutes]
   );
 
   const trainingId = result.insertId;
@@ -118,10 +139,7 @@ async function insertTrainingWithExercises(data) {
 async function updateTrainingWithExercises(trainingId, data) {
   const {
     opis,
-    datum,
-    vreme,
     predicted_duration_minutes,
-    location_id,
     exercises
   } = data;
 
@@ -130,8 +148,8 @@ async function updateTrainingWithExercises(trainingId, data) {
     await connection.beginTransaction();
 
     await connection.query(
-      `UPDATE trainings SET opis = ?, datum = ?, vreme = ?, predicted_duration_minutes = ?, location_id = ? WHERE id = ?`,
-      [opis, datum, vreme, predicted_duration_minutes, location_id, trainingId]
+      `UPDATE trainings SET opis = ?, predicted_duration_minutes = ? WHERE id = ?`,
+      [opis, predicted_duration_minutes, trainingId]
     );
 
     const [existing] = await connection.query(
@@ -200,10 +218,7 @@ async function deleteTrainingById(trainingId) {
     // Prvo obriši povezane vežbe
     await connection.query("DELETE FROM training_exercises WHERE training_id = ?", [trainingId]);
 
-    // Zatim obriši prisutnost ako postoji
-    await connection.query("DELETE FROM training_attendance WHERE training_id = ?", [trainingId]);
-
-    // Na kraju obriši trening
+    // Zatim obriši trening (schedules and attendance will cascade delete)
     await connection.query("DELETE FROM trainings WHERE id = ?", [trainingId]);
 
     await connection.commit();
