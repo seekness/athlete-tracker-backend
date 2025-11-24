@@ -40,7 +40,8 @@ async function createAthlete(req, res) {
 
 async function getAllAthletes(req, res) {
   try {
-    const athletes = await fetchAllAthletesWithGroups();
+    const activeOnly = req.query.activeOnly === 'true';
+    const athletes = await fetchAllAthletesWithGroups(activeOnly);
     res.status(200).json(athletes);
   } catch (error) {
     console.error("Greška pri dobijanju sportista:", error);

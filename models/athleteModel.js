@@ -17,8 +17,14 @@ async function insertAthlete(data) {
   ]);
 }
 
-async function fetchAllAthletesWithGroups() {
-  const query = 'SELECT a.id, a.ime, a.prezime, a.datum_rodenja, a.broj_telefona, a.ime_roditelja, a.jmbg, a.mesto_rodenja, a.adresa_stanovanja, a.mesto_stanovanja, a.email, a.aktivan, a.broj_knjizice, a.datum_poslednjeg_sportskog_pregleda, a.is_paying_member, a.payment_start_date, a.created_at, a.username, GROUP_CONCAT(g.naziv SEPARATOR \', \') AS group_name FROM athletes a LEFT JOIN group_memberships gm ON a.id = gm.athlete_id LEFT JOIN `groups` g ON gm.group_id = g.id GROUP BY a.id ORDER BY a.prezime ASC';
+async function fetchAllAthletesWithGroups(activeOnly = false) {
+  let query = 'SELECT a.id, a.ime, a.prezime, a.datum_rodenja, a.broj_telefona, a.ime_roditelja, a.jmbg, a.mesto_rodenja, a.adresa_stanovanja, a.mesto_stanovanja, a.email, a.aktivan, a.broj_knjizice, a.datum_poslednjeg_sportskog_pregleda, a.is_paying_member, a.payment_start_date, a.created_at, a.username, GROUP_CONCAT(g.naziv SEPARATOR \', \') AS group_name FROM athletes a LEFT JOIN group_memberships gm ON a.id = gm.athlete_id LEFT JOIN `groups` g ON gm.group_id = g.id';
+  
+  if (activeOnly) {
+    query += ' WHERE a.aktivan = 1';
+  }
+  
+  query += ' GROUP BY a.id ORDER BY a.prezime ASC';
   const [rows] = await dbPool.query(query);
   return rows;
 }

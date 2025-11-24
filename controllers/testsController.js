@@ -25,7 +25,9 @@ async function getAllTests(req, res) {
           t.created_at,
           COUNT(DISTINCT te.id) AS exercise_count,
           COUNT(DISTINCT tr.athlete_id) AS athlete_count,
-          COUNT(DISTINCT trv.id) AS value_count
+          COUNT(DISTINCT trv.id) AS value_count,
+          COUNT(DISTINCT tr.id) AS total_assignments,
+          COUNT(DISTINCT CASE WHEN trv.id IS NOT NULL THEN tr.id END) AS filled_assignments
         FROM tests t
         LEFT JOIN test_exercises te ON te.test_id = t.id
         LEFT JOIN test_results tr ON tr.test_exercises_id = te.id
