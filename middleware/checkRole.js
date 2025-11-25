@@ -1,6 +1,7 @@
-function checkRole(role) {
+function checkRole(roles) {
   return (req, res, next) => {
-    if (req.user && req.user.role === role) {
+    const allowedRoles = Array.isArray(roles) ? roles : [roles];
+    if (req.user && allowedRoles.includes(req.user.role)) {
       next();
     } else {
       res.status(403).json({

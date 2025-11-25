@@ -7,7 +7,7 @@ const fs = require('fs');
 
 
 // Kreiraj uploads direktorijume ako ne postoje
-['exercises', 'muscle-groups', 'exercise-categories'].forEach((dir) => {
+['exercises', 'muscle-groups', 'exercise-categories', 'equipment'].forEach((dir) => {
   const target = path.join(__dirname, 'uploads', dir);
   if (!fs.existsSync(target)) {
     fs.mkdirSync(target, { recursive: true });
@@ -38,6 +38,8 @@ const testExercisesRoutes = require("./routes/testExercisesRoutes");
 const testResultsRoutes = require("./routes/testResultsRoutes");
 const trainingScheduleRoutes = require("./routes/trainingScheduleRoutes");
 const trainingPlanRoutes = require("./routes/trainingPlanRoutes");
+const equipmentRoutes = require("./routes/equipmentRoutes");
+const muscleSubGroupRoutes = require("./routes/muscleSubGroupRoutes");
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:3000',
@@ -142,11 +144,14 @@ app.use("/api/test-exercises", testExercisesRoutes);
 app.use("/api/test-results", testResultsRoutes);
 app.use("/api/schedules", trainingScheduleRoutes);
 app.use("/api/training-plans", trainingPlanRoutes);
+app.use("/api/equipment", equipmentRoutes);
+app.use("/api/muscle-sub-groups", muscleSubGroupRoutes);
 
 // Služi statičke fajlove - slike vežbi, mišićnih grupa i kategorija
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
 app.use("/uploads/muscle-groups", express.static(path.join(__dirname, "uploads/muscle-groups")));
 app.use("/uploads/exercise-categories", express.static(path.join(__dirname, "uploads/exercise-categories")));
+app.use("/uploads/equipment", express.static(path.join(__dirname, "uploads/equipment")));
 
 app.get('/api/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });

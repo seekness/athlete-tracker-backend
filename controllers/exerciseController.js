@@ -21,22 +21,35 @@ async function getAllExercises(req, res) {
   }
 }
 
+async function getExerciseById(req, res) {
+  const { id } = req.params;
+  try {
+    const exercise = await fetchExerciseById(id);
+    if (!exercise) {
+      return res.status(404).json({ error: "Vežba nije pronađena." });
+    }
+    res.json(exercise);
+  } catch (error) {
+    console.error("Greška pri dobijanju vežbe:", error);
+    res.status(500).json({ error: "Greška na serveru." });
+  }
+}
+
 async function createExercise(req, res) {
   const {
     naziv,
     opis,
-    muscle_group_id,
     exercise_category_id,
-    other_muscle_group_id,
-    oprema,
     unilateral,
     video_link,
-    slika
+    slika,
+    equipment_ids,
+    muscle_groups
   } = req.body;
 
-  if (!naziv || !muscle_group_id || !exercise_category_id) {
+  if (!naziv || !exercise_category_id) {
     return res.status(400).json({
-      error: "Naziv vežbe, mišićna grupa i kategorija su obavezni."
+      error: "Naziv vežbe i kategorija su obavezni."
     });
   }
 
@@ -44,26 +57,24 @@ async function createExercise(req, res) {
     const id = await insertExercise({
       naziv,
       opis,
-      muscle_group_id,
       exercise_category_id,
-      other_muscle_group_id,
-      oprema,
       unilateral,
       video_link,
-      slika
+      slika,
+      equipment_ids,
+      muscle_groups
     });
 
     res.status(201).json({
       id,
       naziv,
       opis,
-      muscle_group_id,
       exercise_category_id,
-      other_muscle_group_id,
-      oprema,
       unilateral,
       video_link,
-      slika
+      slika,
+      equipment_ids,
+      muscle_groups
     });
   } catch (error) {
     console.error("Greška pri dodavanju vežbe:", error);
@@ -76,18 +87,17 @@ async function updateExercise(req, res) {
   const {
     naziv,
     opis,
-    muscle_group_id,
     exercise_category_id,
-    other_muscle_group_id,
-    oprema,
     unilateral,
     video_link,
-    slika
+    slika,
+    equipment_ids,
+    muscle_groups
   } = req.body;
 
-  if (!naziv || !muscle_group_id || !exercise_category_id) {
+  if (!naziv || !exercise_category_id) {
     return res.status(400).json({
-      error: "Naziv vežbe, mišićna grupa i kategorija su obavezni."
+      error: "Naziv vežbe i kategorija su obavezni."
     });
   }
 
@@ -95,13 +105,12 @@ async function updateExercise(req, res) {
     await updateExerciseById(id, {
       naziv,
       opis,
-      muscle_group_id,
       exercise_category_id,
-      other_muscle_group_id,
-      oprema,
       unilateral,
       video_link,
-      slika
+      slika,
+      equipment_ids,
+      muscle_groups
     });
 
     res.json({ message: "Vežba uspešno ažurirana." });
@@ -123,32 +132,38 @@ async function deleteExercise(req, res) {
 }
 
 async function createExerciseWithImage(req, res) {
-  const {
+  let {
     naziv,
     opis,
-    muscle_group_id,
     exercise_category_id,
-    other_muscle_group_id,
-    oprema,
     unilateral,
-    video_link
+    video_link,
+    equipment_ids,
+    muscle_groups
   } = req.body;
 
-  if (!naziv || !muscle_group_id || !exercise_category_id) {
+  if (!naziv || !exercise_category_id) {
     return res.status(400).json({ error: "Obavezna polja nisu uneta." });
+  }
+
+  // Parse JSON strings if they come from multipart form data
+  if (typeof equipment_ids === 'string') {
+    try { equipment_ids = JSON.parse(equipment_ids); } catch (e) { equipment_ids = []; }
+  }
+  if (typeof muscle_groups === 'string') {
+    try { muscle_groups = JSON.parse(muscle_groups); } catch (e) { muscle_groups = []; }
   }
 
   try {
     const newExerciseId = await insertExercise({
       naziv,
       opis,
-      muscle_group_id: parseInt(muscle_group_id),
       exercise_category_id: parseInt(exercise_category_id),
-      other_muscle_group_id: other_muscle_group_id ? parseInt(other_muscle_group_id) : null,
-      oprema,
       unilateral: unilateral === 'true' || unilateral === true,
       video_link,
-      slika: "" // Postaviti na prazno, ažuriraće se kasnije ako ima sliku
+      slika: "", // Postaviti na prazno, ažuriraće se kasnije ako ima sliku
+      equipment_ids,
+      muscle_groups
     });
 
     let imagePath = "";
@@ -166,13 +181,12 @@ async function createExerciseWithImage(req, res) {
       id: newExerciseId,
       naziv,
       opis,
-      muscle_group_id: parseInt(muscle_group_id),
       exercise_category_id: parseInt(exercise_category_id),
-      other_muscle_group_id: other_muscle_group_id ? parseInt(other_muscle_group_id) : null,
-      oprema,
       unilateral: unilateral === 'true' || unilateral === true,
       video_link,
-      slika: imagePath
+      slika: imagePath,
+      equipment_ids,
+      muscle_groups
     });
   } catch (error) {
     console.error("Greška pri dodavanju vežbe:", error);
@@ -182,19 +196,26 @@ async function createExerciseWithImage(req, res) {
 
 async function updateExerciseWithImage(req, res) {
   const { id } = req.params;
-  const {
+  let {
     naziv,
     opis,
-    muscle_group_id,
     exercise_category_id,
-    other_muscle_group_id,
-    oprema,
     unilateral,
-    video_link
+    video_link,
+    equipment_ids,
+    muscle_groups
   } = req.body;
 
-  if (!naziv || !muscle_group_id || !exercise_category_id) {
+  if (!naziv || !exercise_category_id) {
     return res.status(400).json({ error: "Obavezna polja nisu uneta." });
+  }
+
+  // Parse JSON strings if they come from multipart form data
+  if (typeof equipment_ids === 'string') {
+    try { equipment_ids = JSON.parse(equipment_ids); } catch (e) { equipment_ids = []; }
+  }
+  if (typeof muscle_groups === 'string') {
+    try { muscle_groups = JSON.parse(muscle_groups); } catch (e) { muscle_groups = []; }
   }
 
   try {
@@ -222,13 +243,12 @@ async function updateExerciseWithImage(req, res) {
     await updateExerciseById(id, {
       naziv,
       opis,
-      muscle_group_id: parseInt(muscle_group_id),
       exercise_category_id: parseInt(exercise_category_id),
-      other_muscle_group_id: other_muscle_group_id ? parseInt(other_muscle_group_id) : null,
-      oprema,
       unilateral: unilateral === 'true' || unilateral === true,
       video_link,
-      slika: imagePath
+      slika: imagePath,
+      equipment_ids,
+      muscle_groups
     });
 
     res.json({ message: "Vežba uspešno ažurirana.", slika: imagePath });
@@ -262,6 +282,7 @@ async function deleteExerciseWithImage(req, res) {
 
 module.exports = {
   getAllExercises,
+  getExerciseById,
   createExercise,
   updateExercise,
   deleteExercise,

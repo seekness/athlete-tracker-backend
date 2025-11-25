@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2025-11-25
+
+### Database Changes
+- **New Table**: `equipment`
+  - Stores equipment items (e.g., "Dumbbells", "Barbell").
+  - Columns: `id`, `naziv`, `opis`.
+- **New Table**: `exercise_equipment`
+  - Many-to-many relationship between exercises and equipment.
+  - Columns: `id`, `exercise_id` (FK -> exercises), `equipment_id` (FK -> equipment).
+- **New Table**: `muscle_sub_groups`
+  - Stores sub-groups for muscle groups (e.g., "Upper Chest" for "Chest").
+  - Columns: `id`, `muscle_group_id` (FK -> muscle_groups), `naziv`, `opis`.
+- **New Table**: `exercise_muscle_groups`
+  - Replaces the old single-column relationship in `exercises`.
+  - Supports multiple muscle groups per exercise with activation types.
+  - Columns: `id`, `exercise_id` (FK -> exercises), `muscle_group_id` (FK -> muscle_groups), `muscle_sub_group_id` (FK -> muscle_sub_groups, nullable), `activation_type` (Enum: 'Glavni (primarni)', 'Pomoćni (sekundarni)', 'Stabilizatori').
+- **Table Modified**: `exercises`
+  - Removed columns: `muscle_group_id`, `other_muscle_group_id`, `oprema`.
+  - Data migrated to new tables.
+
+### Backend Logic
+- **New Routes**:
+  - `/api/equipment`: CRUD for equipment.
+  - `/api/muscle-sub-groups`: CRUD for muscle sub-groups.
+- **Updated Routes**:
+  - `/api/exercises`: Updated to handle fetching and saving complex relationships (equipment, multiple muscle groups/sub-groups).
+- **Models**:
+  - `equipmentModel.js`: New model.
+  - `muscleSubGroupModel.js`: New model.
+  - `exerciseModel.js`: Updated to join with new tables and handle transaction-based inserts/updates.
+- **Controllers**:
+  - `equipmentController.js`: New controller.
+  - `muscleSubGroupController.js`: New controller.
+  - `exerciseController.js`: Updated to process JSON arrays for equipment and muscle groups.
+
 ## [Unreleased] - 2025-11-23
 
 ### Database Changes
