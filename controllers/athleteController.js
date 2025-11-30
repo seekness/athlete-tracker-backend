@@ -3,12 +3,27 @@ const {
   fetchAllAthletesWithGroups,
   fetchGroupsByAthleteId,
   fetchAthleteById,
+  fetchAthleteByUserId,
   removeAthleteById,
   updateAthleteById,
   fetchAllAthletes,
   fetchAllCompetitors
 
 } = require("../models/athleteModel");
+
+async function getAthleteByUserId(req, res) {
+  const { userId } = req.params;
+  try {
+    const athlete = await fetchAthleteByUserId(userId);
+    if (!athlete) {
+      return res.status(404).json({ error: "Sportista nije pronađen." });
+    }
+    res.status(200).json(athlete);
+  } catch (error) {
+    console.error("Greška pri dobijanju sportiste po user ID:", error);
+    res.status(500).json({ error: "Greška na serveru." });
+  }
+}
 
 async function createAthlete(req, res) {
   const {
@@ -59,6 +74,27 @@ async function getAthleteGroups(req, res) {
     res.status(200).json(groups);
   } catch (error) {
     console.error("Greška pri dobijanju grupa za sportistu:", error);
+    res.status(500).json({ error: "Greška na serveru." });
+  }
+}
+
+async function getAthlete(req, res) {
+  const { athleteId } = req.params;
+  try {
+    // Prvo pokušaj po ID-u sportiste
+    let athlete = await fetchAthleteById(athleteId);
+    
+    // Ako nije nađen, pokušaj po ID-u korisnika (jer frontend šalje userId za "Moj profil")
+    if (!athlete) {
+      athlete = await fetchAthleteByUserId(athleteId);
+    }
+
+    if (!athlete) {
+      return res.status(404).json({ error: "Sportista nije pronađen." });
+    }
+    res.status(200).json(athlete);
+  } catch (error) {
+    console.error("Greška pri dobijanju sportiste:", error);
     res.status(500).json({ error: "Greška na serveru." });
   }
 }
@@ -116,8 +152,10 @@ module.exports = {
   createAthlete,
   getAllAthletes,
   getAthleteGroups,
+  getAthlete,
   deleteAthlete,
   updateAthlete,
   getAllAthletes2,
-  getAllCompetitors
+  getAllCompetitors,
+  getAthleteByUserId
 };

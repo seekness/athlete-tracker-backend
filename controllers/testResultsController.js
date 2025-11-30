@@ -198,11 +198,26 @@ async function createGroupTestResults(req, res) {
 
 async function updateTestResult(req, res) {
   const { id } = req.params;
+  const { role, id: userId } = req.user;
   const napomena = typeof req.body.napomena !== "undefined" ? req.body.napomena : undefined;
   const providedValues = req.body.values;
 
   if (typeof napomena === "undefined" && typeof providedValues === "undefined" && typeof req.body.vrednost === "undefined") {
     return res.status(400).json({ error: "Nema podataka za izmenu" });
+  }
+
+  // Provera prava pristupa za sportistu
+  if (role === "sportista") {
+    const [athleteRows] = await dbPool.query("SELECT id FROM athletes WHERE user_id = ?", [userId]);
+    if (athleteRows.length === 0) {
+      return res.status(403).json({ error: "Nemate pravo pristupa" });
+    }
+    const athleteId = athleteRows[0].id;
+    
+    const [check] = await dbPool.query("SELECT id FROM test_results WHERE id = ? AND athlete_id = ?", [id, athleteId]);
+    if (check.length === 0) {
+      return res.status(403).json({ error: "Nemate pravo izmene ovog rezultata" });
+    }
   }
 
   const fallbackValue = buildFallbackValue(req.body);

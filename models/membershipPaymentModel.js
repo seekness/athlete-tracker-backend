@@ -49,6 +49,7 @@ async function fetchMonthlyPayments(userId, role) {
     JOIN membership_payments mp ON a.id = mp.athlete_id
     WHERE (
       ? = 'admin' OR
+      (? = 'sportista' AND a.user_id = ?) OR
       a.id IN (
         SELECT gm.athlete_id
         FROM group_memberships gm
@@ -66,7 +67,7 @@ async function fetchMonthlyPayments(userId, role) {
     )
     ORDER BY a.prezime, a.ime, mp.payment_month DESC
   `;
-  const params = [role, userId, userId];
+  const params = [role, role, userId, userId, userId];
   const [rows] = await dbPool.query(query, params);
   return rows;
 }

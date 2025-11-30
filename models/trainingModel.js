@@ -1,33 +1,109 @@
 const dbPool = require("../db/pool");
 
 async function fetchTrainingsForUser(role, userId) {
-  const query = `
-    (
-      SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, ts.location_id
+  let query = "";
+  let params = [];
+
+  if (role === "admin") {
+    query = `
+      SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
       FROM training_schedules ts
       JOIN trainings t ON ts.training_id = t.id
       JOIN programs p ON t.program_id = p.id
-      JOIN program_group_assignments pga ON p.id = pga.program_id
-      WHERE ? = 'admin' OR pga.group_id IN (
-        SELECT group_id FROM coach_group_assignments
-        WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+      LEFT JOIN locations l ON ts.location_id = l.id
+      LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+      ORDER BY ts.datum DESC, ts.vreme DESC
+    `;
+  } else if (role === "trener") {
+    query = `
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN program_group_assignments pga ON p.id = pga.program_id
+        WHERE pga.group_id IN (
+          SELECT group_id FROM coach_group_assignments
+          WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+        )
       )
-    )
-    UNION
-    (
-      SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, ts.location_id
-      FROM training_schedules ts
-      JOIN trainings t ON ts.training_id = t.id
-      JOIN programs p ON t.program_id = p.id
-      JOIN program_athlete_assignments paa ON p.id = paa.program_id
-      WHERE ? = 'admin' OR paa.athlete_id IN (
-        SELECT athlete_id FROM coach_athlete_assignments
-        WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+      UNION
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN program_athlete_assignments paa ON p.id = paa.program_id
+        WHERE paa.athlete_id IN (
+          SELECT athlete_id FROM coach_athlete_assignments
+          WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+        )
       )
-    )
-    ORDER BY datum DESC
-  `;
-  const params = [role, userId, role, userId];
+      ORDER BY datum DESC, vreme DESC
+    `;
+    params = [userId, userId];
+  } else if (role === "sportista") {
+    query = `
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN program_group_assignments pga ON p.id = pga.program_id
+        WHERE pga.group_id IN (
+          SELECT group_id FROM group_memberships
+          WHERE athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+        )
+      )
+      UNION
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN program_athlete_assignments paa ON p.id = paa.program_id
+        WHERE paa.athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+      )
+      UNION
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN training_plan_group_assignments tpga ON ts.training_plan_id = tpga.training_plan_id
+        WHERE tpga.group_id IN (
+          SELECT group_id FROM group_memberships
+          WHERE athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+        )
+      )
+      UNION
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN training_plan_athlete_assignments tpaa ON ts.training_plan_id = tpaa.training_plan_id
+        WHERE tpaa.athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+      )
+      ORDER BY datum DESC, vreme DESC
+    `;
+    params = [userId, userId, userId, userId];
+  } else {
+    return [];
+  }
+
   const [rows] = await dbPool.query(query, params);
   return rows;
 }
@@ -36,12 +112,13 @@ async function fetchTrainingDetailsById(scheduleId) {
   // Try to find as a schedule first
   const [scheduleRows] = await dbPool.query(
     `SELECT ts.id, ts.training_id, ts.datum, ts.vreme, ts.location_id,
-            t.opis, t.predicted_duration_minutes, p.naziv AS program_naziv,
+            t.opis, t.predicted_duration_minutes, p.naziv AS program_naziv, tp.naziv AS plan_naziv,
             l.naziv AS location_name, l.mesto AS location_city
      FROM training_schedules ts
      JOIN trainings t ON ts.training_id = t.id
      JOIN programs p ON t.program_id = p.id
      LEFT JOIN locations l ON ts.location_id = l.id
+     LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
      WHERE ts.id = ?
      LIMIT 1`,
     [scheduleId]

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2025-11-26
+
+### Data Updates
+- **Seed Data**:
+  - Added "Inverted Row" exercise via script (`insert_inverted_row.js`).
+
 ## [Unreleased] - 2025-11-25
 
 ### Database Changes

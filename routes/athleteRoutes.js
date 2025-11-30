@@ -5,16 +5,19 @@ const {
   createAthlete,
   getAllAthletes,
   getAthleteGroups,
+  getAthlete,
   deleteAthlete,
   updateAthlete,
   getAllAthletes2,
-  getAllCompetitors
-
+  getAllCompetitors,
+  getAthleteByUserId
 } = require("../controllers/athleteController");
 
 router.post("/", authenticateToken, createAthlete);
 router.get("/", authenticateToken, getAllAthletes);
+router.get("/by-user/:userId", authenticateToken, getAthleteByUserId);
 router.get("/:athleteId/groups", authenticateToken, getAthleteGroups);
+router.get("/:athleteId", authenticateToken, getAthlete);
 router.delete("/:id", authenticateToken, deleteAthlete);
 router.put("/:athleteId", authenticateToken, updateAthlete);
 router.get("/all-athletes", authenticateToken, getAllAthletes2);

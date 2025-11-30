@@ -2,13 +2,91 @@ const dbPool = require("../db/pool");
 
 async function getAllTests(req, res) {
   const { trener_id } = req.query;
+  const { role, id: userId } = req.user;
 
   const filters = [];
   const params = [];
 
-  if (trener_id) {
-    filters.push("t.trener_id = ?");
-    params.push(trener_id);
+  if (role === "sportista") {
+    // Sportista vidi samo testove gde ima rezultate ili koji su dodeljeni njegovoj grupi (ako postoji logika za to)
+    // Za sada, prikazaćemo testove gde sportista ima unete rezultate ili je test kreirao njegov trener
+    // Ali jednostavnije: prikazaćemo testove gde sportista ima rezultate
+    // ILI testove koji su generalno dostupni (ako nema striktne dodele)
+    
+    // Logika: Prikazati testove u kojima sportista ima unete rezultate (test_results)
+    // Ili testove koje je kreirao trener koji trenira ovog sportistu.
+    
+    // Upit za sportistu:
+    // 1. Testovi gde postoji zapis u test_results za ovog sportistu
+    // 2. (Opciono) Testovi trenera koji trenira sportistu (ovo zahteva join sa coach_athlete_assignments)
+    
+    // Za MVP, prikazaćemo testove gde sportista ima rezultate.
+    // Ako želimo da vidi i buduće testove (zakazane), moramo znati ko mu je trener.
+    
+    // Prošireni upit za sportistu:
+    // Vrati testove koji su kreirani od strane trenera koji je dodeljen ovom sportisti
+    // ILI testove gde sportista već ima rezultat.
+    
+    const athleteQuery = `
+      SELECT DISTINCT t.id
+      FROM tests t
+      LEFT JOIN test_results tr ON tr.test_exercises_id IN (SELECT id FROM test_exercises WHERE test_id = t.id)
+      WHERE tr.athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+      
+      UNION
+      
+      SELECT t.id
+      FROM tests t
+      WHERE t.trener_id IN (
+        SELECT coach_id FROM coach_athlete_assignments 
+        WHERE athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+      )
+      OR t.trener_id IN (
+        SELECT coach_id FROM coach_group_assignments cga
+        JOIN group_memberships gm ON cga.group_id = gm.group_id
+        WHERE gm.athlete_id = (SELECT id FROM athletes WHERE user_id = ?)
+      )
+    `;
+    
+    // Zbog kompleksnosti i limita MySQL view-a u ovom kontekstu, 
+    // možemo pojednostaviti: Vrati sve testove ako je sportista, ali filtriraj u WHERE klauzuli
+    // Ili bolje: Vrati testove trenera koji su povezani sa sportistom.
+    
+    // Jednostavniji pristup:
+    // Ako je sportista, nađi njegove trenere i filtriraj testove tih trenera.
+    
+    // Prvo nađimo ID sportiste
+    const [athleteRows] = await dbPool.query("SELECT id FROM athletes WHERE user_id = ?", [userId]);
+    if (athleteRows.length === 0) {
+      return res.json([]); // Nije pronađen sportista
+    }
+    const athleteId = athleteRows[0].id;
+    
+    // Nađimo trenere ovog sportiste (direktno ili preko grupe)
+    const [coachRows] = await dbPool.query(`
+      SELECT DISTINCT coach_id FROM coach_athlete_assignments WHERE athlete_id = ?
+      UNION
+      SELECT DISTINCT coach_id FROM coach_group_assignments cga
+      JOIN group_memberships gm ON cga.group_id = gm.group_id
+      WHERE gm.athlete_id = ?
+    `, [athleteId, athleteId]);
+    
+    // Izmena: Sportista vidi samo testove gde ima dodeljene rezultate (test_results)
+    // Ovo osigurava da vidi samo "svoja" testiranja.
+    filters.push(`t.id IN (
+      SELECT DISTINCT te.test_id 
+      FROM test_results tr
+      JOIN test_exercises te ON tr.test_exercises_id = te.id
+      WHERE tr.athlete_id = ?
+    )`);
+    params.push(athleteId);
+
+  } else {
+    // Za trenera i admina
+    if (trener_id) {
+      filters.push("t.trener_id = ?");
+      params.push(trener_id);
+    }
   }
 
   const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
@@ -187,6 +265,20 @@ async function getTestResultsBySportista(req, res) {
 
 async function getGroupResultsForTest(req, res) {
   const { test_id } = req.params;
+  const { role, id: userId } = req.user;
+
+  let athleteFilter = "";
+  const params = [test_id];
+
+  if (role === "sportista") {
+    const [athleteRows] = await dbPool.query("SELECT id FROM athletes WHERE user_id = ?", [userId]);
+    if (athleteRows.length === 0) {
+      return res.json([]);
+    }
+    const athleteId = athleteRows[0].id;
+    athleteFilter = "AND tr.athlete_id = ?";
+    params.push(athleteId);
+  }
 
   try {
     const [rows] = await dbPool.query(
@@ -217,10 +309,10 @@ async function getGroupResultsForTest(req, res) {
         JOIN test_exercises te ON tr.test_exercises_id = te.id
         JOIN exercises e ON te.exercises_id = e.id
         LEFT JOIN test_results_values trv ON trv.test_result_id = tr.id
-        WHERE te.test_id = ?
+        WHERE te.test_id = ? ${athleteFilter}
         ORDER BY a.prezime, a.ime, te.id, trv.timestamp ASC, trv.id ASC
       `,
-      [test_id]
+      params
     );
 
     res.json(mapResultsWithValues(rows, { includeAthlete: true }));

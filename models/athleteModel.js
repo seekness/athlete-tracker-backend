@@ -49,6 +49,11 @@ async function fetchAthleteById(id) {
   return rows[0];
 }
 
+async function fetchAthleteByUserId(userId) {
+  const [rows] = await dbPool.query("SELECT * FROM athletes WHERE user_id = ?", [userId]);
+  return rows[0];
+}
+
 async function removeAthleteById(id) {
   const connection = await dbPool.getConnection();
   try {
@@ -137,6 +142,7 @@ module.exports = {
   fetchAllAthletesWithGroups,
   fetchGroupsByAthleteId,
   fetchAthleteById,
+  fetchAthleteByUserId,
   removeAthleteById,
   updateAthleteById,
   fetchAllAthletes,

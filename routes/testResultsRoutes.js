@@ -16,7 +16,7 @@ router.get("/by-test/:test_id", authenticateToken, isTrener, getTestResultsByTes
 router.post("/", authenticateToken, isTrener, createTestResult);
 router.post("/bulk", authenticateToken, isTrener, createBulkTestResults);
 router.post("/group", authenticateToken, isTrener, createGroupTestResults);
-router.put("/:id", authenticateToken, isTrener, updateTestResult);
+router.put("/:id", authenticateToken, updateTestResult);
 router.delete("/:id", authenticateToken, isTrener, deleteTestResult);
 
 module.exports = router;

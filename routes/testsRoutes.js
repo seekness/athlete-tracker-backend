@@ -14,13 +14,13 @@ const {
   getExercisesForTest,
 } = require("../controllers/testsController");
 
-router.get("/", authenticateToken, isTrener, getAllTests);
-router.get("/:id", authenticateToken, isTrener, getTestById);
+router.get("/", authenticateToken, getAllTests);
+router.get("/:id", authenticateToken, getTestById);
 router.post("/", authenticateToken, isTrener, createTest);
 router.put("/:id", authenticateToken, isTrener, updateTest);
 router.delete("/:id", authenticateToken, isTrener, deleteTest);
 router.get("/:test_id/results", authenticateToken, isTrener, getTestResultsBySportista);
-router.get("/:test_id/group_results", authenticateToken, isTrener, getGroupResultsForTest);
-router.get("/:test_id/exercises", authenticateToken, isTrener, getExercisesForTest);
+router.get("/:test_id/group_results", authenticateToken, getGroupResultsForTest);
+router.get("/:test_id/exercises", authenticateToken, getExercisesForTest);
 
 module.exports = router;
