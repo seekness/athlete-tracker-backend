@@ -43,9 +43,37 @@ async function fetchTrainingsForUser(role, userId) {
           WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
         )
       )
+      UNION
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN training_plan_group_assignments tpga ON ts.training_plan_id = tpga.training_plan_id
+        WHERE tpga.group_id IN (
+          SELECT group_id FROM coach_group_assignments
+          WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+        )
+      )
+      UNION
+      (
+        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        FROM training_schedules ts
+        JOIN trainings t ON ts.training_id = t.id
+        JOIN programs p ON t.program_id = p.id
+        LEFT JOIN locations l ON ts.location_id = l.id
+        LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
+        JOIN training_plan_athlete_assignments tpaa ON ts.training_plan_id = tpaa.training_plan_id
+        WHERE tpaa.athlete_id IN (
+          SELECT athlete_id FROM coach_athlete_assignments
+          WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+        )
+      )
       ORDER BY datum DESC, vreme DESC
     `;
-    params = [userId, userId];
+    params = [userId, userId, userId, userId];
   } else if (role === "sportista") {
     query = `
       (

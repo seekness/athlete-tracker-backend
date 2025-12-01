@@ -39,36 +39,44 @@ async function fetchAttendanceByScheduleId(scheduleId, userRole, userId) {
       -- 3. Plan -> Group -> Athlete
       SELECT a.id AS athlete_id, a.ime, a.prezime, a.datum_rodenja, ta.status, ta.napomena
       FROM training_schedules ts
-      JOIN training_plan_group_assignments tpga ON ts.training_plan_id = tpga.training_plan_id
+      JOIN training_plans tp ON ts.training_plan_id = tp.id
+      JOIN training_plan_group_assignments tpga ON tp.id = tpga.training_plan_id
       JOIN group_memberships gm ON tpga.group_id = gm.group_id
       JOIN athletes a ON gm.athlete_id = a.id
       LEFT JOIN training_attendance ta ON a.id = ta.athlete_id AND ta.training_schedule_id = ts.id
       WHERE ts.id = ?
-        AND (? = 'admin' OR tpga.group_id IN (
-          SELECT group_id FROM coach_group_assignments
-          WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
-        ))
+        AND (? = 'admin' 
+             OR tpga.group_id IN (
+               SELECT group_id FROM coach_group_assignments
+               WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+             )
+             OR tp.created_by = ?
+        )
     )
     UNION
     (
       -- 4. Plan -> Athlete
       SELECT a.id AS athlete_id, a.ime, a.prezime, a.datum_rodenja, ta.status, ta.napomena
       FROM training_schedules ts
-      JOIN training_plan_athlete_assignments tpaa ON ts.training_plan_id = tpaa.training_plan_id
+      JOIN training_plans tp ON ts.training_plan_id = tp.id
+      JOIN training_plan_athlete_assignments tpaa ON tp.id = tpaa.training_plan_id
       JOIN athletes a ON tpaa.athlete_id = a.id
       LEFT JOIN training_attendance ta ON a.id = ta.athlete_id AND ta.training_schedule_id = ts.id
       WHERE ts.id = ?
-        AND (? = 'admin' OR tpaa.athlete_id IN (
-          SELECT athlete_id FROM coach_athlete_assignments
-          WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
-        ))
+        AND (? = 'admin' 
+             OR tpaa.athlete_id IN (
+               SELECT athlete_id FROM coach_athlete_assignments
+               WHERE coach_id = (SELECT id FROM trainers WHERE user_id = ?)
+             )
+             OR tp.created_by = ?
+        )
     )
   `;
   const params = [
     scheduleId, userRole, userId, 
     scheduleId, userRole, userId,
-    scheduleId, userRole, userId,
-    scheduleId, userRole, userId
+    scheduleId, userRole, userId, userId,
+    scheduleId, userRole, userId, userId
   ];
   const [rows] = await dbPool.query(query, params);
   return rows;

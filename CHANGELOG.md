@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2025-12-01
+
+### Backend Logic
+- **Controllers**:
+  - `testResultsController.js`: Added `getTestResultsByAthlete` to fetch test results grouped by exercise for a specific athlete.
+
 ## [Unreleased] - 2025-11-26
 
 ### Data Updates

@@ -324,8 +324,77 @@ async function deleteTestResult(req, res) {
   }
 }
 
+async function getTestResultsByAthlete(req, res) {
+  const { athleteId } = req.params;
+
+  try {
+    const [rows] = await dbPool.query(
+      `
+        SELECT
+          tr.id AS test_result_id,
+          tr.athlete_id,
+          tr.test_exercises_id,
+          tr.napomena,
+          te.test_id,
+          t.naziv AS test_naziv,
+          t.datum AS test_datum,
+          te.vrsta_unosa,
+          e.naziv AS vezba,
+          trv.id AS value_id,
+          trv.vrsta_rezultata_1,
+          trv.rezultat_1,
+          trv.jedinica_mere_1,
+          trv.vrsta_rezultata_2,
+          trv.rezultat_2,
+          trv.jedinica_mere_2,
+          trv.vrsta_rezultata_3,
+          trv.rezultat_3,
+          trv.jedinica_mere_3,
+          trv.timestamp
+        FROM test_results tr
+        JOIN test_exercises te ON tr.test_exercises_id = te.id
+        JOIN tests t ON te.test_id = t.id
+        JOIN exercises e ON te.exercises_id = e.id
+        LEFT JOIN test_results_values trv ON trv.test_result_id = tr.id
+        WHERE tr.athlete_id = ?
+        ORDER BY e.naziv, t.datum DESC, trv.timestamp DESC
+      `,
+      [athleteId]
+    );
+
+    const groupedByExercise = {};
+
+    for (const row of rows) {
+      if (!groupedByExercise[row.vezba]) {
+        groupedByExercise[row.vezba] = [];
+      }
+
+      groupedByExercise[row.vezba].push({
+        test_result_id: row.test_result_id,
+        test_id: row.test_id,
+        test_naziv: row.test_naziv,
+        test_datum: row.test_datum,
+        timestamp: row.timestamp,
+        vrsta_unosa: row.vrsta_unosa,
+        rezultat_1: row.rezultat_1,
+        jedinica_mere_1: row.jedinica_mere_1,
+        rezultat_2: row.rezultat_2,
+        jedinica_mere_2: row.jedinica_mere_2,
+        rezultat_3: row.rezultat_3,
+        jedinica_mere_3: row.jedinica_mere_3,
+      });
+    }
+
+    res.json(groupedByExercise);
+  } catch (error) {
+    console.error("Greška pri dohvaćanju istorije testiranja:", error);
+    res.status(500).json({ error: "Greška pri dohvaćanju istorije testiranja" });
+  }
+}
+
 module.exports = {
   getTestResultsByTest,
+  getTestResultsByAthlete,
   createTestResult,
   createBulkTestResults,
   createGroupTestResults,
