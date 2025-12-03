@@ -2,7 +2,11 @@ const dbPool = require("../db/pool");
 
 async function findUserByUsername(username, connection = dbPool) {
   const [users] = await connection.query(
-    "SELECT * FROM users WHERE username = ?",
+    `SELECT u.*, a.id AS athlete_id, t.id AS trainer_id
+     FROM users u
+     LEFT JOIN athletes a ON u.id = a.user_id
+     LEFT JOIN trainers t ON u.id = t.user_id
+     WHERE u.username = ?`,
     [username]
   );
   return users[0];

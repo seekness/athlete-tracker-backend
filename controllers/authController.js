@@ -80,7 +80,14 @@ async function loginUser(req, res) {
       return res.status(401).json("Netačna lozinka.");
     }
 
-    const payload = { id: user.id, username: user.username, display_name: user.display_name, role: user.role };
+    const payload = { 
+      id: user.id, 
+      username: user.username, 
+      display_name: user.display_name, 
+      role: user.role,
+      athlete_id: user.athlete_id,
+      trainer_id: user.trainer_id
+    };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     res.json({ token, user: payload });

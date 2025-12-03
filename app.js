@@ -40,6 +40,7 @@ const trainingScheduleRoutes = require("./routes/trainingScheduleRoutes");
 const trainingPlanRoutes = require("./routes/trainingPlanRoutes");
 const equipmentRoutes = require("./routes/equipmentRoutes");
 const muscleSubGroupRoutes = require("./routes/muscleSubGroupRoutes");
+const resultWorkoutRoutes = require("./routes/resultWorkoutRoutes");
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:3000',
@@ -146,6 +147,7 @@ app.use("/api/schedules", trainingScheduleRoutes);
 app.use("/api/training-plans", trainingPlanRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/muscle-sub-groups", muscleSubGroupRoutes);
+app.use("/api/workout-results", resultWorkoutRoutes);
 
 // Služi statičke fajlove - slike vežbi, mišićnih grupa i kategorija
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
