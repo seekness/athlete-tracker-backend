@@ -11,20 +11,28 @@ async function getMuscleSubGroupsByGroupId(groupId) {
 }
 
 async function createMuscleSubGroup(subGroup) {
-  const { muscle_group_id, naziv, opis } = subGroup;
+  const { muscle_group_id, naziv, opis, slika } = subGroup;
   const [result] = await dbPool.query(
-    "INSERT INTO muscle_sub_groups (muscle_group_id, naziv, opis) VALUES (?, ?, ?)",
-    [muscle_group_id, naziv, opis]
+    "INSERT INTO muscle_sub_groups (muscle_group_id, naziv, opis, slika) VALUES (?, ?, ?, ?)",
+    [muscle_group_id, naziv, opis, slika || null]
   );
   return result.insertId;
 }
 
 async function updateMuscleSubGroup(id, subGroup) {
-  const { muscle_group_id, naziv, opis } = subGroup;
-  await dbPool.query(
-    "UPDATE muscle_sub_groups SET muscle_group_id = ?, naziv = ?, opis = ? WHERE id = ?",
-    [muscle_group_id, naziv, opis, id]
-  );
+  const { muscle_group_id, naziv, opis, slika } = subGroup;
+  let query = "UPDATE muscle_sub_groups SET muscle_group_id = ?, naziv = ?, opis = ?";
+  const params = [muscle_group_id, naziv, opis];
+
+  if (slika !== undefined) {
+    query += ", slika = ?";
+    params.push(slika);
+  }
+
+  query += " WHERE id = ?";
+  params.push(id);
+
+  await dbPool.query(query, params);
 }
 
 async function deleteMuscleSubGroup(id) {

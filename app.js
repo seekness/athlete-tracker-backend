@@ -7,7 +7,7 @@ const fs = require('fs');
 
 
 // Kreiraj uploads direktorijume ako ne postoje
-['exercises', 'muscle-groups', 'exercise-categories', 'equipment'].forEach((dir) => {
+['exercises', 'muscle-groups', 'muscle-sub-groups', 'exercise-categories', 'equipment'].forEach((dir) => {
   const target = path.join(__dirname, 'uploads', dir);
   if (!fs.existsSync(target)) {
     fs.mkdirSync(target, { recursive: true });
@@ -152,6 +152,7 @@ app.use("/api/workout-results", resultWorkoutRoutes);
 // Služi statičke fajlove - slike vežbi, mišićnih grupa i kategorija
 app.use("/uploads/exercises", express.static(path.join(__dirname, "uploads/exercises")));
 app.use("/uploads/muscle-groups", express.static(path.join(__dirname, "uploads/muscle-groups")));
+app.use("/uploads/muscle-sub-groups", express.static(path.join(__dirname, "uploads/muscle-sub-groups")));
 app.use("/uploads/exercise-categories", express.static(path.join(__dirname, "uploads/exercise-categories")));
 app.use("/uploads/equipment", express.static(path.join(__dirname, "uploads/equipment")));
 

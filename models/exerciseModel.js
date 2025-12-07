@@ -7,7 +7,7 @@ async function fetchExercisesWithDetails() {
     SELECT 
       e.id, e.naziv, e.opis, 
       e.exercise_category_id, ec.naziv AS category_name,
-      e.unilateral, e.video_link, e.slika,
+      e.unilateral, e.video_link, e.slika, e.rep_duration_seconds,
       GROUP_CONCAT(DISTINCT eq.naziv SEPARATOR ', ') AS equipment_names,
       GROUP_CONCAT(DISTINCT CASE WHEN emg.activation_type = 'Glavni (primarni)' THEN mg.naziv END SEPARATOR ', ') AS primary_muscle_groups,
       GROUP_CONCAT(DISTINCT CASE WHEN emg.activation_type = 'Pomoćni (sekundarni)' THEN mg.naziv END SEPARATOR ', ') AS secondary_muscle_groups,
@@ -64,6 +64,7 @@ async function insertExercise(exercise) {
     unilateral,
     video_link,
     slika,
+    rep_duration_seconds,
     equipment_ids, // Array of equipment IDs
     muscle_groups // Array of objects { muscle_group_id, muscle_sub_group_id, activation_type }
   } = exercise;
@@ -73,14 +74,15 @@ async function insertExercise(exercise) {
     await connection.beginTransaction();
 
     const [result] = await connection.query(
-      "INSERT INTO exercises (naziv, opis, exercise_category_id, unilateral, video_link, slika) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO exercises (naziv, opis, exercise_category_id, unilateral, video_link, slika, rep_duration_seconds) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         naziv,
         opis,
         exercise_category_id,
         unilateral,
         video_link,
-        slika
+        slika,
+        rep_duration_seconds
       ]
     );
     const exerciseId = result.insertId;
@@ -126,6 +128,7 @@ async function updateExerciseById(id, exercise) {
     unilateral,
     video_link,
     slika,
+    rep_duration_seconds,
     equipment_ids,
     muscle_groups
   } = exercise;
@@ -135,7 +138,7 @@ async function updateExerciseById(id, exercise) {
     await connection.beginTransaction();
 
     await connection.query(
-      "UPDATE exercises SET naziv = ?, opis = ?, exercise_category_id = ?, unilateral = ?, video_link = ?, slika = ? WHERE id = ?",
+      "UPDATE exercises SET naziv = ?, opis = ?, exercise_category_id = ?, unilateral = ?, video_link = ?, slika = ?, rep_duration_seconds = ? WHERE id = ?",
       [
         naziv,
         opis,
@@ -143,6 +146,7 @@ async function updateExerciseById(id, exercise) {
         unilateral,
         video_link,
         slika,
+        rep_duration_seconds,
         id
       ]
     );

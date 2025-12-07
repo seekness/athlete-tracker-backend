@@ -23,12 +23,14 @@ async function getMuscleSubGroupsByGroupId(req, res) {
 
 async function createMuscleSubGroup(req, res) {
   const { muscle_group_id, naziv, opis } = req.body;
+  const slika = req.file ? req.file.filename : null;
+
   if (!muscle_group_id || !naziv) {
     return res.status(400).json({ error: "Muscle Group ID and Naziv are required" });
   }
   try {
-    const id = await muscleSubGroupModel.createMuscleSubGroup({ muscle_group_id, naziv, opis });
-    res.status(201).json({ id, muscle_group_id, naziv, opis });
+    const id = await muscleSubGroupModel.createMuscleSubGroup({ muscle_group_id, naziv, opis, slika });
+    res.status(201).json({ id, muscle_group_id, naziv, opis, slika });
   } catch (error) {
     console.error("Error creating muscle sub-group:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -38,11 +40,17 @@ async function createMuscleSubGroup(req, res) {
 async function updateMuscleSubGroup(req, res) {
   const { id } = req.params;
   const { muscle_group_id, naziv, opis } = req.body;
+  
+  const updateData = { muscle_group_id, naziv, opis };
+  if (req.file) {
+    updateData.slika = req.file.filename;
+  }
+
   if (!muscle_group_id || !naziv) {
     return res.status(400).json({ error: "Muscle Group ID and Naziv are required" });
   }
   try {
-    await muscleSubGroupModel.updateMuscleSubGroup(id, { muscle_group_id, naziv, opis });
+    await muscleSubGroupModel.updateMuscleSubGroup(id, updateData);
     res.json({ message: "Muscle sub-group updated successfully" });
   } catch (error) {
     console.error("Error updating muscle sub-group:", error);

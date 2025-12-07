@@ -1,172 +1,898 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Nov 21, 2025 at 02:31 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
+-- --------------------------------------------------------
+-- Host:                         localhost
+-- Server version:               8.4.7 - MySQL Community Server - GPL
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.11.0.7065
+-- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
---
--- Database: `athlete_tracker`
---
 
--- --------------------------------------------------------
+-- Dumping database structure for athlete_tracker
+CREATE DATABASE IF NOT EXISTS `athlete_tracker` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `athlete_tracker`;
 
---
--- Table structure for table `athletes`
---
-
-CREATE TABLE `athletes` (
-  `id` int(11) NOT NULL,
-  `ime` varchar(255) NOT NULL,
-  `prezime` varchar(255) NOT NULL,
-  `username` varchar(255) DEFAULT NULL,
+-- Dumping structure for table athlete_tracker.athletes
+CREATE TABLE IF NOT EXISTS `athletes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ime` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `prezime` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `username` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
   `datum_rodenja` date DEFAULT NULL,
-  `broj_telefona` varchar(20) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `ime_roditelja` varchar(255) DEFAULT NULL,
-  `jmbg` varchar(13) DEFAULT NULL,
-  `mesto_rodenja` varchar(255) DEFAULT NULL,
-  `adresa_stanovanja` varchar(255) DEFAULT NULL,
-  `mesto_stanovanja` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `aktivan` tinyint(1) DEFAULT 1,
-  `broj_knjizice` varchar(255) DEFAULT NULL,
+  `broj_telefona` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `ime_roditelja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `jmbg` varchar(13) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `mesto_rodenja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `adresa_stanovanja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `mesto_stanovanja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `aktivan` tinyint(1) DEFAULT '1',
+  `broj_knjizice` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
   `datum_poslednjeg_sportskog_pregleda` date DEFAULT NULL,
-  `is_paying_member` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Da li sportista placa clanarinu',
+  `is_paying_member` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Da li sportista placa clanarinu',
   `payment_start_date` date DEFAULT NULL COMMENT 'Datum od kada pocinje da placa clanarinu',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Vreme kreiranja sloga'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Vreme kreiranja sloga',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  CONSTRAINT `athletes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `athletes`
---
-
+-- Dumping data for table athlete_tracker.athletes: ~32 rows (approximately)
 INSERT INTO `athletes` (`id`, `ime`, `prezime`, `username`, `datum_rodenja`, `broj_telefona`, `user_id`, `ime_roditelja`, `jmbg`, `mesto_rodenja`, `adresa_stanovanja`, `mesto_stanovanja`, `email`, `aktivan`, `broj_knjizice`, `datum_poslednjeg_sportskog_pregleda`, `is_paying_member`, `payment_start_date`, `created_at`) VALUES
-(1, 'Zoran', 'Kosanović', 'seekness', '1982-11-02', '063468056', 1, 'Marija', '1111982110017', NULL, '', '', '', 1, '', '1899-11-26', 1, '2025-01-01', '2025-08-24 20:03:07'),
-(2, 'Zoran', 'Kosanović', 'miner', '2007-10-27', '063468056', 2, 'Mile', '1111982110017', NULL, 'Banatska 2v', 'Sombor', 'seekness@gmail.com', 1, 'aaaa', '2025-05-01', 0, '2024-12-27', '2025-08-24 20:03:07'),
-(3, 'Antonija', 'Mala', 'amala', '2013-05-13', '00192290201', 3, 'Perica', '1212121212111', NULL, 'Banatska 2v', 'Sombor', 'nesto@hhaa.zu', 1, '', '2025-08-08', 1, '2024-12-29', '2025-08-24 20:03:07'),
-(4, 'Ognjen', 'Kosanović', 'ogilic', '2016-07-21', '', NULL, 'Zoran', '2507016111000', NULL, 'Banatska 2v', 'Sombor', '', 1, '', '1899-11-26', 1, '2024-12-31', '2025-08-24 20:03:07'),
-(5, 'Test', 'Dodavanje', 'testd', '2010-04-06', '', NULL, '', '', NULL, '', '', '', 1, '', NULL, 1, '2025-08-31', '2025-09-25 21:28:18');
+	(3, 'Ognjen ', 'Kosanović', 'ognjenk', '2016-07-25', '0643210430', 7, 'Antonija, Zoran Kosanović', '', NULL, 'Banatska 2v', 'Sombor', '', 1, 'B-3429/24', '2025-03-31', 0, '2024-12-28', '2025-08-24 21:34:41'),
+	(4, 'Andrija ', 'Lečić', 'andrijal', '2013-07-10', '069713881', NULL, 'Dragana', '', NULL, '', '', '', 1, 'B-3482/24', '2025-03-28', 1, '2025-08-05', '2025-08-28 08:58:23'),
+	(5, 'Đorđe', 'Radonić', 'djordjer', '2016-01-04', '0692120980', NULL, 'Jelena', '', NULL, '', '', '', 1, 'B-3484/24', '2025-03-30', 1, '2025-07-17', '2025-08-28 09:06:12'),
+	(6, 'Erik', 'Beck', 'erikb', '2011-05-04', '0621626844', NULL, 'Anita', '', NULL, '', '', '', 1, 'B-3483/24', '2025-04-01', 1, '2025-08-21', '2025-08-28 10:16:43'),
+	(7, 'Nikola', 'Ilić', 'nikolai', '2010-08-07', '0638559406', NULL, '', '', NULL, '', '', '', 1, 'B-3425/23', '2025-04-01', 1, '2025-08-05', '2025-08-28 10:19:06'),
+	(8, 'Helena', 'Ivković', 'helenai', '2011-12-12', '0644359332', NULL, 'Jelena', '', NULL, '', 'Sombor', '', 1, 'B-3139/21', '2025-04-01', 1, '2025-06-10', '2025-08-28 10:22:18'),
+	(9, 'Teodora', 'Ivković', 'teodorai', '2015-11-07', '0644359332', NULL, 'Jelena', '', NULL, '', 'Sombor', '', 1, 'B-3381/23', '2025-04-02', 1, '2025-06-27', '2025-08-28 10:24:18'),
+	(10, 'Veljko', 'Stričević', 'veljkos', '2014-10-02', '0603111520', NULL, 'Goran', '', NULL, '', 'Sombor', '', 1, 'B-3419/23', '2025-04-01', 1, '2025-08-30', '2025-08-28 10:27:39'),
+	(11, 'Relja', 'Leovac', 'reljal', '2011-05-19', '0691702420', NULL, 'Jadranka', '', NULL, '', 'Sombor', '', 1, 'B-3348/23', '2025-04-01', 1, '2025-08-15', '2025-08-28 10:30:18'),
+	(12, 'Anastasija', 'Gubica', 'anastasijag', '2009-10-22', '0614550355', NULL, 'Natalija', '', NULL, '', 'Sombor', '', 1, 'B-2908/20', '2025-03-31', 0, '2024-12-29', '2025-08-28 10:38:42'),
+	(14, 'Una ', 'Bošnjačić', 'unab', '2010-06-30', '0612184169', NULL, 'Ana', '', NULL, 'Sonja Marinkovića 7', 'Sombor', '', 1, 'B-2964/21', '2025-04-01', 0, '2024-12-30', '2025-08-28 10:43:32'),
+	(15, 'Nemanja', 'Paštrović', 'nemanjap', '2009-03-10', '0644409925', NULL, 'Nikola', '', NULL, '', 'Sombor', '', 0, 'B-2642/18', '2025-04-02', 1, '2025-08-14', '2025-08-28 10:46:05'),
+	(16, 'Petra ', 'Jurišić', 'petraj', '2008-09-01', '0611413994', NULL, 'Jelena', '', NULL, '', 'Sombor', '', 1, 'B-3136/21', '2025-04-02', 0, '2022-12-31', '2025-08-28 10:49:33'),
+	(17, 'Ana', 'Petrović', 'anap', '2012-10-16', '063300710', NULL, 'Radmila', '', NULL, '', 'Sombor', '', 0, 'B-3134/21', '2025-04-03', 1, '2025-04-04', '2025-08-28 10:53:16'),
+	(18, 'Nikola', 'Džinić', 'nikoladz', '2015-11-29', '0640293679', NULL, 'Nataša', '', NULL, '', 'Sombor', '', 0, 'B-3487/24', '2025-03-30', 1, '2025-08-04', '2025-08-28 11:06:43'),
+	(19, 'Veljko', 'Parčetić', 'veljkop', '2015-12-01', '0691708415', NULL, 'Maja', '', NULL, '', 'Sombor', '', 1, 'B-3487/24', '2025-04-01', 1, '2025-07-23', '2025-08-28 11:12:21'),
+	(20, 'Dunja', 'Lazić', 'dunjal', '2014-05-11', '0631659558', NULL, 'Biljana', '', NULL, '', 'Sombor', '', 1, 'B-3489/24', '2025-03-31', 1, '2025-08-13', '2025-08-28 11:15:48'),
+	(21, 'Vukašin', 'Bodiroga', 'vukasinb', '2015-07-26', '0603250383', NULL, '', '', NULL, '', 'Sombor', '', 1, 'B-3495/24', '2025-04-01', 1, '2025-08-11', '2025-08-28 11:19:25'),
+	(22, 'Jordan', 'Vulić', 'jordanv', '2015-11-23', '0644764853', NULL, 'Zorica', '', NULL, '', 'Sombor', '', 1, 'B-3496/24', '2025-03-30', 1, '2025-08-31', '2025-08-28 11:22:49'),
+	(23, 'Novak', 'Radaković', 'novakr', '2014-08-06', '0658848440', NULL, 'Dragana', '', NULL, '', 'Sombor', '', 1, 'B-3552/24', '2025-04-01', 1, '2025-08-08', '2025-08-28 11:25:00'),
+	(24, 'Petra', 'Ćirić', 'petrac', '2010-06-24', '0616150520', NULL, '', '', NULL, '', 'Sombor', '', 1, 'B-3541/24', '2025-04-01', 1, '2025-08-20', '2025-08-28 11:28:12'),
+	(25, 'Vanja', 'Roksandić', 'vanjar', '2014-07-20', '0604850770', NULL, 'Tanja', '', NULL, '', 'Sombor', '', 1, 'B-3513/24', '2025-04-01', 1, '2025-08-01', '2025-08-28 11:33:05'),
+	(26, 'Filip', 'Pekanović', 'filipp', '2009-05-19', '0654742772', NULL, '', '', NULL, '', 'Sombor', '', 1, 'B-3540/24', '2025-04-01', 1, '2025-08-21', '2025-08-29 10:02:27'),
+	(27, 'Aleks', 'Zolcer', 'aleksz', '2014-07-19', '0653045510', NULL, 'Nora', '', NULL, '', 'Sombor', '', 1, 'B-3486/24', '2025-03-30', 1, '2025-08-18', '2025-08-29 10:10:12'),
+	(28, 'Luka', 'Parčetić', 'lukap', '2017-09-14', '0691708415', NULL, 'Igor', '1409017810013', NULL, 'Banatska 3', 'Sombor', '', 1, 'B-3669/25', '2025-08-05', 0, '2024-12-25', '2025-08-29 10:14:37'),
+	(29, 'Kosta', 'Lečić', 'kostal', '2016-10-08', '', NULL, 'Dragana', '', NULL, '', 'Sombor', '', 1, '', '2025-03-31', 0, '2024-12-29', '2025-08-29 10:16:50'),
+	(30, 'Isidora', 'Popadić', 'isidorap', '2013-05-10', '063451804', NULL, 'Branislava', '1305013815002', NULL, 'Isidore Sekulić 26', 'Sombor', '', 1, 'B-', '2025-03-31', 1, '2025-08-11', '2025-08-29 10:23:43'),
+	(31, 'Una', 'Plac', 'unap', '2013-06-30', '0637228729', NULL, 'Mihael', '0207013815015', NULL, 'Bukovac bb', 'Sombor', '', 1, 'B-', '2025-04-01', 1, '2025-07-27', '2025-08-29 10:32:30'),
+	(32, 'Elena ', 'Vukelić', 'elena', '2025-08-28', '0601531217', NULL, '-', '', NULL, 'Nikola Vukićević', 'Sombor', '', 1, '-', '2025-04-02', 1, '2025-04-14', '2025-08-29 10:35:13'),
+	(33, 'Dušan', 'Paštrović', 'dusanp', '2025-08-19', '0652083554', NULL, '', '', NULL, '', 'Sombor', '', 1, 'B-', '2025-04-01', 1, '2025-08-12', '2025-08-29 10:36:53'),
+	(34, 'Nikola ', 'Kvočka', 'nikolak', '2025-07-27', '0601117810', NULL, '', '', NULL, '', 'Sombor', '', 1, 'B-', '2025-04-01', 1, '2025-07-18', '2025-08-29 10:38:32'),
+	(35, 'Veljko', 'Roknić', 'vladimir', '2025-08-06', '0641838550', NULL, 'Vladimir', '', NULL, '', 'Sombor', '', 1, 'B-', '2025-04-02', 1, '2025-07-16', '2025-08-29 10:41:36');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.coach_athlete_assignments
+CREATE TABLE IF NOT EXISTS `coach_athlete_assignments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `coach_id` int NOT NULL,
+  `athlete_id` int NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coach_id` (`coach_id`,`athlete_id`),
+  KEY `athlete_id` (`athlete_id`),
+  CONSTRAINT `coach_athlete_assignments_ibfk_1` FOREIGN KEY (`coach_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `coach_athlete_assignments`
---
-
-CREATE TABLE `coach_athlete_assignments` (
-  `id` int(11) NOT NULL,
-  `coach_id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
-  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `coach_athlete_assignments`
---
-
+-- Dumping data for table athlete_tracker.coach_athlete_assignments: ~35 rows (approximately)
 INSERT INTO `coach_athlete_assignments` (`id`, `coach_id`, `athlete_id`, `assigned_at`) VALUES
-(1, 4, 2, '2025-08-12 15:11:27'),
-(2, 4, 3, '2025-08-12 15:14:30'),
-(14, 6, 4, '2025-09-06 10:11:26'),
-(15, 6, 3, '2025-09-06 10:11:34'),
-(16, 6, 5, '2025-09-25 21:29:09');
+	(2, 4, 3, '2025-08-12 15:14:30'),
+	(71, 6, 6, '2025-09-25 21:11:21'),
+	(117, 6, 21, '2025-09-25 21:33:50'),
+	(118, 6, 18, '2025-09-25 21:33:50'),
+	(119, 6, 36, '2025-09-25 21:33:50'),
+	(120, 6, 8, '2025-09-25 21:33:50'),
+	(121, 6, 14, '2025-09-25 21:34:00'),
+	(122, 6, 12, '2025-09-25 21:34:00'),
+	(123, 6, 7, '2025-09-25 21:34:00'),
+	(124, 6, 9, '2025-09-25 21:34:00'),
+	(125, 6, 16, '2025-09-25 21:34:00'),
+	(126, 6, 3, '2025-09-25 21:34:00'),
+	(127, 6, 34, '2025-09-25 21:34:00'),
+	(128, 6, 20, '2025-09-25 21:34:00'),
+	(129, 6, 11, '2025-09-25 21:34:00'),
+	(130, 6, 4, '2025-09-25 21:34:00'),
+	(131, 6, 29, '2025-09-25 21:34:00'),
+	(132, 6, 19, '2025-09-25 21:34:00'),
+	(133, 6, 28, '2025-09-25 21:34:00'),
+	(134, 6, 33, '2025-09-25 21:34:00'),
+	(135, 6, 15, '2025-09-25 21:34:00'),
+	(136, 6, 26, '2025-09-25 21:34:00'),
+	(137, 6, 17, '2025-09-25 21:34:00'),
+	(138, 6, 31, '2025-09-25 21:34:00'),
+	(139, 6, 30, '2025-09-25 21:34:00'),
+	(140, 6, 23, '2025-09-25 21:34:00'),
+	(141, 6, 5, '2025-09-25 21:34:00'),
+	(142, 6, 35, '2025-09-25 21:34:00'),
+	(143, 6, 25, '2025-09-25 21:34:00'),
+	(144, 6, 10, '2025-09-25 21:34:00'),
+	(145, 6, 37, '2025-09-25 21:34:00'),
+	(146, 6, 32, '2025-09-25 21:34:00'),
+	(147, 6, 22, '2025-09-25 21:34:00'),
+	(148, 6, 27, '2025-09-25 21:34:00'),
+	(149, 6, 24, '2025-09-25 21:34:00');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.coach_group_assignments
+CREATE TABLE IF NOT EXISTS `coach_group_assignments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `coach_id` int NOT NULL,
+  `group_id` int NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coach_id` (`coach_id`,`group_id`),
+  KEY `group_id` (`group_id`),
+  CONSTRAINT `coach_group_assignments_ibfk_1` FOREIGN KEY (`coach_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `coach_group_assignments_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `coach_group_assignments`
---
-
-CREATE TABLE `coach_group_assignments` (
-  `id` int(11) NOT NULL,
-  `coach_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL,
-  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `coach_group_assignments`
---
-
+-- Dumping data for table athlete_tracker.coach_group_assignments: ~3 rows (approximately)
 INSERT INTO `coach_group_assignments` (`id`, `coach_id`, `group_id`, `assigned_at`) VALUES
-(1, 4, 1, '2025-08-12 15:11:27'),
-(2, 4, 2, '2025-08-23 14:10:35'),
-(6, 6, 1, '2025-09-06 09:27:19'),
-(7, 4, 4, '2025-09-06 10:45:17');
+	(1, 4, 1, '2025-08-12 15:11:27'),
+	(2, 6, 2, '2025-09-08 15:23:31'),
+	(3, 6, 1, '2025-09-08 15:23:31'),
+	(4, 6, 3, '2025-12-06 11:26:22');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.equipment
+CREATE TABLE IF NOT EXISTS `equipment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `slika` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
---
--- Table structure for table `exercises`
---
+-- Dumping data for table athlete_tracker.equipment: ~25 rows (approximately)
+INSERT INTO `equipment` (`id`, `naziv`, `opis`, `slika`) VALUES
+	(1, 'Šipka', 'Osnovna olimpijska šipka za vežbe snage.', '/uploads/equipment/sipka.jpg'),
+	(2, 'Teg ploče', 'Ploče različitih težina koje se stavljaju na šipku.', '/uploads/equipment/ploce.jpg'),
+	(3, 'Bučice', 'Par bučica za vežbe snage i izolacije.', '/uploads/equipment/bucice.jpg'),
+	(4, 'Kettlebell', 'Teg u obliku kugle sa ručkom.', '/uploads/equipment/kettlebell.jpg'),
+	(5, 'Bench klupa', 'Klupa za potiske, pregibe i druge vežbe.', '/uploads/equipment/bench.jpg'),
+	(6, 'Stalak za čučanj (Squat rack)', 'Stalak za izvođenje čučnjeva i potisaka.', '/uploads/equipment/squat-rack.jpg'),
+	(7, 'Smith mašina', 'Mašina sa vođenom šipkom za potiske i čučnjeve.', '/uploads/equipment/smith.jpg'),
+	(8, 'Mašina za potisak nogama (Leg press)', 'Mašina za potiske nogama.', '/uploads/equipment/leg-press.jpg'),
+	(9, 'Mašina za ekstenziju nogu (Leg extension)', 'Mašina za opružanje kolena.', '/uploads/equipment/leg-extension.jpg'),
+	(10, 'Mašina za fleksiju nogu (Leg curl)', 'Mašina za savijanje kolena.', '/uploads/equipment/leg-curl.jpg'),
+	(11, 'Mašina za potisak grudima (Chest press)', 'Mašina za potiske grudima.', '/uploads/equipment/chest-press.jpg'),
+	(12, 'Mašina za veslanje (Seated row)', 'Mašina za veslanje u sedećem položaju.', '/uploads/equipment/seated-row.jpg'),
+	(13, 'Mašina za lat povlačenje (Lat pulldown)', 'Mašina za povlačenje šipke ka grudima.', '/uploads/equipment/lat-pulldown.jpg'),
+	(14, 'Mašina za ramena (Shoulder press)', 'Mašina za potiske iznad glave.', '/uploads/equipment/shoulder-press.jpg'),
+	(15, 'Mašina za triceps potisak', 'Mašina ili kabl nastavak za triceps.', '/uploads/equipment/triceps.jpg'),
+	(16, 'Mašina za biceps pregib', 'Mašina za pregibe bicepsa.', '/uploads/equipment/biceps.jpg'),
+	(17, 'Kabl mašina – gornji nastavak', 'Gornji nastavak za povlačenja i potiske.', '/uploads/equipment/kabl-gornji.jpg'),
+	(18, 'Kabl mašina – donji nastavak', 'Donji nastavak za veslanja i pregibe.', '/uploads/equipment/kabl-donji.jpg'),
+	(19, 'Kabl mašina – podesivi nastavak', 'Podesivi nastavak za crossover, face pull i izolacione vežbe.', '/uploads/equipment/kabl-podesivi.jpg'),
+	(20, 'Kabl mašina – dvostruka podesiva', 'Dve nezavisne kolone za raznovrsne pokrete.', '/uploads/equipment/kabl-dual.jpg'),
+	(21, 'Jednostavna kabl stanica', 'Jednostavna verzija sa jednim nastavkom.', '/uploads/equipment/kabl-single.jpg'),
+	(22, 'Točak za trbušnjake', 'Točak sa ručkama za izođenje vežbi za jačanje stomačnih mišića.', ''),
+	(23, 'Mašina za trbušnjake', 'Mašina za mišića trbušnog zida.', ''),
+	(24, 'Skotova klupa', 'Skotova klupa (poznata i kao Scott bench ili Preacher bench) je specijalizovana klupa namenjena za izolaciju bicepsa.', ''),
+	(25, 'Klupa za leđa', 'Klupa za ekstenziju leđa, izvođenje vežbe za donja leđa.', '');
 
-CREATE TABLE `exercises` (
-  `id` int(11) NOT NULL,
-  `naziv` varchar(255) NOT NULL,
-  `opis` text DEFAULT NULL,
-  `muscle_group_id` int(11) DEFAULT NULL,
-  `oprema` varchar(255) DEFAULT NULL,
-  `unilateral` tinyint(1) DEFAULT 0,
-  `video_link` varchar(255) DEFAULT NULL,
-  `slika` varchar(255) DEFAULT NULL,
-  `exercise_category_id` int(11) DEFAULT NULL,
-  `other_muscle_group_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+-- Dumping structure for table athlete_tracker.exercises
+CREATE TABLE IF NOT EXISTS `exercises` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `unilateral` tinyint(1) DEFAULT '0',
+  `video_link` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `slika` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `exercise_category_id` int DEFAULT NULL,
+  `rep_duration_seconds` int DEFAULT NULL COMMENT 'Vreme trajanja jednog ponavljanja u sekundama',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `naziv` (`naziv`),
+  KEY `exercise_category_id` (`exercise_category_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `exercises`
---
+-- Dumping data for table athlete_tracker.exercises: ~126 rows (approximately)
+INSERT INTO `exercises` (`id`, `naziv`, `opis`, `unilateral`, `video_link`, `slika`, `exercise_category_id`) VALUES
+	(2, 'Bench press (barbell)', 'Osnovna vežba za grudi i triceps. Izvodi se potiskom šipke sa klupe.', 0, 'https://www.youtube.com/watch?v=rT7DgCr-3pg', '/uploads/exercises/2.gif', 2),
+	(3, 'Cable lat pulldown', 'Vežba za leđa, posebno latissimus dorsi. Povlačenje šipke ka grudima na kabl mašini.', 0, 'https://www.youtube.com/watch?v=CAwf7n6Luuc', '/uploads/exercises/3.gif', 2),
+	(4, 'Zagrevanje', '', 0, '', '/uploads/exercises/4.jpg', 1),
+	(5, 'Veslanje', '', 0, '', '/uploads/exercises/5.jpg', 1),
+	(6, 'Veslanje sa gumom', '', 0, '', '/uploads/exercises/6.jpg', 1),
+	(7, 'Tempo', '', 0, '', '/uploads/exercises/7.jpg', 1),
+	(8, 'Bench press (dumbbell)', 'Varijanta bench pressa sa bučicama. Veća aktivacija stabilizatora.', 0, 'https://www.youtube.com/watch?v=VmB1G1K7v94', '/uploads/exercises/8.gif', 2),
+	(9, 'Incline bench press (barbell)', 'Bench press na kosoj klupi sa šipkom. Fokus na gornji deo grudi.', 0, 'https://www.youtube.com/watch?v=SrqOu55lrYU', '/uploads/exercises/9.gif', 2),
+	(10, 'Incline bench press (dumbbell)', 'Bench press na kosoj klupi sa bučicama. Fokus na gornji deo grudi i stabilizaciju.', 0, 'https://www.youtube.com/watch?v=8iPEnn-ltC8', '/uploads/exercises/10.gif', 2),
+	(11, 'Plank', 'Izdržaj u planku. Aktivira core mišiće i stabilizatore.', 0, 'https://www.youtube.com/watch?v=pSHjTRCQxIw', '/uploads/exercises/11.gif', 2),
+	(12, 'Plank - side', 'Bočni plank. Fokus na obliques i stabilizaciju core-a.', 1, 'https://www.youtube.com/watch?v=K2VljzCC16g', '/uploads/exercises/12.jpg', 2),
+	(13, 'Crunch', 'Klasična vežba za trbušne mišiće. Podizanje gornjeg dela tela iz ležećeg položaja.', 0, 'https://www.youtube.com/watch?v=Xyd_fa5zoEU', '/uploads/exercises/13.gif', 2),
+	(14, 'Cable kneeling crunch', 'Trbušni pregib sa kablom u klečećem položaju.', 0, 'https://www.youtube.com/shorts/CDO29I7PCoc', '/uploads/exercises/14.gif', 2),
+	(15, 'Leg rise', 'Podizanje nogu iz ležećeg položaja. Fokus na donje trbušne mišiće.', 0, 'https://www.youtube.com/watch?v=JB2oyawG9KI', '/uploads/exercises/15.gif', 2),
+	(16, 'Decline crunch', 'Crunch na kosoj klupi. Veća aktivacija trbušnih mišića.', 0, 'https://www.youtube.com/shorts/D_6tXVmq_nM', '/uploads/exercises/16.jpg', 2),
+	(17, 'Cable twist', 'Rotacija trupa uz otpor kabl mašine. Fokus na obliques.', 1, 'https://www.youtube.com/shorts/PFSU873ljaY', '/uploads/exercises/17.gif', 2),
+	(18, 'Cable wood chop', 'Pokret sličan cepanju drveta uz otpor kabl mašine. Fokus na obliques i core.', 1, 'https://www.youtube.com/watch?v=gcGNypjIQDo', '/uploads/exercises/18.gif', 2),
+	(19, 'Dumbbell Side Bend', 'Pregib trupa u stranu sa bučicom. Fokus na obliques.', 1, 'https://www.youtube.com/shorts/kqr_IjiUuyY', '/uploads/exercises/19.gif', 2),
+	(20, 'Machine Ab Crunch', 'Trbušni pregib na mašini. Fokus na rectus abdominis.', 0, 'https://www.youtube.com/shorts/AxzuYPQGhKU', '/uploads/exercises/20.gif', 2),
+	(21, 'Russian twist', 'Rotacija trupa u sedećem položaju. Aktivira obliques.', 0, 'https://www.youtube.com/watch?v=wkD8rjkodUI', '/uploads/exercises/21.gif', 2),
+	(22, 'Seated leg tuck', 'Sedeći pregib nogu ka grudima. Fokus na donje trbušne mišiće.', 0, 'https://www.youtube.com/shorts/UmhwN3ps0j8', '/uploads/exercises/22.jpg', 2),
+	(23, 'Mountain climber', 'Dinamična vežba u planku. Aktivira core, ramena i noge.', 0, 'https://www.youtube.com/watch?v=nmwgirgXLYM', '/uploads/exercises/23.gif', 2),
+	(24, 'Ab wheel rollout', 'Izvlačenje sa ab wheel-om. Fokus na core i stabilizaciju.', 0, 'https://www.youtube.com/watch?v=kMjbpumsN9U', '/uploads/exercises/24.gif', 2),
+	(25, 'Bench pull (privlak)', 'Privlačenje šipke ili bučica na bench klupi. Fokus na leđa.', 0, 'https://www.youtube.com/watch?v=64AnL8BVd_8', '/uploads/exercises/25.jpg', 2),
+	(26, 'Push up (sklekovi)', 'Osnovna vežba za grudi, triceps i ramena. Izvodi se potiskom tela sa poda.', 0, 'https://www.youtube.com/watch?v=IODxDxX7oi4', '/uploads/exercises/26.gif', 2),
+	(28, 'Pull up (zgibovi)', 'Zgibovi na šipci. Osnovna vežba za leđa i biceps.', 0, 'https://www.youtube.com/watch?v=eGo4IYlbE5g', '/uploads/exercises/28.gif', 2),
+	(29, 'Chin up', 'Zgibovi pod supinacijom hvata. Fokus na biceps i leđa.', 0, 'https://www.youtube.com/watch?v=brhRXlOhsAM', '/uploads/exercises/29.gif', 2),
+	(30, 'Trčanje - stepenice', 'Trčanje po stepenicama', 0, 'https://www.youtube.com/shorts/BBkjw-KRU48', '/uploads/exercises/30.jpg', 3),
+	(31, 'Bodyweight squats (čučnjevi)', 'Čučnjevi bez opterećenja. Osnovna vežba za noge i core.', 0, 'https://www.youtube.com/watch?v=aclHkVaku9U', '/uploads/exercises/31.gif', 2),
+	(32, 'Dips (propadanje)', 'Propadanje na razboju. Aktivira triceps, grudi i ramena.', 0, 'https://www.youtube.com/watch?v=2z8JmcrW-As', '/uploads/exercises/32.gif', 2),
+	(33, 'Dips - bench (propadanje)', 'Propadanje sa osloncem na klupi. Fokus na triceps.', 0, 'https://www.youtube.com/watch?v=6kALZikXxLc', '/uploads/exercises/33.gif', 2),
+	(34, 'Barbell biceps curl', 'Pregib sa šipkom. Osnovna vežba za biceps.', 0, 'https://www.youtube.com/watch?v=ykJmrZ5v0Oo', '/uploads/exercises/34.gif', 2),
+	(35, 'Dumbbell biceps curl', 'Pregib sa bučicama. Veća sloboda pokreta.', 0, 'https://www.youtube.com/watch?v=ykJmrZ5v0Oo', '/uploads/exercises/35.gif', 2),
+	(36, 'Dumbbell incline curl', 'Pregib sa bučicama na kosoj klupi. Fokus na biceps.', 0, 'https://www.youtube.com/watch?v=soxrZlIl35U', '/uploads/exercises/36.gif', 2),
+	(37, 'EZ bar curl - overhand grip', 'Pregib sa EZ šipkom nadhvatom. Fokus na brachialis i podlakticu.', 0, 'https://www.youtube.com/watch?v=soxrZlIl35U', '/uploads/exercises/37.gif', 2),
+	(38, 'EZ bar curl - close grip', 'Pregib sa EZ šipkom uskim hvatom. Fokus na unutrašnji deo bicepsa.', 0, 'https://www.youtube.com/watch?v=soxrZlIl35U', '/uploads/exercises/38.gif', 2),
+	(39, 'EZ bar preacer curl', 'Pregib na preacer klupi sa EZ šipkom. Fokus na biceps.', 0, 'https://www.youtube.com/watch?v=soxrZlIl35U', '/uploads/exercises/39.gif', 2),
+	(40, 'Hammer Preacer Curl', 'Neutral grip pregib na preacer klupi. Fokus na brachialis.', 0, 'https://www.youtube.com/shorts/oHbSWPo3swM', '/uploads/exercises/40.gif', 2),
+	(41, 'Hammer Curl', 'Neutral grip pregib sa bučicama. Fokus na brachialis i biceps.', 0, 'https://www.youtube.com/watch?v=zC3nLlEvin4', '/uploads/exercises/41.gif', 2),
+	(42, 'Dumbbell lunges', 'Iskorak sa bučicama. Aktivira kvadriceps, gluteus i zadnju ložu.', 1, 'https://www.youtube.com/watch?v=lf4gJgKyLpI', '/uploads/exercises/42.gif', 2),
+	(43, 'Dumbbell squats', 'Čučanj sa bučicama. Aktivira noge i core.', 0, 'https://www.youtube.com/shorts/AddQcbkGLQE', '/uploads/exercises/43.gif', 2),
+	(44, 'Sumo squats - dumbbell', 'Sumo čučanj sa bučicom. Fokus na unutrašnji deo butina i gluteus.', 0, 'https://www.youtube.com/watch?v=vBA3vyOxJv0', '/uploads/exercises/44.gif', 2),
+	(45, 'Side lunges (iskorak u stranu)', 'Iskorak u stranu sa bučicama ili bez. Fokus na kvadriceps, gluteus i aduktore.', 1, 'https://www.youtube.com/watch?v=rvqLVxYqEvo', '/uploads/exercises/45.jpg', 2),
+	(46, 'Close grip Push-ups', 'Sklekovi sa uskim hvatom. Fokus na triceps i unutrašnji deo grudi.', 0, 'https://www.youtube.com/watch?v=J0DnG1_S92I', '/uploads/exercises/46.gif', 2),
+	(47, 'Archer Push-ups', 'Sklekovi sa pomeranjem težine na jednu ruku. Fokus na grudi i triceps.', 0, 'https://www.youtube.com/watch?v=-9STxbTF5lM', '/uploads/exercises/47.gif', 2),
+	(48, 'Decline Push-ups', 'Sklekovi sa stopalima na povišenju. Fokus na gornji deo grudi.', 0, 'https://www.youtube.com/watch?v=QBlYp-EwHlo', '/uploads/exercises/48.gif', 2),
+	(50, 'One arm row', 'Veslanje jednom rukom sa bučicom. Fokus na leđa i biceps.', 1, 'https://www.youtube.com/watch?v=pYcpY20QaE8', '/uploads/exercises/50.gif', 2),
+	(51, 'Bent Arm Pullover', 'Pullover sa savijenim rukama. Fokus na grudi i latissimus.', 0, 'https://www.youtube.com/shorts/XZqV6RNWIno', '/uploads/exercises/51.gif', 2),
+	(52, 'Straight Arm Pullover', 'Pullover sa opruženim rukama. Fokus na latissimus i core.', 0, 'https://www.youtube.com/watch?v=E4NQ5DfqwbU', '/uploads/exercises/52.gif', 2),
+	(53, 'Angels and devils', 'Vežba za ramena i core, izvođenje pokreta rukama u obliku krila.', 0, 'https://www.youtube.com/watch?v=Nkla4hz-1Q8', '/uploads/exercises/53.gif', 2),
+	(54, 'Dumbbell push press', 'Potisak bučicama uz pomoć nogu. Aktivira ramena i core.', 0, 'https://www.youtube.com/watch?v=sElIkjcfyNY', '/uploads/exercises/54.gif', 2),
+	(55, 'Barbell push press', 'Potisak šipkom uz pomoć nogu. Aktivira ramena i core.', 0, 'https://www.youtube.com/watch?v=iaBVSJm78ko', '/uploads/exercises/55.gif', 2),
+	(56, 'Plank - arm strech', 'Plank sa opružanjem ruke. Fokus na core i stabilizaciju ramena.', 0, 'https://www.youtube.com/shorts/tf4Tjuqa-5A', '/uploads/exercises/56.gif', 2),
+	(57, 'Side Plank - knee tuck', 'Plank sa privlačenjem kolena. Fokus na donje trbušne mišiće.', 1, 'https://www.youtube.com/shorts/5OEpqS7er_U', '/uploads/exercises/57.jpg', 2),
+	(58, 'Plank - knee superman', 'Plank sa privlačenjem kolena i opružanjem ruke. Fokus na core i stabilizaciju.', 0, 'https://www.youtube.com/watch?v=k-fIGXqPdSA', '/uploads/exercises/58.gif', 2),
+	(59, 'Plank - superman', 'Plank sa opružanjem ruke i noge. Fokus na core i gluteus.', 0, 'https://www.youtube.com/shorts/EZb3Wy6cqcM', '/uploads/exercises/59.jpg', 2),
+	(60, 'Plank - leg lift', 'Plank sa podizanjem noge. Fokus na core i gluteus.', 0, 'https://www.youtube.com/shorts/SYfo1o0bkbM', '/uploads/exercises/60.gif', 2),
+	(61, 'Deadlift', 'Osnovna vežba za snagu celog tela. Aktivira leđa, noge i core.', 0, 'https://www.youtube.com/watch?v=-4qRntuXBSc', '/uploads/exercises/61.gif', 2),
+	(62, 'Bent Over Barbell Rows', 'Veslanje sa šipkom u pretklonu. Fokus na leđa i biceps.', 0, 'https://www.youtube.com/watch?v=bm0_q9bR_HA', '/uploads/exercises/62.gif', 2),
+	(63, 'Landmine Row', 'Veslanje sa šipkom u landmine postavci. Fokus na leđa.', 0, 'https://www.youtube.com/shorts/Sr2q7i-i8X0', '/uploads/exercises/63.gif', 2),
+	(65, 'Barbell Upright Row', 'Povlačenje šipke uz telo. Fokus na ramena i trapez.', 0, 'https://www.youtube.com/watch?v=amCU-ziHITM', '/uploads/exercises/65.jpg', 2),
+	(66, 'Barbell Chest Supported Row', 'Veslanje šipkom na kosoj klupi. Fokus na leđa.', 0, 'https://www.youtube.com/shorts/HcyxWDuWyHE', '/uploads/exercises/66.webp', 2),
+	(67, 'Barbell Shrug', 'Podizanje ramena sa šipkom. Fokus na trapez.', 0, 'https://www.youtube.com/watch?v=larn3Asl6oM', '/uploads/exercises/67.gif', 2),
+	(68, 'Barbell Good Morning', 'Vežba za donja leđa i zadnju ložu. Izvodi se savijanjem trupa sa šipkom na leđima.', 0, 'https://www.youtube.com/shorts/7cpldMZjLOs', '/uploads/exercises/68.jpg', 2),
+	(69, 'Landmine Deadlift', 'Deadlift sa šipkom u landmine postavci. Fokus na noge i leđa.', 0, 'https://www.youtube.com/watch?v=WkmLb2JxtKA', '/uploads/exercises/69.gif', 2),
+	(70, 'Meadows Row', 'Jednoručno veslanje šipkom u landmine postavci. Fokus na leđa i biceps.', 1, 'https://www.youtube.com/shorts/uexTkvxwMGM', '/uploads/exercises/70.jpg', 2),
+	(71, 'Barbell Hip Bridge', 'Most sa šipkom preko kukova. Fokus na gluteus i zadnju ložu.', 0, 'https://www.youtube.com/watch?v=ylpfCk3i-0Y', '/uploads/exercises/71.gif', 2),
+	(72, 'Clean And Jerk', 'Olimpijska vežba snage. Kombinacija podizanja šipke na ramena i potiska iznad glave.', 0, 'https://www.youtube.com/shorts/UTYou-Gf4c8', '/uploads/exercises/72.jpg', 2),
+	(73, 'Pendlay Row', 'Veslanje šipkom iz položaja sa poda. Fokus na leđa.', 0, 'https://www.youtube.com/watch?v=h4nkoayPFWw', '/uploads/exercises/73.webp', 2),
+	(74, 'Romanian Deadlift', 'Deadlift varijanta sa fokusom na zadnju ložu i gluteus.', 0, 'https://www.youtube.com/watch?v=7j-2w4-P14I', '/uploads/exercises/74.gif', 2),
+	(75, 'Barbell High Pull', 'Eksplozivno povlačenje šipke do nivoa grudi. Fokus na ramena i trapez.', 0, 'https://www.youtube.com/watch?v=4XpOul65Z1k', '/uploads/exercises/75.webp', 2),
+	(76, 'Snatch Grip Deadlift', 'Deadlift sa širokim hvatom. Fokus na leđa, gluteus i zadnju ložu.', 0, 'https://www.youtube.com/watch?v=r5eT5DUfzww', '/uploads/exercises/76.jpg', 2),
+	(77, 'Dumbbell Deadlift', 'Deadlift varijanta sa bučicama. Fokus na leđa, gluteus i zadnju ložu.', 0, 'https://www.youtube.com/shorts/v7svtgo35oo', '/uploads/exercises/77.gif', 2),
+	(78, 'Dumbbell Shrug', 'Podizanje ramena sa bučicama. Fokus na trapez.', 0, 'https://www.youtube.com/watch?v=cJRVVxmytaM', '/uploads/exercises/78.gif', 2),
+	(79, 'Dumbbell Upright Row', 'Povlačenje bučica uz telo. Fokus na ramena i trapez.', 0, 'https://www.youtube.com/watch?v=K0dYqPCaO14', '/uploads/exercises/79.gif', 2),
+	(80, 'Dumbbell Bent Over Row', 'Veslanje bučicama u pretklonu. Fokus na leđa i biceps.', 0, 'https://www.youtube.com/shorts/IOOLhrkN_NI', '/uploads/exercises/80.jpg', 2),
+	(81, 'Incline Dumbbell Row', 'Veslanje bučicama na kosoj klupi. Fokus na leđa i zadnji deltoid.', 0, 'https://www.youtube.com/watch?v=llFTFDwmGcw', '/uploads/exercises/81.gif', 2),
+	(82, 'Renegade Row', 'Veslanje bučicama iz plank pozicije. Fokus na leđa, ramena i core.', 0, 'https://www.youtube.com/watch?v=wTqlJ0aoJlM', '/uploads/exercises/82.gif', 2),
+	(83, 'Dumbbell Farmers Walk', 'Hod sa bučicama u rukama. Fokus na podlaktice, trapez i core.', 0, 'https://www.youtube.com/watch?v=Fkzk_RqlYig', '/uploads/exercises/83.gif', 2),
+	(84, 'Side-Lying Rear Fly', 'Podizanje bučice u ležećem položaju na boku. Fokus na zadnji deltoid.', 1, 'https://www.youtube.com/watch?v=A8bTKrPdnQ0', '/uploads/exercises/84.jpg', 2),
+	(85, 'Bent Over Rear Delt Fly', 'Izolaciona vežba za zadnji deltoid. Izvodi se u pretklonu sa bučicama.', 0, 'https://www.youtube.com/shorts/LsT-bR_zxLo', '/uploads/exercises/85.jpg', 2),
+	(86, 'Dumbbell Pullover', 'Vežba za grudi i latissimus. Izvodi se ležeći na bench klupi sa bučicom.', 0, 'https://www.youtube.com/watch?v=5lbvUCXfDU0', '/uploads/exercises/86.gif', 2),
+	(87, 'Dumbbell Seal Row', 'Veslanje bučicama ležeći na ravnoj klupi. Fokus na leđa.', 0, 'https://www.youtube.com/shorts/v3Tq9gb0Le8', '/uploads/exercises/87.gif', 2),
+	(88, 'Dumbbell Good Mornings', 'Varijanta good mornings sa bučicama. Fokus na donja leđa i zadnju ložu.', 0, 'https://www.youtube.com/shorts/9prcXIdXev0', '/uploads/exercises/88.jpg', 2),
+	(89, 'Dumbbell Superman', 'Superman varijanta sa bučicama. Fokus na donja leđa i gluteus.', 0, 'https://www.youtube.com/watch?v=nAa1TDIPDaU', '/uploads/exercises/89.jpg', 2),
+	(90, 'Dumbbell Wood Chopper', 'Pokret sličan cepanju drveta sa bučicom. Fokus na obliques i core.', 1, 'https://www.youtube.com/watch?v=bxSY805t8CQ', '/uploads/exercises/90.jpg', 2),
+	(91, 'Dumbbell Glute Bridge', 'Most sa bučicom preko kukova. Fokus na gluteus i zadnju ložu.', 0, 'https://www.youtube.com/shorts/iOrJXNUH3to', '/uploads/exercises/91.gif', 2),
+	(92, 'Dumbbell Swings', 'Dinamična vežba za snagu i eksplozivnost. Fokus na gluteus, zadnju ložu i core.', 0, 'https://www.youtube.com/shorts/tR4cfEutWuM', '/uploads/exercises/92.gif', 2),
+	(93, 'Chest-Supported Rear Delt Row', 'Veslanje bučicama na kosoj klupi. Fokus na zadnji deltoid i gornja leđa.', 0, 'https://www.youtube.com/shorts/x0v6GWYzI18', '/uploads/exercises/93.gif', 2),
+	(94, 'Dumbbell Gorilla Row', 'Veslanje bučicama iz polučučnja. Fokus na leđa i biceps.', 1, 'https://www.youtube.com/shorts/8Eta24IW61M', '/uploads/exercises/94.webp', 2),
+	(95, 'Dumbbell Romanian Deadlift', 'Varijanta RDL sa bučicama. Fokus na zadnju ložu, gluteus i donja leđa.', 0, 'https://www.youtube.com/watch?v=xAL7lHwj30E', '/uploads/exercises/95.gif', 2),
+	(96, 'Dumbbell I, Y, T, W Raise', 'Kompleks pokreta za ramena i gornja leđa. Fokus na stabilizaciju lopatica.', 0, 'https://www.youtube.com/shorts/mMAZ1TwinJc', '/uploads/exercises/96.gif', 2),
+	(97, 'One-Arm Lat Pulldown', 'Jednoručno povlačenje na kabl mašini. Fokus na latissimus dorsi.', 1, 'https://www.youtube.com/watch?v=HBC5s98wXko', '/uploads/exercises/97.gif', 2),
+	(98, 'Seated Cable Rows', 'Veslanje na kabl mašini u sedećem položaju. Fokus na leđa i biceps.', 0, 'https://www.youtube.com/watch?v=GZbfZ033f74', '/uploads/exercises/98.jpg', 2),
+	(99, 'Wide Grip Seated Row', 'Veslanje na kabl mašini širokim hvatom. Fokus na gornja leđa.', 0, 'https://www.youtube.com/shorts/vqPY3fDessY', '/uploads/exercises/99.jpg', 2),
+	(100, 'Straight Arm Lat Pulldown', 'Povlačenje kablom sa opruženim rukama. Fokus na latissimus i core.', 0, 'https://www.youtube.com/shorts/hAMcfubonDc', '/uploads/exercises/100.gif', 2),
+	(101, 'V Bar Lat Pulldown', 'Povlačenje kablom sa V ručkom. Fokus na latissimus i biceps.', 0, 'https://www.youtube.com/shorts/c31U7TCvgi8', '/uploads/exercises/101.jpg', 2),
+	(102, 'Cable Twisting Standing Row', 'Veslanje kablom sa rotacijom trupa. Fokus na leđa i obliques.', 1, 'https://www.youtube.com/shorts/elHvNZb6wm0', '/uploads/exercises/102.jpg', 2),
+	(103, 'Seated One Arm Cable Row', 'Jednoručno veslanje na kabl mašini u sedećem položaju. Fokus na leđa.', 1, 'https://www.youtube.com/shorts/yIvvQc2Z6uM', '/uploads/exercises/103.jpg', 2),
+	(104, 'Cable Upright Row', 'Povlačenje kablom uz telo. Fokus na ramena i trapez.', 0, 'https://www.youtube.com/watch?v=WNz7O59GORA', '/uploads/exercises/104.jpg', 2),
+	(105, 'Cable Shrug', 'Podizanje ramena na kabl mašini. Fokus na trapez.', 0, 'https://www.youtube.com/watch?v=Wab3-dsZohU', '/uploads/exercises/105.jpg', 2),
+	(106, 'Cable High Row', 'Veslanje kablom iz visoke pozicije. Fokus na gornja leđa.', 0, 'https://www.youtube.com/shorts/Q6hDd7nf12k', '/uploads/exercises/106.webp', 2),
+	(107, 'Reverse Cable Crossover', 'Unakrsno povlačenje kablova unazad. Fokus na zadnji deltoid.', 0, 'https://www.youtube.com/shorts/zuo_4gqANgo', '/uploads/exercises/107.jpg', 2),
+	(108, 'Face Pull', 'Povlačenje kablom ka licu. Fokus na zadnji deltoid i trapez.', 0, 'https://www.youtube.com/watch?v=0Po47vvj9g4', '/uploads/exercises/108.gif', 2),
+	(118, 'Close Grip Lat Pulldown', 'Povlačenje kablom uskim hvatom. Fokus na latissimus i biceps.', 0, 'https://www.youtube.com/shorts/51ql2-2kLfA', '/uploads/exercises/118.gif', 2),
+	(119, 'Reverse Grip Lat Pulldown', 'Povlačenje kablom nadhvatom. Fokus na latissimus i biceps.', 0, 'https://www.youtube.com/watch?v=SNiwpA13ZLU', '/uploads/exercises/119.jpg', 2),
+	(120, 'Behind-The-Neck Lat Pulldown', 'Povlačenje kablom iza glave. Fokus na latissimus i trapez.', 0, 'https://www.youtube.com/watch?v=I8FXgUKsPg0', '/uploads/exercises/120.webp', 2),
+	(121, 'Cable Machine Y Raise', 'Podizanje kablova u obliku slova Y. Fokus na ramena i gornja leđa.', 0, 'https://www.youtube.com/shorts/Zy0M8JMLnD0', '/uploads/exercises/121.gif', 2),
+	(122, 'Bent Over Cable Lateral Raise', 'Podizanje kablova u pretklonu. Fokus na zadnji deltoid.', 0, 'https://www.youtube.com/watch?v=vUoNttBLIS4', '/uploads/exercises/122.jpg', 2),
+	(123, 'Chest Supported Row', 'Veslanje sa osloncem grudima na klupi. Fokus na leđa i biceps.', 0, 'https://www.youtube.com/shorts/FTwvmczf7bE', '/uploads/exercises/123.gif', 2),
+	(124, 'Iso-Lateral Lat Pulldown', 'Jednoručno povlačenje na mašini. Fokus na latissimus.', 1, 'https://www.youtube.com/shorts/Q5c9c0XD2CA', '/uploads/exercises/124.jpg', 2),
+	(125, 'Back Extension', 'Ekstenzija leđa na mašini. Fokus na donja leđa i gluteus.', 0, 'https://www.youtube.com/watch?v=ph3pddpKzzw', '/uploads/exercises/125.gif', 2),
+	(126, 'Smith Machine Stiff-Legged Deadlift', 'Mrtvo dizanje sa ispruženim nogama na Smith mašini. Fokus na zadnju ložu i gluteus.', 0, 'https://www.youtube.com/shorts/kFqgaems1bs', '/uploads/exercises/126.jpg', 2),
+	(127, 'Dumbbell Clean and Press', 'Kombinovana vežba koja spaja podizanje bučica (clean) i potisak iznad glave (press). Aktivira noge, ramena, ruke i core.', 0, 'https://www.youtube.com/watch?v=uNMzhqDcO8c', '/uploads/exercises/127.jpg', 2),
+	(128, 'Decline Bench Press', 'Potisak sa šipkom na kosoj klupi nadole. Fokus na donji deo grudi.', 0, 'https://www.youtube.com/shorts/a-UFQE4oxWY', '/uploads/exercises/128.jpg', 2),
+	(129, 'Close-Grip Bench Press', 'Potisak sa šipkom uskim hvatom. Fokus na triceps i unutrašnji deo grudi.', 0, 'https://www.youtube.com/watch?v=Jf7DLNfQxqI', '/uploads/exercises/129.jpg', 2),
+	(130, 'Wide-Grip Barbell Bench Press', 'Potisak sa šipkom širokim hvatom. Fokus na spoljašnji deo grudi.', 0, 'https://www.youtube.com/shorts/ue4A9g3j4II', '/uploads/exercises/130.jpg', 2),
+	(131, 'Dumbbell Fly', 'Razvlačenje bučicama na ravnoj klupi. Fokus na grudi.', 0, 'https://www.youtube.com/watch?v=eozdVDA78K0', '/uploads/exercises/131.gif', 2),
+	(132, 'Incline Dumbbell Fly', 'Razvlačenje bučicama na kosoj klupi. Fokus na gornji deo grudi.', 0, 'https://www.youtube.com/watch?v=idAvu2HvqSQ', '/uploads/exercises/132.gif', 2),
+	(133, 'Decline Dumbbell Fly', 'Razvlačenje bučicama na kosoj klupi nadole. Fokus na donji deo grudi.', 0, 'https://www.youtube.com/shorts/lI3nfjJNVEE', '/uploads/exercises/133.gif', 2),
+	(134, 'Decline Dumbbell Press', 'Potisak bučicama na kosoj klupi nadole. Fokus na donji deo grudi.', 0, 'https://www.youtube.com/shorts/1OdTFeN90W4', '/uploads/exercises/134.gif', 2),
+	(135, 'Dumbbell Squeeze Press', 'Potisak bučicama uz sabijanje. Fokus na unutrašnji deo grudi i triceps.', 0, 'https://www.youtube.com/watch?v=rHfxaP0iF1E', '/uploads/exercises/135.jpg', 2),
+	(136, 'Standing Upward Chest Fly', 'Razvlačenje kablova odozdo u stojećem položaju. Fokus na gornji deo grudi.', 0, 'https://www.youtube.com/watch?v=XSdcma4EIWs', '/uploads/exercises/136.gif', 2),
+	(137, 'Cable Crossover', 'Unakrsno razvlačenje kablova. Fokus na grudi.', 0, 'https://www.youtube.com/shorts/y4RJDSOBEl8', '/uploads/exercises/137.gif', 2),
+	(138, 'Poligoni spretnosti', 'Razni poligoni spretnosti', 0, 'https://www.youtube.com/shorts/4nvp5Xq8Amo', '/uploads/exercises/138.gif', 3),
+	(139, 'Lunge with Twist', 'Iskorak sa rotacijom trupa. Aktivira noge, gluteus i core.', 1, 'https://www.youtube.com/watch?v=wrwwXE_x-pQ', '/uploads/exercises/139.jpg', 2);
 
-INSERT INTO `exercises` (`id`, `naziv`, `opis`, `muscle_group_id`, `oprema`, `unilateral`, `video_link`, `slika`, `exercise_category_id`, `other_muscle_group_id`) VALUES
-(2, 'Bench press', '', 1, 'Tegovi', 0, '', '/uploads/exercises/2.gif', 2, 5),
-(3, 'Cable lat pull', '', 2, 'Lat mašina', 0, '', '/uploads/exercises/3.gif', 2, 4),
-(5, 'Zagrevanje', '', 2, 'čamac, veslo', 0, '', '', 1, 11),
-(6, 'Veslanje', '', 2, 'čamac, veslo', 0, '', '', 1, 11),
-(7, 'Veslanje sa gumom', '', 2, 'čamac, veslo, guma', 0, '', '', 1, 11);
+-- Dumping structure for table athlete_tracker.exercise_categories
+CREATE TABLE IF NOT EXISTS `exercise_categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `ikonica` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `naziv` (`naziv`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `exercise_categories`
---
-
-CREATE TABLE `exercise_categories` (
-  `id` int(11) NOT NULL,
-  `naziv` varchar(255) NOT NULL,
-  `opis` text DEFAULT NULL,
-  `ikonica` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `exercise_categories`
---
-
+-- Dumping data for table athlete_tracker.exercise_categories: ~3 rows (approximately)
 INSERT INTO `exercise_categories` (`id`, `naziv`, `opis`, `ikonica`) VALUES
-(1, 'Veslanje', 'Veslanje na otovrenom', NULL),
-(2, 'Teretana', 'Rad na snazi', NULL);
+	(1, 'Veslanje', 'Veslanje na otovrenom', '/uploads/exercise-categories/1.jpg'),
+	(2, 'Teretana', 'Rad na snazi', '/uploads/exercise-categories/2.jpg'),
+	(3, 'Trčanje', '', '/uploads/exercise-categories/3.jpg');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.exercise_equipment
+CREATE TABLE IF NOT EXISTS `exercise_equipment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `exercise_id` int NOT NULL,
+  `equipment_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `exercise_id` (`exercise_id`),
+  KEY `equipment_id` (`equipment_id`),
+  CONSTRAINT `exercise_equipment_ibfk_1` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `exercise_equipment_ibfk_2` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
---
--- Table structure for table `fizicke_mere`
---
+-- Dumping data for table athlete_tracker.exercise_equipment: ~158 rows (approximately)
+INSERT INTO `exercise_equipment` (`id`, `exercise_id`, `equipment_id`) VALUES
+	(4, 3, 17),
+	(5, 8, 3),
+	(6, 8, 5),
+	(10, 10, 3),
+	(11, 10, 5),
+	(12, 28, 6),
+	(15, 34, 1),
+	(16, 34, 2),
+	(17, 35, 3),
+	(18, 32, 6),
+	(21, 29, 6),
+	(22, 33, 5),
+	(23, 37, 1),
+	(24, 37, 2),
+	(25, 38, 1),
+	(26, 38, 2),
+	(37, 36, 3),
+	(38, 36, 5),
+	(39, 39, 1),
+	(40, 39, 5),
+	(139, 24, 22),
+	(140, 68, 1),
+	(141, 68, 2),
+	(142, 71, 1),
+	(143, 71, 2),
+	(144, 71, 5),
+	(146, 14, 17),
+	(149, 72, 1),
+	(150, 72, 2),
+	(151, 16, 5),
+	(154, 19, 3),
+	(155, 17, 19),
+	(156, 18, 19),
+	(157, 90, 3),
+	(159, 20, 23),
+	(160, 44, 3),
+	(162, 41, 3),
+	(165, 40, 3),
+	(166, 40, 24),
+	(167, 61, 1),
+	(168, 61, 2),
+	(171, 77, 3),
+	(172, 91, 3),
+	(173, 91, 5),
+	(174, 95, 3),
+	(175, 92, 3),
+	(176, 42, 3),
+	(177, 43, 3),
+	(178, 69, 1),
+	(179, 69, 2),
+	(180, 74, 1),
+	(181, 74, 2),
+	(182, 45, 3),
+	(183, 76, 1),
+	(184, 76, 2),
+	(185, 2, 1),
+	(186, 2, 2),
+	(187, 2, 5),
+	(188, 51, 1),
+	(189, 51, 2),
+	(190, 48, 5),
+	(191, 86, 3),
+	(192, 86, 5),
+	(193, 9, 1),
+	(194, 9, 2),
+	(195, 9, 5),
+	(196, 83, 3),
+	(197, 88, 3),
+	(198, 65, 1),
+	(199, 65, 2),
+	(200, 75, 1),
+	(201, 75, 2),
+	(202, 55, 1),
+	(203, 55, 2),
+	(204, 85, 3),
+	(205, 85, 3),
+	(206, 104, 19),
+	(207, 93, 3),
+	(208, 93, 5),
+	(209, 96, 3),
+	(210, 96, 5),
+	(211, 79, 3),
+	(212, 54, 3),
+	(214, 108, 19),
+	(215, 107, 20),
+	(216, 84, 3),
+	(217, 84, 5),
+	(220, 66, 1),
+	(221, 66, 2),
+	(222, 66, 5),
+	(223, 67, 1),
+	(224, 67, 2),
+	(225, 25, 5),
+	(226, 25, 1),
+	(227, 62, 1),
+	(228, 62, 2),
+	(229, 106, 19),
+	(232, 87, 3),
+	(233, 87, 5),
+	(234, 81, 3),
+	(235, 81, 5),
+	(238, 63, 1),
+	(239, 63, 2),
+	(244, 70, 1),
+	(245, 70, 2),
+	(246, 102, 19),
+	(247, 94, 3),
+	(248, 73, 1),
+	(249, 73, 2),
+	(250, 82, 3),
+	(251, 82, 13),
+	(252, 98, 18),
+	(253, 105, 19),
+	(254, 80, 3),
+	(255, 78, 3),
+	(256, 89, 3),
+	(257, 89, 5),
+	(259, 97, 17),
+	(260, 50, 3),
+	(261, 50, 5),
+	(262, 103, 18),
+	(263, 100, 17),
+	(264, 52, 1),
+	(265, 52, 2),
+	(266, 101, 13),
+	(267, 99, 18),
+	(278, 125, 25),
+	(279, 120, 13),
+	(280, 122, 19),
+	(281, 121, 19),
+	(282, 123, 5),
+	(283, 123, 3),
+	(284, 118, 13),
+	(285, 124, 13),
+	(286, 119, 13),
+	(287, 126, 7),
+	(289, 127, 3),
+	(293, 129, 1),
+	(294, 129, 2),
+	(295, 129, 5),
+	(311, 137, 20),
+	(312, 128, 1),
+	(313, 128, 2),
+	(314, 128, 5),
+	(315, 133, 3),
+	(316, 133, 5),
+	(317, 134, 3),
+	(318, 134, 5),
+	(319, 131, 3),
+	(320, 131, 5),
+	(321, 135, 3),
+	(322, 135, 5),
+	(323, 132, 3),
+	(324, 132, 5),
+	(325, 136, 19),
+	(326, 130, 1),
+	(327, 130, 2),
+	(328, 130, 5);
 
-CREATE TABLE `fizicke_mere` (
-  `id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
+-- Dumping structure for table athlete_tracker.exercise_muscle_groups
+CREATE TABLE IF NOT EXISTS `exercise_muscle_groups` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `exercise_id` int NOT NULL,
+  `muscle_group_id` int NOT NULL,
+  `muscle_sub_group_id` int DEFAULT NULL,
+  `activation_type` enum('Glavni (primarni)','Pomoćni (sekundarni)','Stabilizatori') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `exercise_id` (`exercise_id`),
+  KEY `muscle_group_id` (`muscle_group_id`),
+  KEY `muscle_sub_group_id` (`muscle_sub_group_id`),
+  CONSTRAINT `exercise_muscle_groups_ibfk_1` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `exercise_muscle_groups_ibfk_2` FOREIGN KEY (`muscle_group_id`) REFERENCES `muscle_groups` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `exercise_muscle_groups_ibfk_3` FOREIGN KEY (`muscle_sub_group_id`) REFERENCES `muscle_sub_groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=891 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table athlete_tracker.exercise_muscle_groups: ~349 rows (approximately)
+INSERT INTO `exercise_muscle_groups` (`id`, `exercise_id`, `muscle_group_id`, `muscle_sub_group_id`, `activation_type`) VALUES
+	(278, 46, 5, 13, 'Glavni (primarni)'),
+	(279, 46, 1, 2, 'Pomoćni (sekundarni)'),
+	(280, 46, 3, 7, 'Stabilizatori'),
+	(303, 26, 1, 1, 'Glavni (primarni)'),
+	(304, 26, 5, 13, 'Pomoćni (sekundarni)'),
+	(305, 26, 3, 7, 'Pomoćni (sekundarni)'),
+	(306, 28, 2, 3, 'Glavni (primarni)'),
+	(307, 28, 2, 4, 'Pomoćni (sekundarni)'),
+	(308, 28, 4, 11, 'Pomoćni (sekundarni)'),
+	(309, 29, 4, 11, 'Glavni (primarni)'),
+	(310, 29, 2, 3, 'Glavni (primarni)'),
+	(311, 29, 2, 5, 'Pomoćni (sekundarni)'),
+	(312, 8, 1, 1, 'Glavni (primarni)'),
+	(313, 8, 5, 13, 'Pomoćni (sekundarni)'),
+	(314, 8, 3, 7, 'Pomoćni (sekundarni)'),
+	(315, 8, 11, 30, 'Stabilizatori'),
+	(319, 10, 1, 1, 'Glavni (primarni)'),
+	(320, 10, 5, 13, 'Pomoćni (sekundarni)'),
+	(321, 10, 3, 7, 'Pomoćni (sekundarni)'),
+	(322, 10, 11, 30, 'Stabilizatori'),
+	(323, 11, 11, 30, 'Glavni (primarni)'),
+	(324, 11, 11, 28, 'Pomoćni (sekundarni)'),
+	(327, 13, 11, 28, 'Glavni (primarni)'),
+	(330, 15, 11, 28, 'Glavni (primarni)'),
+	(331, 15, 11, 29, 'Pomoćni (sekundarni)'),
+	(343, 3, 2, 3, 'Glavni (primarni)'),
+	(344, 3, 2, 5, 'Pomoćni (sekundarni)'),
+	(345, 3, 2, 4, 'Pomoćni (sekundarni)'),
+	(346, 3, 4, 11, 'Pomoćni (sekundarni)'),
+	(438, 53, 3, 9, 'Glavni (primarni)'),
+	(439, 53, 11, 30, 'Stabilizatori'),
+	(443, 24, 11, 30, 'Glavni (primarni)'),
+	(444, 24, 11, 28, 'Pomoćni (sekundarni)'),
+	(445, 24, 3, 10, 'Stabilizatori'),
+	(446, 68, 2, 6, 'Glavni (primarni)'),
+	(447, 68, 8, 20, 'Glavni (primarni)'),
+	(448, 68, 9, 23, 'Pomoćni (sekundarni)'),
+	(449, 68, 11, 30, 'Stabilizatori'),
+	(450, 71, 9, 23, 'Glavni (primarni)'),
+	(451, 71, 8, 20, 'Pomoćni (sekundarni)'),
+	(452, 71, 8, 21, 'Pomoćni (sekundarni)'),
+	(453, 71, 11, 30, 'Stabilizatori'),
+	(456, 14, 11, 28, 'Glavni (primarni)'),
+	(457, 14, 11, 30, 'Pomoćni (sekundarni)'),
+	(462, 72, 7, 16, 'Glavni (primarni)'),
+	(463, 72, 9, 23, 'Glavni (primarni)'),
+	(464, 72, 2, 3, 'Pomoćni (sekundarni)'),
+	(465, 72, 3, 7, 'Pomoćni (sekundarni)'),
+	(466, 72, 5, 13, 'Pomoćni (sekundarni)'),
+	(467, 72, 11, 30, 'Stabilizatori'),
+	(468, 16, 11, 28, 'Glavni (primarni)'),
+	(469, 16, 11, 30, 'Pomoćni (sekundarni)'),
+	(474, 19, 11, 29, 'Glavni (primarni)'),
+	(475, 19, 11, 30, 'Stabilizatori'),
+	(476, 17, 11, 29, 'Glavni (primarni)'),
+	(477, 17, 11, 30, 'Stabilizatori'),
+	(478, 18, 11, 29, 'Glavni (primarni)'),
+	(479, 18, 11, 30, 'Stabilizatori'),
+	(480, 90, 11, 29, 'Glavni (primarni)'),
+	(481, 90, 11, 30, 'Stabilizatori'),
+	(483, 20, 11, 28, 'Glavni (primarni)'),
+	(484, 23, 11, 28, 'Glavni (primarni)'),
+	(485, 23, 3, 7, 'Pomoćni (sekundarni)'),
+	(486, 23, 7, NULL, 'Pomoćni (sekundarni)'),
+	(487, 23, 9, 23, 'Pomoćni (sekundarni)'),
+	(488, 56, 11, 28, 'Glavni (primarni)'),
+	(489, 56, 3, 10, 'Stabilizatori'),
+	(490, 57, 11, 28, 'Glavni (primarni)'),
+	(491, 57, 11, 29, 'Pomoćni (sekundarni)'),
+	(492, 58, 11, 28, 'Glavni (primarni)'),
+	(493, 58, 3, 10, 'Stabilizatori'),
+	(494, 60, 11, 28, 'Glavni (primarni)'),
+	(495, 60, 9, 23, 'Pomoćni (sekundarni)'),
+	(496, 60, 11, 30, 'Stabilizatori'),
+	(497, 12, 11, 29, 'Glavni (primarni)'),
+	(498, 12, 11, 30, 'Stabilizatori'),
+	(499, 59, 11, 28, 'Glavni (primarni)'),
+	(500, 59, 9, 23, 'Pomoćni (sekundarni)'),
+	(501, 21, 11, 29, 'Glavni (primarni)'),
+	(502, 21, 11, 30, 'Stabilizatori'),
+	(503, 22, 11, 28, 'Glavni (primarni)'),
+	(504, 22, 11, 29, 'Pomoćni (sekundarni)'),
+	(509, 44, 12, 36, 'Glavni (primarni)'),
+	(510, 44, 9, 23, 'Glavni (primarni)'),
+	(511, 44, 7, NULL, 'Pomoćni (sekundarni)'),
+	(512, 44, 11, NULL, 'Stabilizatori'),
+	(515, 41, 4, 12, 'Glavni (primarni)'),
+	(516, 41, 4, 11, 'Pomoćni (sekundarni)'),
+	(519, 40, 4, 12, 'Glavni (primarni)'),
+	(520, 40, 4, 11, 'Pomoćni (sekundarni)'),
+	(521, 61, 2, 6, 'Glavni (primarni)'),
+	(522, 61, 9, 23, 'Glavni (primarni)'),
+	(523, 61, 8, 20, 'Glavni (primarni)'),
+	(524, 61, 7, NULL, 'Pomoćni (sekundarni)'),
+	(525, 61, 11, NULL, 'Stabilizatori'),
+	(536, 77, 2, 6, 'Glavni (primarni)'),
+	(537, 77, 9, 23, 'Glavni (primarni)'),
+	(538, 77, 8, 20, 'Glavni (primarni)'),
+	(539, 77, 7, NULL, 'Pomoćni (sekundarni)'),
+	(540, 77, 11, 30, 'Stabilizatori'),
+	(541, 91, 9, 23, 'Glavni (primarni)'),
+	(542, 91, 8, 20, 'Pomoćni (sekundarni)'),
+	(543, 91, 8, 21, 'Pomoćni (sekundarni)'),
+	(544, 91, 11, 30, 'Stabilizatori'),
+	(545, 95, 8, 20, 'Glavni (primarni)'),
+	(546, 95, 9, 23, 'Glavni (primarni)'),
+	(547, 95, 2, 6, 'Pomoćni (sekundarni)'),
+	(548, 95, 11, 30, 'Stabilizatori'),
+	(549, 92, 9, 23, 'Glavni (primarni)'),
+	(550, 92, 8, 20, 'Glavni (primarni)'),
+	(551, 92, 2, 6, 'Pomoćni (sekundarni)'),
+	(552, 92, 11, 30, 'Stabilizatori'),
+	(553, 42, 9, 23, 'Glavni (primarni)'),
+	(554, 42, 7, NULL, 'Glavni (primarni)'),
+	(555, 42, 8, 20, 'Pomoćni (sekundarni)'),
+	(556, 42, 11, NULL, 'Stabilizatori'),
+	(557, 43, 7, NULL, 'Glavni (primarni)'),
+	(558, 43, 9, 23, 'Glavni (primarni)'),
+	(559, 43, 8, 20, 'Pomoćni (sekundarni)'),
+	(560, 43, 11, NULL, 'Stabilizatori'),
+	(561, 69, 7, NULL, 'Glavni (primarni)'),
+	(562, 69, 9, 23, 'Glavni (primarni)'),
+	(563, 69, 8, 20, 'Pomoćni (sekundarni)'),
+	(564, 69, 2, 6, 'Pomoćni (sekundarni)'),
+	(565, 69, 11, NULL, 'Stabilizatori'),
+	(566, 74, 8, 20, 'Glavni (primarni)'),
+	(567, 74, 8, 21, 'Glavni (primarni)'),
+	(568, 74, 9, 23, 'Glavni (primarni)'),
+	(569, 74, 2, 6, 'Pomoćni (sekundarni)'),
+	(570, 74, 11, 30, 'Stabilizatori'),
+	(571, 45, 7, NULL, 'Glavni (primarni)'),
+	(572, 45, 9, 23, 'Glavni (primarni)'),
+	(573, 45, 12, 34, 'Pomoćni (sekundarni)'),
+	(574, 45, 8, 20, 'Pomoćni (sekundarni)'),
+	(575, 76, 2, 3, 'Glavni (primarni)'),
+	(576, 76, 9, 23, 'Glavni (primarni)'),
+	(577, 76, 8, 20, 'Pomoćni (sekundarni)'),
+	(578, 76, 7, 17, 'Pomoćni (sekundarni)'),
+	(579, 76, 2, 6, 'Pomoćni (sekundarni)'),
+	(580, 76, 11, 30, 'Stabilizatori'),
+	(581, 47, 1, 1, 'Glavni (primarni)'),
+	(582, 47, 5, 13, 'Pomoćni (sekundarni)'),
+	(583, 47, 3, 7, 'Stabilizatori'),
+	(584, 2, 1, 1, 'Glavni (primarni)'),
+	(585, 2, 5, 13, 'Pomoćni (sekundarni)'),
+	(586, 2, 3, 7, 'Pomoćni (sekundarni)'),
+	(587, 51, 1, 1, 'Glavni (primarni)'),
+	(588, 51, 2, 3, 'Pomoćni (sekundarni)'),
+	(589, 48, 1, 1, 'Glavni (primarni)'),
+	(590, 48, 5, 13, 'Pomoćni (sekundarni)'),
+	(591, 48, 3, 7, 'Stabilizatori'),
+	(592, 86, 1, 1, 'Glavni (primarni)'),
+	(593, 86, 2, 3, 'Pomoćni (sekundarni)'),
+	(594, 9, 1, 1, 'Glavni (primarni)'),
+	(595, 9, 5, 13, 'Pomoćni (sekundarni)'),
+	(596, 9, 3, 7, 'Pomoćni (sekundarni)'),
+	(597, 83, 6, 14, 'Glavni (primarni)'),
+	(598, 83, 2, 4, 'Pomoćni (sekundarni)'),
+	(599, 83, 11, 30, 'Stabilizatori'),
+	(600, 88, 2, 6, 'Glavni (primarni)'),
+	(601, 88, 8, 20, 'Glavni (primarni)'),
+	(602, 88, 9, 23, 'Pomoćni (sekundarni)'),
+	(603, 88, 11, 30, 'Stabilizatori'),
+	(604, 65, 3, 8, 'Glavni (primarni)'),
+	(605, 65, 2, 4, 'Pomoćni (sekundarni)'),
+	(606, 75, 3, 8, 'Glavni (primarni)'),
+	(607, 75, 2, 4, 'Pomoćni (sekundarni)'),
+	(608, 55, 3, 7, 'Glavni (primarni)'),
+	(609, 55, 7, 16, 'Pomoćni (sekundarni)'),
+	(610, 55, 11, 30, 'Stabilizatori'),
+	(611, 85, 3, 9, 'Glavni (primarni)'),
+	(612, 85, 2, 5, 'Pomoćni (sekundarni)'),
+	(613, 104, 3, 8, 'Glavni (primarni)'),
+	(614, 104, 2, 4, 'Pomoćni (sekundarni)'),
+	(615, 93, 3, 9, 'Glavni (primarni)'),
+	(616, 93, 2, 5, 'Pomoćni (sekundarni)'),
+	(617, 93, 4, 11, 'Pomoćni (sekundarni)'),
+	(618, 96, 3, 9, 'Glavni (primarni)'),
+	(619, 96, 3, 8, 'Pomoćni (sekundarni)'),
+	(620, 96, 2, 5, 'Pomoćni (sekundarni)'),
+	(621, 79, 3, 8, 'Glavni (primarni)'),
+	(622, 79, 2, 4, 'Pomoćni (sekundarni)'),
+	(623, 54, 3, 7, 'Glavni (primarni)'),
+	(624, 54, 7, 16, 'Pomoćni (sekundarni)'),
+	(625, 54, 11, 30, 'Stabilizatori'),
+	(629, 108, 3, 9, 'Glavni (primarni)'),
+	(630, 108, 2, 4, 'Pomoćni (sekundarni)'),
+	(631, 108, 2, 5, 'Pomoćni (sekundarni)'),
+	(632, 107, 3, 9, 'Glavni (primarni)'),
+	(633, 107, 2, 5, 'Pomoćni (sekundarni)'),
+	(634, 84, 3, 9, 'Glavni (primarni)'),
+	(635, 84, 2, 5, 'Pomoćni (sekundarni)'),
+	(638, 66, 2, 3, 'Glavni (primarni)'),
+	(639, 66, 2, 5, 'Pomoćni (sekundarni)'),
+	(640, 66, 4, 11, 'Pomoćni (sekundarni)'),
+	(641, 67, 2, 4, 'Glavni (primarni)'),
+	(642, 25, 2, 3, 'Glavni (primarni)'),
+	(643, 25, 2, 5, 'Pomoćni (sekundarni)'),
+	(644, 25, 4, 11, 'Pomoćni (sekundarni)'),
+	(645, 62, 2, 3, 'Glavni (primarni)'),
+	(646, 62, 2, 5, 'Pomoćni (sekundarni)'),
+	(647, 62, 4, 11, 'Pomoćni (sekundarni)'),
+	(648, 106, 2, 5, 'Glavni (primarni)'),
+	(649, 106, 2, 4, 'Glavni (primarni)'),
+	(650, 106, 3, 9, 'Pomoćni (sekundarni)'),
+	(657, 87, 2, 3, 'Glavni (primarni)'),
+	(658, 87, 2, 5, 'Pomoćni (sekundarni)'),
+	(659, 87, 4, 11, 'Pomoćni (sekundarni)'),
+	(660, 81, 2, 3, 'Glavni (primarni)'),
+	(661, 81, 2, 5, 'Pomoćni (sekundarni)'),
+	(662, 81, 3, 9, 'Pomoćni (sekundarni)'),
+	(663, 81, 4, 11, 'Pomoćni (sekundarni)'),
+	(667, 63, 2, 3, 'Glavni (primarni)'),
+	(668, 63, 2, 4, 'Pomoćni (sekundarni)'),
+	(669, 63, 4, 11, 'Pomoćni (sekundarni)'),
+	(678, 70, 2, 3, 'Glavni (primarni)'),
+	(679, 70, 2, 5, 'Pomoćni (sekundarni)'),
+	(680, 70, 2, 4, 'Pomoćni (sekundarni)'),
+	(681, 70, 3, 9, 'Pomoćni (sekundarni)'),
+	(682, 70, 4, 11, 'Pomoćni (sekundarni)'),
+	(683, 102, 2, 3, 'Glavni (primarni)'),
+	(684, 102, 11, 29, 'Pomoćni (sekundarni)'),
+	(685, 94, 2, 3, 'Glavni (primarni)'),
+	(686, 94, 2, 5, 'Pomoćni (sekundarni)'),
+	(687, 94, 4, 11, 'Pomoćni (sekundarni)'),
+	(688, 73, 2, 3, 'Glavni (primarni)'),
+	(689, 73, 2, 5, 'Pomoćni (sekundarni)'),
+	(690, 73, 4, 11, 'Pomoćni (sekundarni)'),
+	(691, 82, 2, 3, 'Glavni (primarni)'),
+	(692, 82, 3, 7, 'Pomoćni (sekundarni)'),
+	(693, 82, 5, 13, 'Pomoćni (sekundarni)'),
+	(694, 82, 11, 30, 'Stabilizatori'),
+	(695, 98, 2, 3, 'Glavni (primarni)'),
+	(696, 98, 2, 5, 'Pomoćni (sekundarni)'),
+	(697, 98, 4, 11, 'Pomoćni (sekundarni)'),
+	(698, 105, 2, 4, 'Glavni (primarni)'),
+	(699, 80, 2, 3, 'Glavni (primarni)'),
+	(700, 80, 2, 5, 'Pomoćni (sekundarni)'),
+	(701, 80, 4, 11, 'Pomoćni (sekundarni)'),
+	(702, 78, 2, 4, 'Glavni (primarni)'),
+	(703, 89, 2, 6, 'Glavni (primarni)'),
+	(704, 89, 9, 23, 'Pomoćni (sekundarni)'),
+	(705, 89, 11, 30, 'Stabilizatori'),
+	(709, 97, 2, 3, 'Glavni (primarni)'),
+	(710, 97, 2, 4, 'Pomoćni (sekundarni)'),
+	(711, 97, 4, 11, 'Pomoćni (sekundarni)'),
+	(712, 50, 2, 3, 'Glavni (primarni)'),
+	(713, 50, 2, 5, 'Pomoćni (sekundarni)'),
+	(714, 50, 4, 11, 'Pomoćni (sekundarni)'),
+	(715, 103, 2, 3, 'Glavni (primarni)'),
+	(716, 103, 2, 5, 'Pomoćni (sekundarni)'),
+	(717, 103, 4, 11, 'Pomoćni (sekundarni)'),
+	(718, 100, 2, 3, 'Glavni (primarni)'),
+	(719, 100, 11, 30, 'Stabilizatori'),
+	(720, 52, 2, 3, 'Glavni (primarni)'),
+	(721, 52, 11, 30, 'Stabilizatori'),
+	(722, 101, 2, 3, 'Glavni (primarni)'),
+	(723, 101, 4, 11, 'Pomoćni (sekundarni)'),
+	(724, 99, 2, 5, 'Glavni (primarni)'),
+	(725, 99, 2, 4, 'Glavni (primarni)'),
+	(726, 99, 3, 9, 'Pomoćni (sekundarni)'),
+	(727, 99, 4, 11, 'Pomoćni (sekundarni)'),
+	(732, 31, 10, 26, 'Glavni (primarni)'),
+	(733, 31, 9, 23, 'Glavni (primarni)'),
+	(734, 31, 8, 20, 'Pomoćni (sekundarni)'),
+	(735, 31, 11, 30, 'Stabilizatori'),
+	(736, 32, 5, 13, 'Glavni (primarni)'),
+	(737, 32, 1, 1, 'Pomoćni (sekundarni)'),
+	(738, 32, 3, 7, 'Pomoćni (sekundarni)'),
+	(739, 33, 5, 13, 'Glavni (primarni)'),
+	(740, 33, 1, 1, 'Pomoćni (sekundarni)'),
+	(741, 34, 4, 11, 'Glavni (primarni)'),
+	(742, 34, 4, 12, 'Pomoćni (sekundarni)'),
+	(743, 35, 4, 11, 'Glavni (primarni)'),
+	(744, 35, 4, 12, 'Pomoćni (sekundarni)'),
+	(745, 36, 4, 11, 'Glavni (primarni)'),
+	(746, 36, 4, 12, 'Pomoćni (sekundarni)'),
+	(747, 37, 4, 12, 'Glavni (primarni)'),
+	(748, 37, 6, 15, 'Pomoćni (sekundarni)'),
+	(749, 38, 4, 11, 'Glavni (primarni)'),
+	(750, 38, 4, 12, 'Pomoćni (sekundarni)'),
+	(751, 39, 4, 11, 'Glavni (primarni)'),
+	(752, 39, 4, 12, 'Pomoćni (sekundarni)'),
+	(785, 125, 2, 6, 'Glavni (primarni)'),
+	(786, 125, 9, 23, 'Pomoćni (sekundarni)'),
+	(787, 125, 8, 20, 'Pomoćni (sekundarni)'),
+	(788, 120, 2, 3, 'Glavni (primarni)'),
+	(789, 120, 3, 9, 'Pomoćni (sekundarni)'),
+	(790, 120, 2, 4, 'Pomoćni (sekundarni)'),
+	(791, 122, 3, 9, 'Glavni (primarni)'),
+	(792, 122, 2, 5, 'Pomoćni (sekundarni)'),
+	(793, 121, 3, 8, 'Glavni (primarni)'),
+	(794, 121, 3, 9, 'Pomoćni (sekundarni)'),
+	(795, 121, 2, 5, 'Pomoćni (sekundarni)'),
+	(796, 123, 2, 3, 'Glavni (primarni)'),
+	(797, 123, 2, 5, 'Pomoćni (sekundarni)'),
+	(798, 123, 4, 11, 'Pomoćni (sekundarni)'),
+	(799, 118, 2, 3, 'Glavni (primarni)'),
+	(800, 118, 4, 11, 'Pomoćni (sekundarni)'),
+	(801, 124, 2, 3, 'Glavni (primarni)'),
+	(802, 124, 4, 11, 'Pomoćni (sekundarni)'),
+	(803, 124, 2, 4, 'Pomoćni (sekundarni)'),
+	(804, 119, 2, 3, 'Glavni (primarni)'),
+	(805, 119, 4, 11, 'Glavni (primarni)'),
+	(806, 119, 2, 5, 'Pomoćni (sekundarni)'),
+	(807, 126, 8, 20, 'Glavni (primarni)'),
+	(808, 126, 9, 23, 'Glavni (primarni)'),
+	(809, 126, 2, 6, 'Pomoćni (sekundarni)'),
+	(810, 126, 11, 30, 'Stabilizatori'),
+	(811, 30, 8, 20, 'Glavni (primarni)'),
+	(812, 30, 9, 23, 'Glavni (primarni)'),
+	(813, 30, 10, 26, 'Pomoćni (sekundarni)'),
+	(814, 30, 11, 30, 'Stabilizatori'),
+	(822, 127, 10, 26, 'Glavni (primarni)'),
+	(823, 127, 9, 23, 'Glavni (primarni)'),
+	(824, 127, 3, 8, 'Glavni (primarni)'),
+	(825, 127, 5, 13, 'Pomoćni (sekundarni)'),
+	(826, 127, 4, 11, 'Pomoćni (sekundarni)'),
+	(827, 127, 2, 6, 'Pomoćni (sekundarni)'),
+	(828, 127, 11, 30, 'Stabilizatori'),
+	(832, 129, 5, 13, 'Glavni (primarni)'),
+	(833, 129, 1, 1, 'Pomoćni (sekundarni)'),
+	(834, 129, 3, 7, 'Pomoćni (sekundarni)'),
+	(852, 137, 1, 1, 'Glavni (primarni)'),
+	(853, 137, 3, 7, 'Pomoćni (sekundarni)'),
+	(854, 128, 1, 1, 'Glavni (primarni)'),
+	(855, 128, 5, 13, 'Pomoćni (sekundarni)'),
+	(856, 128, 3, 7, 'Pomoćni (sekundarni)'),
+	(857, 133, 1, 1, 'Glavni (primarni)'),
+	(858, 133, 3, 7, 'Pomoćni (sekundarni)'),
+	(859, 134, 1, 1, 'Glavni (primarni)'),
+	(860, 134, 5, 13, 'Pomoćni (sekundarni)'),
+	(861, 134, 3, 7, 'Pomoćni (sekundarni)'),
+	(862, 131, 1, 1, 'Glavni (primarni)'),
+	(863, 131, 3, 7, 'Pomoćni (sekundarni)'),
+	(864, 135, 1, 1, 'Glavni (primarni)'),
+	(865, 135, 5, 13, 'Pomoćni (sekundarni)'),
+	(866, 132, 1, 1, 'Glavni (primarni)'),
+	(867, 132, 3, 7, 'Pomoćni (sekundarni)'),
+	(868, 136, 1, 1, 'Glavni (primarni)'),
+	(869, 136, 3, 7, 'Pomoćni (sekundarni)'),
+	(870, 130, 1, 1, 'Glavni (primarni)'),
+	(871, 130, 3, 7, 'Pomoćni (sekundarni)'),
+	(872, 138, 7, NULL, 'Glavni (primarni)'),
+	(886, 139, 10, 26, 'Glavni (primarni)'),
+	(887, 139, 9, 23, 'Glavni (primarni)'),
+	(888, 139, 11, 30, 'Glavni (primarni)'),
+	(889, 139, 8, 20, 'Pomoćni (sekundarni)'),
+	(890, 139, 2, 6, 'Pomoćni (sekundarni)');
+
+-- Dumping structure for table athlete_tracker.fizicke_mere
+CREATE TABLE IF NOT EXISTS `fizicke_mere` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `athlete_id` int NOT NULL,
   `datum_merenja` date NOT NULL,
   `visina_cm` decimal(5,2) DEFAULT NULL,
   `tezina_kg` decimal(5,2) DEFAULT NULL,
@@ -178,982 +904,1054 @@ CREATE TABLE `fizicke_mere` (
   `obim_ramena_cm` decimal(5,2) DEFAULT NULL,
   `obim_butine_cm` decimal(5,2) DEFAULT NULL,
   `obim_vrata_cm` decimal(5,2) DEFAULT NULL,
-  `bmi` decimal(5,2) GENERATED ALWAYS AS (`tezina_kg` / pow(`visina_cm` / 100,2)) STORED
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `bmi` decimal(5,2) GENERATED ALWAYS AS ((`tezina_kg` / pow((`visina_cm` / 100),2))) STORED,
+  PRIMARY KEY (`id`),
+  KEY `athlete_id` (`athlete_id`),
+  CONSTRAINT `fizicke_mere_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `fizicke_mere`
---
+-- Dumping data for table athlete_tracker.fizicke_mere: ~0 rows (approximately)
 
-INSERT INTO `fizicke_mere` (`id`, `athlete_id`, `datum_merenja`, `visina_cm`, `tezina_kg`, `obim_struka_cm`, `obim_kukova_cm`, `obim_grudi_cm`, `obim_nadlaktice_cm`, `obim_podlaktice_cm`, `obim_ramena_cm`, `obim_butine_cm`, `obim_vrata_cm`) VALUES
-(1, 2, '2025-08-30', 182.00, 94.00, 95.00, NULL, NULL, 34.00, NULL, NULL, NULL, NULL),
-(3, 3, '2025-08-30', 124.00, 25.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(4, 2, '2025-08-20', 182.00, 93.00, NULL, NULL, NULL, NULL, NULL, 115.00, NULL, NULL),
-(5, 2, '2025-08-31', 182.00, 94.50, NULL, 105.00, NULL, NULL, NULL, NULL, 61.00, NULL);
+-- Dumping structure for table athlete_tracker.groups
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `naziv` (`naziv`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `groups`
---
-
-CREATE TABLE `groups` (
-  `id` int(11) NOT NULL,
-  `naziv` varchar(255) NOT NULL,
-  `opis` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `groups`
---
-
+-- Dumping data for table athlete_tracker.groups: ~2 rows (approximately)
 INSERT INTO `groups` (`id`, `naziv`, `opis`) VALUES
-(1, 'Napredna', 'Stariji i bolji klinci'),
-(2, 'Početna', 'Početnici i slabiji takmičari'),
-(4, 'Test grupa', 'test grupa sa dodelom');
+	(1, 'Takmičarska', 'Stariji i bolji klinci'),
+	(2, 'Početna', NULL),
+	(3, 'Test', 'Test grupa');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.group_memberships
+CREATE TABLE IF NOT EXISTS `group_memberships` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `group_id` int NOT NULL,
+  `athlete_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `group_id` (`group_id`,`athlete_id`),
+  KEY `athlete_id` (`athlete_id`),
+  CONSTRAINT `group_memberships_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `group_memberships_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `group_memberships`
---
-
-CREATE TABLE `group_memberships` (
-  `id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `group_memberships`
---
-
+-- Dumping data for table athlete_tracker.group_memberships: ~32 rows (approximately)
 INSERT INTO `group_memberships` (`id`, `group_id`, `athlete_id`) VALUES
-(37, 1, 1),
-(35, 1, 2),
-(40, 1, 3),
-(41, 2, 3),
-(42, 2, 4),
-(43, 2, 5);
+	(45, 1, 12),
+	(46, 1, 14),
+	(49, 2, 16),
+	(70, 2, 32),
+	(73, 2, 35),
+	(76, 1, 19),
+	(77, 1, 27),
+	(78, 1, 4),
+	(79, 1, 20),
+	(80, 2, 33),
+	(81, 1, 6),
+	(82, 1, 26),
+	(83, 1, 8),
+	(84, 2, 30),
+	(89, 2, 34),
+	(91, 1, 7),
+	(92, 1, 23),
+	(93, 1, 24),
+	(94, 2, 11),
+	(95, 2, 31),
+	(96, 1, 25),
+	(97, 1, 10),
+	(98, 1, 21),
+	(99, 1, 5),
+	(100, 1, 3),
+	(102, 1, 22),
+	(103, 2, 28),
+	(105, 2, 29),
+	(106, 1, 17),
+	(109, 1, 9),
+	(110, 1, 15),
+	(111, 1, 18),
+	(112, 3, 6),
+	(113, 3, 14),
+	(114, 3, 24);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `individuals`
---
-
-CREATE TABLE `individuals` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `ime` varchar(50) NOT NULL,
-  `prezime` varchar(50) NOT NULL,
+-- Dumping structure for table athlete_tracker.individuals
+CREATE TABLE IF NOT EXISTS `individuals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `ime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `prezime` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `datum_rodjenja` date DEFAULT NULL,
-  `pol` enum('musko','zensko','drugo') DEFAULT NULL,
-  `cilj` text DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `pol` enum('musko','zensko','drugo') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `cilj` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  CONSTRAINT `individuals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
--- --------------------------------------------------------
+-- Dumping data for table athlete_tracker.individuals: ~0 rows (approximately)
 
---
--- Table structure for table `locations`
---
+-- Dumping structure for table athlete_tracker.locations
+CREATE TABLE IF NOT EXISTS `locations` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `adresa` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `mesto` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `naziv` (`naziv`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
-CREATE TABLE `locations` (
-  `id` int(11) NOT NULL,
-  `naziv` varchar(255) NOT NULL,
-  `adresa` varchar(255) DEFAULT NULL,
-  `mesto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `locations`
---
-
+-- Dumping data for table athlete_tracker.locations: ~4 rows (approximately)
 INSERT INTO `locations` (`id`, `naziv`, `adresa`, `mesto`) VALUES
-(1, 'Kajak klub', 'Apatinski put bb', 'Sombor'),
-(2, 'Kajak klub - teretana', 'Apatinski put bb', 'Sombor'),
-(3, 'Mostonga - teretana', 'Apatinski put bb', 'Sombor'),
-(5, 'Mostonga - trim staza', 'Apatinski put bb', 'Sombor');
+	(1, 'Kajak klub', 'Apatinski put bb', 'Sombor'),
+	(2, 'Kajak klub - teretana', 'Apatinski put b', 'Sombor'),
+	(3, 'Mostonga - teretana', 'Apatinski put bb', 'Sombor'),
+	(5, 'Mostonga - trim staza', 'Apatinski put bb', 'Sombor');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `membership_fees`
---
-
-CREATE TABLE `membership_fees` (
-  `id` int(11) NOT NULL,
+-- Dumping structure for table athlete_tracker.membership_fees
+CREATE TABLE IF NOT EXISTS `membership_fees` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `amount_first` decimal(10,2) NOT NULL COMMENT 'Iznos za prvo dete',
   `amount_second` decimal(10,2) NOT NULL COMMENT 'Iznos za drugo dete',
   `amount_third` decimal(10,2) NOT NULL COMMENT 'Iznos za trece dete',
-  `valid_from` date NOT NULL COMMENT 'Datum od kada cena vazi'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `valid_from` date NOT NULL COMMENT 'Datum od kada cena vazi',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `membership_fees`
---
-
+-- Dumping data for table athlete_tracker.membership_fees: ~0 rows (approximately)
 INSERT INTO `membership_fees` (`id`, `amount_first`, `amount_second`, `amount_third`, `valid_from`) VALUES
-(1, 2500.00, 1500.00, 800.00, '2024-12-31');
+	(1, 2500.00, 1500.00, 1000.00, '2025-01-01');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `membership_payments`
---
-
-CREATE TABLE `membership_payments` (
-  `id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
+-- Dumping structure for table athlete_tracker.membership_payments
+CREATE TABLE IF NOT EXISTS `membership_payments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `athlete_id` int NOT NULL,
   `payment_date` date NOT NULL,
   `amount_paid` decimal(10,2) NOT NULL,
-  `child_order` int(11) NOT NULL COMMENT 'Redni broj deteta (1, 2, 3)',
-  `note` text DEFAULT NULL,
-  `payment_month` date NOT NULL COMMENT 'Mjesec za koji je placena clanarina'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `child_order` int NOT NULL COMMENT 'Redni broj deteta (1, 2, 3)',
+  `note` text,
+  `payment_month` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_payment_athlete` (`athlete_id`),
+  CONSTRAINT `fk_payment_athlete` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `membership_payments`
---
-
+-- Dumping data for table athlete_tracker.membership_payments: ~85 rows (approximately)
 INSERT INTO `membership_payments` (`id`, `athlete_id`, `payment_date`, `amount_paid`, `child_order`, `note`, `payment_month`) VALUES
-(1, 3, '2025-08-24', 2500.00, 1, '', '2025-01-01'),
-(2, 3, '2025-08-27', 800.00, 3, '', '2025-02-01'),
-(10, 3, '2025-08-27', 2500.00, 1, '', '2025-03-01'),
-(11, 3, '2025-08-27', 2500.00, 1, '', '2025-04-01'),
-(13, 1, '2025-09-08', 2500.00, 1, '', '2025-05-01'),
-(14, 1, '2025-09-08', 2500.00, 1, '', '2025-06-01'),
-(17, 4, '2025-09-25', 2500.00, 1, '', '2024-12-31'),
-(18, 4, '2025-09-25', 2500.00, 1, '', '2025-01-01'),
-(19, 1, '2025-09-25', 2500.00, 1, '', '2025-07-01'),
-(20, 1, '2025-09-25', 2500.00, 1, '', '2025-08-01'),
-(21, 1, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
-(22, 1, '2025-09-25', 2500.00, 1, '', '2025-10-01');
+	(2, 6, '2025-09-25', 2500.00, 1, '', '2025-08-21'),
+	(3, 21, '2025-09-25', 2500.00, 1, '', '2025-08-11'),
+	(4, 21, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+	(5, 6, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+	(6, 7, '2025-09-25', 2500.00, 1, '', '2025-08-05'),
+	(7, 7, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+	(8, 8, '2025-09-25', 2500.00, 1, '', '2025-06-10'),
+	(9, 8, '2025-09-25', 2500.00, 1, '', '2025-07-01'),
+	(12, 4, '2025-09-25', 2500.00, 1, '', '2025-08-05'),
+	(13, 4, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+	(14, 19, '2025-09-25', 2500.00, 1, '', '2025-07-23'),
+	(15, 19, '2025-09-25', 2500.00, 1, '', '2025-08-01'),
+	(16, 19, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+	(17, 15, '2025-09-25', 2500.00, 1, '', '2025-08-14'),
+	(18, 20, '2025-09-25', 2500.00, 1, '', '2025-08-13'),
+	(19, 26, '2025-09-25', 2500.00, 1, '', '2025-08-21'),
+	(20, 23, '2025-09-25', 2500.00, 1, '', '2025-08-08'),
+	(21, 5, '2025-09-25', 2500.00, 1, '', '2025-07-17'),
+	(23, 25, '2025-09-25', 2500.00, 1, '', '2025-08-01'),
+	(24, 10, '2025-09-25', 2500.00, 1, '', '2025-08-30'),
+	(25, 22, '2025-09-25', 2500.00, 1, '', '2025-09-01'),
+	(26, 27, '2025-09-25', 2500.00, 1, '', '2025-08-18'),
+	(27, 24, '2025-09-25', 2500.00, 1, '', '2025-08-20'),
+	(28, 18, '2025-09-25', 2500.00, 1, '', '2025-08-04'),
+	(29, 21, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(30, 18, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(31, 7, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(32, 8, '2025-10-23', 2500.00, 1, '', '2025-08-01'),
+	(34, 34, '2025-10-23', 2500.00, 1, '', '2025-07-18'),
+	(35, 34, '2025-10-23', 2500.00, 1, '', '2025-08-01'),
+	(36, 34, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(37, 20, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(38, 20, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(39, 11, '2025-10-23', 2500.00, 1, '', '2025-08-15'),
+	(40, 11, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(41, 11, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(42, 11, '2025-10-23', 2500.00, 1, '', '2025-11-01'),
+	(43, 4, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(44, 19, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(45, 26, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(46, 26, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(47, 31, '2025-10-23', 2500.00, 1, '', '2025-07-27'),
+	(48, 31, '2025-10-23', 2500.00, 1, '', '2025-08-01'),
+	(49, 33, '2025-10-23', 2500.00, 1, '', '2025-08-12'),
+	(50, 33, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(51, 30, '2025-10-23', 2500.00, 1, '', '2025-08-11'),
+	(52, 23, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(53, 23, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(55, 35, '2025-10-23', 2500.00, 1, '', '2025-07-16'),
+	(56, 35, '2025-10-23', 2500.00, 1, '', '2025-08-01'),
+	(57, 35, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(58, 25, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(59, 32, '2025-10-23', 2500.00, 1, '', '2025-04-14'),
+	(60, 32, '2025-10-23', 2500.00, 1, '', '2025-05-01'),
+	(61, 32, '2025-10-23', 2500.00, 1, '', '2025-06-01'),
+	(62, 32, '2025-10-23', 2500.00, 1, '', '2025-07-01'),
+	(65, 22, '2025-10-23', 2500.00, 1, '', '2025-10-01'),
+	(66, 31, '2025-10-23', 2500.00, 1, '', '2025-09-01'),
+	(72, 9, '2025-10-23', 1500.00, 2, '', '2025-06-27'),
+	(73, 9, '2025-10-23', 1500.00, 2, '', '2025-07-01'),
+	(74, 9, '2025-10-23', 1500.00, 2, '', '2025-08-01'),
+	(75, 33, '2025-10-31', 2500.00, 1, '', '2025-10-01'),
+	(76, 25, '2025-10-31', 2500.00, 1, '', '2025-10-01'),
+	(77, 6, '2025-10-31', 2500.00, 1, '', '2025-10-01'),
+	(78, 7, '2025-11-03', 2500.00, 1, '', '2025-11-01'),
+	(79, 25, '2025-11-03', 2500.00, 1, '', '2025-11-01'),
+	(80, 27, '2025-11-03', 2500.00, 1, '', '2025-09-01'),
+	(81, 27, '2025-11-03', 2500.00, 1, '', '2025-10-01'),
+	(82, 5, '2025-11-03', 2500.00, 1, '', '2025-08-01'),
+	(83, 5, '2025-11-03', 2500.00, 1, '', '2025-09-01'),
+	(84, 5, '2025-11-03', 2500.00, 1, '', '2025-10-01'),
+	(85, 35, '2025-11-03', 2500.00, 1, '', '2025-10-01'),
+	(86, 18, '2025-11-14', 2500.00, 1, '', '2025-10-01'),
+	(87, 4, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(88, 5, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(89, 19, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(90, 20, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(91, 21, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(92, 22, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(93, 23, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(94, 30, '2025-11-30', 2500.00, 1, '', '2025-09-01'),
+	(95, 30, '2025-11-30', 2500.00, 1, '', '2025-10-01'),
+	(96, 30, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(97, 33, '2025-11-30', 2500.00, 1, '', '2025-11-01'),
+	(98, 6, '2025-11-30', 2500.00, 1, '', '2025-11-01');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.muscle_groups
+CREATE TABLE IF NOT EXISTS `muscle_groups` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `ikona` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `naziv` (`naziv`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `muscle_groups`
---
-
-CREATE TABLE `muscle_groups` (
-  `id` int(11) NOT NULL,
-  `naziv` varchar(255) NOT NULL,
-  `opis` text DEFAULT NULL,
-  `ikona` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `muscle_groups`
---
-
+-- Dumping data for table athlete_tracker.muscle_groups: ~13 rows (approximately)
 INSERT INTO `muscle_groups` (`id`, `naziv`, `opis`, `ikona`) VALUES
-(1, 'Grudi', 'Mišići grudnog koša.', 'URL_do_slike_grudi'),
-(2, 'Leđa', 'Mišići leđa, uključujući latisimuse i trapeziuse.', 'URL_do_slike_ledja'),
-(3, 'Ramena', 'Deltoidni mišići.', 'URL_do_slike_ramena'),
-(4, 'Biceps', 'Mišići prednje strane nadlaktice.', 'URL_do_slike_bicepsa'),
-(5, 'Triceps', 'Mišići zadnje strane nadlaktice.', 'URL_do_slike_tricepsa'),
-(6, 'Podlaktice', 'Mišići podlaktice.', 'URL_do_slike_podlaktica'),
-(7, 'Kvadriceps', 'Mišići prednje strane butine.', 'URL_do_slike_kvadricepsa'),
-(8, 'Zadnja loža', 'Mišići zadnje strane butine.', 'URL_do_slike_zadnje_loze'),
-(9, 'Gluteus', 'Mišići zadnjice.', 'URL_do_slike_gluteusa'),
-(10, 'Listovi', 'Mišići potkolenice.', 'URL_do_slike_listova'),
-(11, 'Core', 'Mišići trupa.', 'URL_do_slike_cora');
+	(1, 'Grudi', 'Mišići grudnog koša.', '/uploads/muscle-groups/1.jpg'),
+	(2, 'Leđa', 'Mišići leđa, uključujući latisimuse i trapeziuse.', '/uploads/muscle-groups/2.jpg'),
+	(3, 'Ramena', 'Deltoidni mišići.', '/uploads/muscle-groups/3.jpg'),
+	(4, 'Biceps', 'Mišići prednje strane nadlaktice.', '/uploads/muscle-groups/4.jpg'),
+	(5, 'Triceps', 'Mišići zadnje strane nadlaktice.', '/uploads/muscle-groups/5.jpg'),
+	(6, 'Podlaktice', 'Mišići podlaktice.', '/uploads/muscle-groups/6.jpg'),
+	(7, 'Kvadriceps', 'Mišići prednje strane butine.', '/uploads/muscle-groups/7.jpg'),
+	(8, 'Zadnja loža', 'Mišići zadnje strane butine.', '/uploads/muscle-groups/8.jpg'),
+	(9, 'Gluteus', 'Mišići zadnjice.', '/uploads/muscle-groups/9.jpg'),
+	(10, 'Listovi', 'Mišići potkolenice.', '/uploads/muscle-groups/10.jpg'),
+	(11, 'Core', 'Mišići trupa.', '/uploads/muscle-groups/11.jpg'),
+	(12, 'Aduktori', 'Unutrašnja strana butine – mišići adductor longus, brevis i magnus.', '/uploads/muscle-groups/12.jpg'),
+	(13, 'Abduktori', 'Spoljašnja strana butine – gluteus medius, minimus i tensor fasciae latae.', '/uploads/muscle-groups/13.jpg');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.muscle_sub_groups
+CREATE TABLE IF NOT EXISTS `muscle_sub_groups` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `muscle_group_id` int NOT NULL,
+  `naziv` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  PRIMARY KEY (`id`),
+  KEY `muscle_group_id` (`muscle_group_id`),
+  CONSTRAINT `muscle_sub_groups_ibfk_1` FOREIGN KEY (`muscle_group_id`) REFERENCES `muscle_groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
---
--- Table structure for table `napredne_mere`
---
+-- Dumping data for table athlete_tracker.muscle_sub_groups: ~36 rows (approximately)
+INSERT INTO `muscle_sub_groups` (`id`, `muscle_group_id`, `naziv`, `opis`) VALUES
+	(1, 1, 'Pectoralis major', 'Veliki grudni mišić – gornji, srednji i donji deo.'),
+	(2, 1, 'Pectoralis minor', 'Mali grudni mišić, ispod pectoralis majora.'),
+	(3, 2, 'Latissimus dorsi', 'Široki leđni mišić, ključan za povlačenja i veslanja.'),
+	(4, 2, 'Trapezius', 'Mišić gornjeg dela leđa i vrata, važan za stabilizaciju ramena.'),
+	(5, 2, 'Rhomboidei', 'Mišići između lopatica, povlače lopatice ka kičmi.'),
+	(6, 2, 'Donja leđa (Erector spinae)', 'Duboki mišići leđa, ključni za ekstenziju kičme.'),
+	(7, 3, 'Deltoid – prednji', 'Prednji deo ramena, aktivan kod potisaka.'),
+	(8, 3, 'Deltoid – srednji', 'Srednji deo ramena, ključan za lateralne podizaje.'),
+	(9, 3, 'Deltoid – zadnji', 'Zadnji deo ramena, aktivan kod veslanja i povlačenja.'),
+	(10, 3, 'Rotatorna manžetna', 'Grupa mišića (supraspinatus, infraspinatus, teres minor, subscapularis) za stabilizaciju ramena.'),
+	(11, 4, 'Biceps brachii', 'Glavni mišić prednje strane nadlaktice.'),
+	(12, 4, 'Brachialis', 'Dublji mišić ispod bicepsa, pomaže pri savijanju lakta.'),
+	(13, 5, 'Triceps brachii', 'Glavni mišić zadnje strane nadlaktice.'),
+	(14, 6, 'Flexori podlaktice', 'Mišići odgovorni za savijanje šake i prstiju.'),
+	(15, 6, 'Extensori podlaktice', 'Mišići odgovorni za opružanje šake i prstiju.'),
+	(16, 7, 'Rectus femoris', 'Centralni deo kvadricepsa, aktivan kod ekstenzije kolena.'),
+	(17, 7, 'Vastus lateralis', 'Spoljašnji deo kvadricepsa.'),
+	(18, 7, 'Vastus medialis', 'Unutrašnji deo kvadricepsa, važan za stabilizaciju kolena.'),
+	(19, 7, 'Vastus intermedius', 'Dublji deo kvadricepsa, ispod rectus femorisa.'),
+	(20, 8, 'Biceps femoris', 'Glavni mišić zadnje lože.'),
+	(21, 8, 'Semitendinosus', 'Mišić zadnje lože, važan za fleksiju kolena.'),
+	(22, 8, 'Semimembranosus', 'Mišić zadnje lože, važan za ekstenziju kuka.'),
+	(23, 9, 'Gluteus maximus', 'Najveći mišić zadnjice, ključan za potiske kukova.'),
+	(24, 9, 'Gluteus medius', 'Manji glutealni mišić, važan za stabilizaciju i abdukciju.'),
+	(25, 9, 'Gluteus minimus', 'Najmanji glutealni mišić, pomaže pri abdukciji.'),
+	(26, 10, 'Gastrocnemius', 'Površinski mišić lista, aktivan kod skokova i trčanja.'),
+	(27, 10, 'Soleus', 'Dublji mišić lista, važan za stabilizaciju i hod.'),
+	(28, 11, 'Rectus abdominis', 'Prednji trbušni mišić – “six pack”.'),
+	(29, 11, 'Obliques', 'Bočni trbušni mišići – rotacija i stabilizacija.'),
+	(30, 11, 'Transversus abdominis', 'Duboki trbušni mišić, ključan za stabilizaciju.'),
+	(34, 12, 'Adductor longus', 'Dugi aduktor butine.'),
+	(35, 12, 'Adductor brevis', 'Kratki aduktor butine.'),
+	(36, 12, 'Adductor magnus', 'Najveći aduktor butine.'),
+	(37, 13, 'Gluteus medius', 'Spoljašnji glutealni mišić, važan za abdukciju.'),
+	(38, 13, 'Gluteus minimus', 'Manji glutealni mišić, pomaže pri abdukciji.'),
+	(39, 13, 'Tensor fasciae latae', 'Mišić spoljašnje strane butine, važan za stabilizaciju i abdukciju.');
 
-CREATE TABLE `napredne_mere` (
-  `id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
+-- Dumping structure for table athlete_tracker.napredne_mere
+CREATE TABLE IF NOT EXISTS `napredne_mere` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `athlete_id` int NOT NULL,
   `datum_merenja` date NOT NULL,
   `body_fat_percent` decimal(5,2) DEFAULT NULL,
   `lean_mass_kg` decimal(5,2) DEFAULT NULL,
   `bmr` decimal(6,2) DEFAULT NULL,
-  `vo2_max` decimal(5,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `vo2_max` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `athlete_id` (`athlete_id`),
+  CONSTRAINT `napredne_mere_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `napredne_mere`
---
+-- Dumping data for table athlete_tracker.napredne_mere: ~0 rows (approximately)
 
-INSERT INTO `napredne_mere` (`id`, `athlete_id`, `datum_merenja`, `body_fat_percent`, `lean_mass_kg`, `bmr`, `vo2_max`) VALUES
-(1, 2, '2025-08-30', NULL, NULL, NULL, NULL),
-(2, 3, '2025-08-30', NULL, NULL, NULL, NULL),
-(3, 2, '2025-08-20', NULL, NULL, NULL, NULL),
-(4, 2, '2025-08-31', 21.40, NULL, NULL, NULL);
+-- Dumping structure for table athlete_tracker.programs
+CREATE TABLE IF NOT EXISTS `programs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `opis` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `kreirao_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `naziv` (`naziv`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `programs`
---
-
-CREATE TABLE `programs` (
-  `id` int(11) NOT NULL,
-  `naziv` varchar(255) NOT NULL,
-  `opis` text DEFAULT NULL,
-  `kreirao_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `programs`
---
-
+-- Dumping data for table athlete_tracker.programs: ~3 rows (approximately)
 INSERT INTO `programs` (`id`, `naziv`, `opis`, `kreirao_id`) VALUES
-(4, 'Test 1', 'proba', 1),
-(5, 'Test 2', 'Testiranje unosa programa', 1);
+	(4, 'Test 1', 'proba', 1),
+	(6, 'Zimske pripreme - mali takmičari', 'Plan treninga obuhvata period od jednog mikrociklusa.', 6),
+	(7, 'Test program', 'test', 6);
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.program_athlete_assignments
+CREATE TABLE IF NOT EXISTS `program_athlete_assignments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `program_id` int NOT NULL,
+  `athlete_id` int NOT NULL,
+  `assigned_by_user_id` int NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `program_id` (`program_id`),
+  KEY `athlete_id` (`athlete_id`),
+  KEY `assigned_by_user_id` (`assigned_by_user_id`),
+  CONSTRAINT `program_athlete_assignments_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `program_athlete_assignments_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `program_athlete_assignments_ibfk_3` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `program_athlete_assignments`
---
+-- Dumping data for table athlete_tracker.program_athlete_assignments: ~0 rows (approximately)
 
-CREATE TABLE `program_athlete_assignments` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
-  `assigned_by_user_id` int(11) NOT NULL,
-  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+-- Dumping structure for table athlete_tracker.program_group_assignments
+CREATE TABLE IF NOT EXISTS `program_group_assignments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `program_id` int NOT NULL,
+  `group_id` int NOT NULL,
+  `assigned_by_user_id` int NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `program_id` (`program_id`),
+  KEY `group_id` (`group_id`),
+  KEY `assigned_by_user_id` (`assigned_by_user_id`),
+  CONSTRAINT `program_group_assignments_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `program_group_assignments_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `program_group_assignments_ibfk_3` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `program_athlete_assignments`
---
+-- Dumping data for table athlete_tracker.program_group_assignments: ~0 rows (approximately)
 
-INSERT INTO `program_athlete_assignments` (`id`, `program_id`, `athlete_id`, `assigned_by_user_id`, `assigned_at`) VALUES
-(1, 4, 3, 1, '2025-08-17 21:13:32'),
-(2, 4, 2, 1, '2025-08-17 21:38:43');
+-- Dumping structure for table athlete_tracker.result_workout
+CREATE TABLE IF NOT EXISTS `result_workout` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `training_schedule_id` int DEFAULT NULL,
+  `training_id` int DEFAULT NULL,
+  `started_at` datetime DEFAULT NULL,
+  `finished_at` datetime DEFAULT NULL,
+  `rest_time` int DEFAULT '0' COMMENT 'Total rest time in seconds',
+  `user_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `training_schedule_id` (`training_schedule_id`),
+  KEY `training_id` (`training_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `result_workout_ibfk_1` FOREIGN KEY (`training_schedule_id`) REFERENCES `training_schedules` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `result_workout_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `trainings` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `result_workout_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
+-- Dumping data for table athlete_tracker.result_workout: ~0 rows (approximately)
 
---
--- Table structure for table `program_group_assignments`
---
+-- Dumping structure for table athlete_tracker.result_workout_exercise
+CREATE TABLE IF NOT EXISTS `result_workout_exercise` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `result_workout_id` int NOT NULL,
+  `training_exercise_id` int NOT NULL,
+  `set_number` int NOT NULL,
+  `working_time` int DEFAULT '0' COMMENT 'Time taken for the set in seconds',
+  `vreme` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
+  `tezina` decimal(10,2) DEFAULT NULL,
+  `ponavljanje` int DEFAULT NULL,
+  `duzina` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `result_workout_id` (`result_workout_id`),
+  KEY `training_exercise_id` (`training_exercise_id`),
+  CONSTRAINT `result_workout_exercise_ibfk_1` FOREIGN KEY (`result_workout_id`) REFERENCES `result_workout` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `result_workout_exercise_ibfk_2` FOREIGN KEY (`training_exercise_id`) REFERENCES `training_exercises` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
-CREATE TABLE `program_group_assignments` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL,
-  `assigned_by_user_id` int(11) NOT NULL,
-  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+-- Dumping data for table athlete_tracker.result_workout_exercise: ~0 rows (approximately)
 
---
--- Dumping data for table `program_group_assignments`
---
-
-INSERT INTO `program_group_assignments` (`id`, `program_id`, `group_id`, `assigned_by_user_id`, `assigned_at`) VALUES
-(4, 4, 2, 1, '2025-08-17 21:44:28'),
-(6, 4, 1, 1, '2025-08-17 21:45:15'),
-(7, 5, 1, 1, '2025-09-15 20:21:33');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tests`
---
-
-CREATE TABLE `tests` (
-  `id` int(11) NOT NULL,
-  `naziv` text NOT NULL,
+-- Dumping structure for table athlete_tracker.tests
+CREATE TABLE IF NOT EXISTS `tests` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   `datum` date NOT NULL,
-  `trener_id` int(11) DEFAULT NULL,
-  `napomena` text DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `trener_id` int DEFAULT NULL,
+  `napomena` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `trener_id` (`trener_id`),
+  CONSTRAINT `tests_ibfk_1` FOREIGN KEY (`trener_id`) REFERENCES `trainers` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
+-- Dumping data for table athlete_tracker.tests: ~5 rows (approximately)
+INSERT INTO `tests` (`id`, `naziv`, `datum`, `trener_id`, `napomena`, `created_at`) VALUES
+	(3, 'Kontrolno merenje 2x2000m veslanje', '2025-10-18', 6, 'Prvo kontrolno merenje na 2000m', '2025-11-14 18:51:17'),
+	(4, 'Kontrolno merenje 2x2000m veslanje', '2025-10-25', 6, '2. kontrolno merenje', '2025-11-14 18:59:38'),
+	(5, 'Kontrolno merenje 2x2000m', '2025-11-01', 6, NULL, '2025-11-20 09:37:59'),
+	(6, 'Kontrola Beograd 2 x 2000m', '2025-11-08', 6, NULL, '2025-11-20 10:05:40'),
+	(7, 'Kontrolno merenje - tegovi na 60"', '2025-11-19', 6, NULL, '2025-11-20 12:14:06');
 
---
--- Table structure for table `test_exercises`
---
+-- Dumping structure for table athlete_tracker.test_exercises
+CREATE TABLE IF NOT EXISTS `test_exercises` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `test_id` int NOT NULL,
+  `exercises_id` int NOT NULL,
+  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','vreme-tezina,ponavljanje','tezina-ponavljanje','ponavljanje','ponavljanje-max') CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `test_id` (`test_id`),
+  KEY `exercises_id` (`exercises_id`),
+  CONSTRAINT `test_exercises_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `test_exercises_ibfk_2` FOREIGN KEY (`exercises_id`) REFERENCES `exercises` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
-CREATE TABLE `test_exercises` (
-  `id` int(11) NOT NULL,
-  `test_id` int(11) NOT NULL,
-  `exercises_id` int(11) NOT NULL,
-  `vrsta_unosa` enum('tezina-vreme','duzina-vreme','vreme-duzina','vreme-ponavljanje','vreme-duzina,ponavljanje','vreme-tezina,ponavljanje','tezina-ponavljanje','ponavljanje','ponavljanje-max') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+-- Dumping data for table athlete_tracker.test_exercises: ~13 rows (approximately)
+INSERT INTO `test_exercises` (`id`, `test_id`, `exercises_id`, `vrsta_unosa`) VALUES
+	(10, 3, 5, 'duzina-vreme'),
+	(12, 5, 5, 'duzina-vreme'),
+	(13, 6, 5, 'duzina-vreme'),
+	(14, 6, 5, 'duzina-vreme'),
+	(16, 3, 5, 'duzina-vreme'),
+	(18, 5, 5, 'duzina-vreme'),
+	(19, 4, 5, 'duzina-vreme'),
+	(20, 4, 5, 'duzina-vreme'),
+	(24, 7, 13, 'vreme-ponavljanje'),
+	(25, 7, 28, 'vreme-ponavljanje'),
+	(26, 7, 26, 'vreme-ponavljanje'),
+	(27, 7, 2, 'vreme-tezina,ponavljanje'),
+	(28, 7, 31, 'vreme-ponavljanje');
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.test_results
+CREATE TABLE IF NOT EXISTS `test_results` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `athlete_id` int NOT NULL,
+  `test_exercises_id` int NOT NULL,
+  `napomena` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  PRIMARY KEY (`id`),
+  KEY `athlete_id` (`athlete_id`),
+  KEY `test_exercises_id` (`test_exercises_id`),
+  CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`),
+  CONSTRAINT `test_results_ibfk_2` FOREIGN KEY (`test_exercises_id`) REFERENCES `test_exercises` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=318 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `test_results`
---
+-- Dumping data for table athlete_tracker.test_results: ~180 rows (approximately)
+INSERT INTO `test_results` (`id`, `athlete_id`, `test_exercises_id`, `napomena`) VALUES
+	(57, 3, 10, 'prva kontrola'),
+	(58, 4, 10, 'prva kontrola'),
+	(60, 6, 10, 'prva kontrola'),
+	(61, 7, 10, 'prva kontrola'),
+	(62, 8, 10, 'prva kontrola'),
+	(65, 12, 10, 'prva kontrola'),
+	(66, 14, 10, 'prva kontrola'),
+	(69, 18, 10, 'prva kontrola'),
+	(72, 21, 10, 'prva kontrola'),
+	(73, 22, 10, 'prva kontrola'),
+	(76, 25, 10, 'prva kontrola'),
+	(77, 26, 10, 'prva kontrola'),
+	(79, 14, 12, 'Prva: 10\':46"\nDruga: 10\':56"\nokret na 500m'),
+	(80, 12, 12, 'Prva: 11\':30"\nDruga: 12\':20"\nokret na 500m'),
+	(81, 7, 12, 'Prva: 11\':05"\nDruga: nije startovao\nokret na 500m'),
+	(82, 8, 12, 'Prva: 11\':39"\nDruga: 11\':36"\nokret na 500m'),
+	(83, 3, 12, 'Prva: 17\':20"\nDruga: nije startovao\nokret na 500m'),
+	(84, 26, 12, 'Prva: 10\':40"\nDruga: 11\':05"\nokret na 500m'),
+	(85, 22, 12, 'Prva: 12\':34"\nDruga: 12\':46"\nokret na 500m'),
+	(86, 4, 12, 'Prva: 12\':59"\nDruga: 13\':16"\nokret na 500m'),
+	(87, 19, 12, 'Prva: 13\':06"\nDruga: 13\':35"\nokret na 500m'),
+	(88, 23, 12, 'Prva: 13\':10"\nDruga: 13\':22"\nokret na 500m'),
+	(90, 6, 12, 'prva kontrola'),
+	(91, 14, 13, 'prvo merenje'),
+	(92, 8, 13, 'prvo merenje'),
+	(93, 26, 13, 'prvo merenje'),
+	(94, 12, 13, 'prvo merenje'),
+	(95, 14, 14, 'drugo merenje \nprosek 2025g : 10\':10"\nprosek 2024g : 10\':43"'),
+	(96, 8, 14, 'drugo merenje\nprosek 2025 g : 10\':29"'),
+	(97, 26, 14, 'drugo merenje\nprosek 2025 g : 10\':00"'),
+	(98, 12, 14, 'drugo merenje \nprosek 2025g : 10\':19"\nprosek 2024g : 10\':45"'),
+	(121, 6, 16, 'druga kontrola'),
+	(122, 21, 16, 'druga kontrola'),
+	(123, 14, 16, 'druga kontrola'),
+	(124, 18, 16, 'druga kontrola - nije veslao'),
+	(125, 12, 16, 'druga kontrola'),
+	(126, 7, 16, 'druga kontrola'),
+	(127, 8, 16, 'druga kontrola'),
+	(129, 3, 16, 'druga kontrola'),
+	(131, 4, 16, 'druga kontrola'),
+	(134, 26, 16, 'druga kontrola'),
+	(138, 25, 16, 'druga kontrola'),
+	(140, 22, 16, 'druga kontrola'),
+	(145, 9, 12, NULL),
+	(146, 6, 18, 'druga kontrola'),
+	(147, 14, 18, NULL),
+	(148, 12, 18, NULL),
+	(149, 7, 18, NULL),
+	(150, 8, 18, NULL),
+	(151, 3, 18, NULL),
+	(152, 4, 18, NULL),
+	(153, 26, 18, NULL),
+	(154, 23, 18, NULL),
+	(155, 22, 18, NULL),
+	(156, 19, 18, NULL),
+	(157, 9, 18, NULL),
+	(158, 6, 19, 'prva kontrola'),
+	(159, 21, 19, 'prva kontrola'),
+	(160, 14, 19, 'prva kontrola'),
+	(161, 18, 19, 'prva kontrola'),
+	(162, 12, 19, 'prva kontrola'),
+	(163, 7, 19, 'prva kontrola'),
+	(164, 3, 19, 'prva kontrola'),
+	(165, 19, 19, 'prva kontrola'),
+	(166, 26, 19, 'prva kontrola'),
+	(167, 23, 19, 'prva kontrola'),
+	(168, 22, 19, 'prva kontrola'),
+	(169, 27, 19, 'prva kontrola'),
+	(170, 6, 20, 'druga kontrola'),
+	(171, 21, 20, 'nisu išli mali'),
+	(172, 14, 20, 'druga kontrola'),
+	(173, 18, 20, 'nisu išli mali'),
+	(174, 12, 20, 'druga kontrola'),
+	(175, 7, 20, 'druga kontrola'),
+	(176, 3, 20, 'nisu išli mali'),
+	(177, 19, 20, 'nisu išli mali'),
+	(178, 26, 20, 'druga kontrola'),
+	(179, 23, 20, 'nisu išli mali'),
+	(180, 22, 20, 'nisu išli mali'),
+	(181, 27, 20, 'nisu išli mali'),
+	(183, 21, 24, ''),
+	(184, 14, 24, ''),
+	(186, 21, 25, 'mali nisu radili'),
+	(187, 14, 25, ''),
+	(189, 21, 26, ''),
+	(190, 14, 26, 'veliki rade zgibove'),
+	(192, 21, 27, ''),
+	(193, 14, 27, ''),
+	(194, 12, 24, ''),
+	(195, 12, 25, ''),
+	(196, 12, 26, 'veliki rade zgibove'),
+	(197, 12, 27, ''),
+	(199, 19, 24, ''),
+	(201, 19, 25, ''),
+	(203, 19, 26, ''),
+	(205, 19, 27, ''),
+	(206, 3, 24, ''),
+	(207, 5, 24, ''),
+	(209, 7, 24, ''),
+	(210, 8, 24, ''),
+	(211, 9, 24, ''),
+	(216, 20, 24, ''),
+	(217, 22, 24, ''),
+	(218, 23, 24, ''),
+	(220, 25, 24, ''),
+	(221, 26, 24, ''),
+	(222, 27, 24, ''),
+	(223, 3, 25, 'mali rade sklekove'),
+	(224, 5, 25, ''),
+	(226, 7, 25, ''),
+	(227, 8, 25, ''),
+	(228, 9, 25, ''),
+	(233, 20, 25, 'mali rade sklekove'),
+	(234, 22, 25, ''),
+	(235, 23, 25, ''),
+	(237, 25, 25, ''),
+	(238, 26, 25, ''),
+	(239, 27, 25, ''),
+	(240, 3, 26, ''),
+	(241, 5, 26, ''),
+	(243, 7, 26, ''),
+	(244, 8, 26, ''),
+	(245, 9, 26, ''),
+	(250, 20, 26, ''),
+	(251, 22, 26, ''),
+	(252, 23, 26, ''),
+	(254, 25, 26, ''),
+	(255, 26, 26, ''),
+	(256, 27, 26, ''),
+	(257, 3, 27, ''),
+	(258, 5, 27, ''),
+	(260, 7, 27, ''),
+	(261, 8, 27, ''),
+	(262, 9, 27, ''),
+	(267, 20, 27, ''),
+	(268, 22, 27, ''),
+	(269, 23, 27, ''),
+	(271, 25, 27, ''),
+	(272, 26, 27, ''),
+	(273, 27, 27, ''),
+	(274, 34, 24, ''),
+	(275, 11, 24, ''),
+	(277, 28, 24, ''),
+	(278, 33, 24, ''),
+	(279, 35, 24, ''),
+	(280, 34, 25, ''),
+	(281, 11, 25, 'nije mogao ni jedan uradti'),
+	(283, 28, 25, ''),
+	(284, 33, 25, ''),
+	(285, 35, 25, ''),
+	(286, 34, 26, ''),
+	(287, 11, 26, 'veliki radili zgibove'),
+	(289, 28, 26, ''),
+	(290, 33, 26, ''),
+	(291, 35, 26, ''),
+	(292, 34, 27, ''),
+	(293, 11, 27, ''),
+	(295, 28, 27, ''),
+	(296, 33, 27, ''),
+	(297, 35, 27, ''),
+	(298, 21, 28, ''),
+	(299, 14, 28, ''),
+	(300, 12, 28, ''),
+	(301, 7, 28, ''),
+	(302, 8, 28, ''),
+	(303, 9, 28, ''),
+	(304, 3, 28, ''),
+	(305, 34, 28, ''),
+	(306, 20, 28, ''),
+	(307, 11, 28, ''),
+	(308, 28, 28, ''),
+	(309, 19, 28, ''),
+	(310, 33, 28, ''),
+	(311, 26, 28, ''),
+	(312, 23, 28, ''),
+	(313, 5, 28, ''),
+	(314, 35, 28, ''),
+	(315, 25, 28, ''),
+	(316, 22, 28, ''),
+	(317, 27, 28, '');
 
-CREATE TABLE `test_results` (
-  `id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
-  `test_exercises_id` int(11) NOT NULL,
-  `napomena` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+-- Dumping structure for table athlete_tracker.test_results_values
+CREATE TABLE IF NOT EXISTS `test_results_values` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `test_result_id` int NOT NULL,
+  `vrsta_rezultata_1` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `rezultat_1` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `jedinica_mere_1` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `vrsta_rezultata_2` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `rezultat_2` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `jedinica_mere_2` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `vrsta_rezultata_3` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `rezultat_3` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `jedinica_mere_3` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `test_result_id` (`test_result_id`),
+  CONSTRAINT `test_results_values_ibfk_1` FOREIGN KEY (`test_result_id`) REFERENCES `test_results` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=354 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
+-- Dumping data for table athlete_tracker.test_results_values: ~168 rows (approximately)
+INSERT INTO `test_results_values` (`id`, `test_result_id`, `vrsta_rezultata_1`, `rezultat_1`, `jedinica_mere_1`, `vrsta_rezultata_2`, `rezultat_2`, `jedinica_mere_2`, `vrsta_rezultata_3`, `rezultat_3`, `jedinica_mere_3`, `timestamp`) VALUES
+	(15, 79, 'duzina', '2000', 'm', 'vreme', '10:46', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:42:03'),
+	(16, 80, 'duzina', '2000', 'm', 'vreme', '11:30', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:43:38'),
+	(17, 81, 'duzina', '2000', 'm', 'vreme', '11:05', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:44:13'),
+	(18, 82, 'duzina', '2000', 'm', 'vreme', '11:36', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:45:10'),
+	(20, 83, 'duzina', '2000', 'm', 'vreme', '17:20', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:46:44'),
+	(21, 86, 'duzina', '2000', 'm', 'vreme', '12:59', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:47:27'),
+	(22, 87, 'duzina', '2000', 'm', 'vreme', '13:06', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:48:14'),
+	(23, 84, 'duzina', '2000', 'm', 'vreme', '10:40', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:48:49'),
+	(24, 88, 'duzina', '2000', 'm', 'vreme', '13:10', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:49:20'),
+	(25, 85, 'duzina', '2000', 'm', 'vreme', '12:34', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:50:03'),
+	(26, 91, 'duzina', '2000', 'm', 'vreme', '10:03', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:23:03'),
+	(28, 94, 'duzina', '2000', 'm', 'vreme', '10:14', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:24:29'),
+	(29, 98, 'duzina', '2000', 'm', 'vreme', '10:24', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:27:03'),
+	(30, 95, 'duzina', '2000', 'm', 'vreme', '10:17', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:23:44'),
+	(31, 96, 'duzina', '2000', 'm', 'vreme', '10:34', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:28:14'),
+	(32, 92, 'duzina', '2000', 'm', 'vreme', '10:24', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:28:15'),
+	(33, 97, 'duzina', '2000', 'm', 'vreme', '09:57', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:28:59'),
+	(34, 93, 'duzina', '2000', 'm', 'vreme', '10:04', 'mm:ss', NULL, NULL, NULL, '2025-11-20 09:29:01'),
+	(35, 60, 'duzina', '2000', 'm', 'vreme', '12:00', 'mm:ss', NULL, NULL, NULL, '2025-11-14 18:02:00'),
+	(36, 121, 'duzina', '2000', 'm', 'vreme', '12:27', 'mm:ss', NULL, NULL, NULL, '2025-11-20 10:54:55'),
+	(37, 72, 'duzina', '2000', 'm', 'vreme', '14:34', 'mm:ss', NULL, NULL, NULL, '2025-11-14 18:06:50'),
+	(38, 122, 'duzina', '2000', 'm', 'vreme', '15:05', 'mm:ss', NULL, NULL, NULL, '2025-11-20 10:55:36'),
+	(39, 66, 'duzina', '2000', 'm', 'vreme', '10:39', 'mm:ss', NULL, NULL, NULL, '2025-11-14 18:10:46'),
+	(40, 123, 'duzina', '2000', 'm', 'vreme', '11:15', 'mm:ss', NULL, NULL, NULL, '2025-11-20 10:56:09'),
+	(41, 69, 'duzina', '2000', 'm', 'vreme', '15:25', 'mm:ss', NULL, NULL, NULL, '2025-11-14 18:10:44'),
+	(59, 146, 'duzina', '12\':44"', 'm', 'vreme', '', 'mm:ss', NULL, NULL, NULL, '2025-11-20 11:36:24'),
+	(60, 90, 'duzina', '12\':20"', 'm', 'vreme', '', 'mm:ss', NULL, NULL, NULL, '2025-11-20 08:41:16'),
+	(85, 57, 'duzina', '2000', 'm', 'vreme', '14:58', 'mm:ss', '', '', '', '2025-11-20 11:08:06'),
+	(86, 126, 'duzina', '2000', 'm', 'vreme', '11:30', 'mm:ss', '', '', '', '2025-11-20 11:00:04'),
+	(87, 62, 'duzina', '2000', 'm', 'vreme', '10:59', 'mm:ss', '', '', '', '2025-11-20 11:00:39'),
+	(88, 127, 'duzina', '2000', 'm', 'vreme', '11:42', 'mm:ss', '', '', '', '2025-11-20 11:00:51'),
+	(89, 61, 'duzina', '2000', 'm', 'vreme', '10:30', 'mm:ss', '', '', '', '2025-11-20 10:59:50'),
+	(90, 125, 'duzina', '2000', 'm', 'vreme', '10:40', 'mm:ss', '', '', '', '2025-11-20 10:59:16'),
+	(91, 65, 'duzina', '2000', 'm', 'vreme', '10:55', 'mm:ss', '', '', '', '2025-11-20 10:58:41'),
+	(92, 124, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-20 10:58:38'),
+	(93, 140, 'duzina', '2000', 'm', 'vreme', '13:04', 'mm:ss', '', '', '', '2025-11-20 11:11:12'),
+	(94, 73, 'duzina', '2000', 'm', 'vreme', '12:48', 'mm:ss', '', '', '', '2025-11-20 11:11:00'),
+	(95, 138, 'duzina', '2000', 'm', 'vreme', '13:55', 'mm:ss', '', '', '', '2025-11-20 11:10:29'),
+	(96, 76, 'duzina', '2000', 'm', 'vreme', '13:30', 'mm:ss', '', '', '', '2025-11-20 11:10:16'),
+	(97, 134, 'duzina', '2000', 'm', 'vreme', '11:09', 'mm:ss', '', '', '', '2025-11-20 11:09:43'),
+	(98, 77, 'duzina', '2000', 'm', 'vreme', '10:32', 'mm:ss', '', '', '', '2025-11-20 11:09:34'),
+	(99, 131, 'duzina', '2000', 'm', 'vreme', '13:13', 'mm:ss', '', '', '', '2025-11-20 11:07:30'),
+	(100, 58, 'duzina', '2000', 'm', 'vreme', '12:58', 'mm:ss', '', '', '', '2025-11-20 11:07:12'),
+	(101, 129, 'duzina', '2000', 'm', 'vreme', '15:22', 'mm:ss', '', '', '', '2025-11-20 11:06:52'),
+	(102, 158, 'duzina', '2000', 'm', 'vreme', '12:15', 'mm:ss', '', '', '', '2025-11-21 11:46:58'),
+	(103, 170, 'duzina', '2000', 'm', 'vreme', '12:35', 'mm:ss', '', '', '', '2025-11-21 11:47:06'),
+	(104, 159, 'duzina', '2000', 'm', 'vreme', '14:35', 'mm:ss', '', '', '', '2025-11-21 11:48:31'),
+	(105, 171, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:48:39'),
+	(106, 160, 'duzina', '2000', 'm', 'vreme', '10:35', 'mm:ss', '', '', '', '2025-11-21 11:49:32'),
+	(107, 172, 'duzina', '2000', 'm', 'vreme', '10:32', 'mm:ss', '', '', '', '2025-11-21 11:49:50'),
+	(108, 161, 'duzina', '2000', 'm', 'vreme', '14:39', 'mm:ss', '', '', '', '2025-11-21 11:50:15'),
+	(109, 173, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:50:28'),
+	(110, 162, 'duzina', '2000', 'm', 'vreme', '10:37', 'mm:ss', '', '', '', '2025-11-21 11:50:59'),
+	(111, 174, 'duzina', '2000', 'm', 'vreme', '10:33', 'mm:ss', '', '', '', '2025-11-21 11:51:18'),
+	(112, 163, 'duzina', '2000', 'm', 'vreme', '11:08', 'mm:ss', '', '', '', '2025-11-21 11:51:55'),
+	(113, 175, 'duzina', '2000', 'm', 'vreme', '10:40', 'mm:ss', '', '', '', '2025-11-21 11:52:03'),
+	(114, 164, 'duzina', '2000', 'm', 'vreme', '14:40', 'mm:ss', '', '', '', '2025-11-21 11:52:46'),
+	(115, 176, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:52:50'),
+	(116, 165, 'duzina', '2000', 'm', 'vreme', '13:10', 'mm:ss', '', '', '', '2025-11-21 11:53:19'),
+	(117, 177, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:53:36'),
+	(118, 166, 'duzina', '2000', 'm', 'vreme', '10:30', 'mm:ss', '', '', '', '2025-11-21 11:54:03'),
+	(119, 178, 'duzina', '2000', 'm', 'vreme', '10:47', 'mm:ss', '', '', '', '2025-11-21 11:54:26'),
+	(120, 167, 'duzina', '2000', 'm', 'vreme', '13:25', 'mm:ss', '', '', '', '2025-11-21 11:55:01'),
+	(121, 179, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:55:13'),
+	(122, 168, 'duzina', '2000', 'm', 'vreme', '12:50', 'mm:ss', '', '', '', '2025-11-21 11:55:44'),
+	(123, 180, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:55:53'),
+	(124, 169, 'duzina', '2000', 'm', 'vreme', '15:01', 'mm:ss', '', '', '', '2025-11-21 11:57:01'),
+	(125, 181, 'duzina', '2000', 'm', 'vreme', '00:00', 'mm:ss', '', '', '', '2025-11-21 11:57:17'),
+	(242, 183, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '48', 'pon', '', '', '', '2025-11-22 15:09:05'),
+	(243, 189, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '9', 'pon', '', '', '', '2025-11-22 15:10:00'),
+	(244, 192, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '27', 'pon', '2025-11-22 15:10:00'),
+	(245, 184, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '55', 'pon', '', '', '', '2025-11-22 15:09:05'),
+	(246, 187, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '15', 'pon', '', '', '', '2025-11-22 15:10:00'),
+	(248, 193, 'vreme', '01:00', 'mm:ss', 'tezina', '30', 'kg', 'ponavljanje', '42', 'pon', '2025-11-22 15:10:00'),
+	(249, 194, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '45', 'pon', '', '', '', '2025-11-24 17:51:34'),
+	(250, 195, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '16', 'pon', '', '', '', '2025-11-24 17:51:34'),
+	(253, 197, 'vreme', '01:00', 'mm:ss', 'tezina', '35', 'kg', 'ponavljanje', '30', 'pon', '2025-11-24 17:51:34'),
+	(254, 209, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '43', 'pon', '', '', '', '2025-11-24 18:09:39'),
+	(255, 226, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '3', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(257, 260, 'vreme', '01:00', 'mm:ss', 'tezina', '40', 'kg', 'ponavljanje', '41', 'pon', '2025-11-24 18:09:40'),
+	(258, 210, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '45', 'pon', '', '', '', '2025-11-24 18:09:39'),
+	(259, 227, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '6', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(260, 261, 'vreme', '01:00', 'mm:ss', 'tezina', '30', 'kg', 'ponavljanje', '30', 'pon', '2025-11-24 18:09:40'),
+	(262, 211, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '31', 'pon', '', '', '', '2025-11-24 18:09:39'),
+	(264, 245, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '26', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(265, 262, 'vreme', '01:00', 'mm:ss', 'tezina', '10', 'kg', 'ponavljanje', '69', 'pon', '2025-11-24 18:09:40'),
+	(266, 206, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '37', 'pon', '', '', '', '2025-11-24 18:09:39'),
+	(268, 240, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '34', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(269, 257, 'vreme', '01:00', 'mm:ss', 'tezina', '10', 'kg', 'ponavljanje', '53', 'pon', '2025-11-24 18:09:40'),
+	(270, 274, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '19', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(272, 286, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '9', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(273, 292, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '25', 'pon', '2025-11-24 18:13:24'),
+	(274, 216, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '30', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(276, 250, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '20', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(277, 267, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '46', 'pon', '2025-11-24 18:09:40'),
+	(279, 275, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '42', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(281, 287, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(282, 233, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(283, 186, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-22 15:10:00'),
+	(284, 280, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(285, 223, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(286, 228, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(287, 293, 'vreme', '01:00', 'mm:ss', 'tezina', '35', 'kg', 'ponavljanje', '21', 'pon', '2025-11-24 18:13:24'),
+	(288, 277, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '19', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(289, 283, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(290, 289, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '13', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(291, 295, 'vreme', '01:00', 'mm:ss', 'tezina', '7,5', 'kg', 'ponavljanje', '40', 'pon', '2025-11-24 18:13:24'),
+	(292, 199, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '34', 'pon', '', '', '', '2025-11-24 17:51:56'),
+	(293, 201, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 17:51:56'),
+	(294, 203, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '30', 'pon', '', '', '', '2025-11-24 17:51:56'),
+	(295, 205, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '48', 'pon', '2025-11-24 17:51:56'),
+	(296, 278, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '40', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(297, 284, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '6', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(298, 290, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(299, 296, 'vreme', '01:00', 'mm:ss', 'tezina', '35', 'kg', 'ponavljanje', '30', 'pon', '2025-11-24 18:13:24'),
+	(300, 221, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '49', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(301, 238, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '22', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(302, 255, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(303, 272, 'vreme', '01:00', 'mm:ss', 'tezina', '40', 'kg', 'ponavljanje', '35', 'pon', '2025-11-24 18:09:40'),
+	(304, 218, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '46', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(305, 235, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(306, 252, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '45', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(307, 269, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '25', 'pon', '2025-11-24 18:09:40'),
+	(308, 207, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '31', 'pon', '', '', '', '2025-11-24 18:09:39'),
+	(309, 224, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(310, 241, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '37', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(311, 258, 'vreme', '01:00', 'mm:ss', 'tezina', '10', 'kg', 'ponavljanje', '48', 'pon', '2025-11-24 18:09:40'),
+	(312, 279, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '22', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(313, 285, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(314, 291, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '17', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(315, 297, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '29', 'pon', '2025-11-24 18:13:24'),
+	(316, 220, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '27', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(317, 237, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(318, 254, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '17', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(319, 271, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '34', 'pon', '2025-11-24 18:09:40'),
+	(320, 217, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '41', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(321, 234, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(322, 251, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '34', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(323, 268, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '63', 'pon', '2025-11-24 18:09:40'),
+	(324, 222, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '32', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(325, 239, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(326, 256, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '21', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(327, 273, 'vreme', '01:00', 'mm:ss', 'tezina', '15', 'kg', 'ponavljanje', '46', 'pon', '2025-11-24 18:09:40'),
+	(328, 244, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(329, 190, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-22 15:10:00'),
+	(330, 196, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 17:51:34'),
+	(331, 243, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '-', 'pon', '', '', '', '2025-11-24 18:09:40'),
+	(333, 281, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '0', 'pon', '', '', '', '2025-11-24 18:13:24'),
+	(334, 298, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '39', 'pon', '', '', '', '2025-11-25 11:23:30'),
+	(335, 299, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '50', 'pon', '', '', '', '2025-11-25 11:24:22'),
+	(336, 300, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '51', 'pon', '', '', '', '2025-11-25 11:24:42'),
+	(337, 301, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '33', 'pon', '', '', '', '2025-11-25 11:25:08'),
+	(338, 302, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '49', 'pon', '', '', '', '2025-11-25 11:25:27'),
+	(339, 303, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '59', 'pon', '', '', '', '2025-11-25 11:25:53'),
+	(340, 304, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '50', 'pon', '', '', '', '2025-11-25 11:26:15'),
+	(341, 305, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '22', 'pon', '', '', '', '2025-11-25 11:26:35'),
+	(342, 307, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '35', 'pon', '', '', '', '2025-11-25 11:27:19'),
+	(343, 308, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '35', 'pon', '', '', '', '2025-11-25 11:27:43'),
+	(344, 309, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '39', 'pon', '', '', '', '2025-11-25 11:28:11'),
+	(345, 310, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '49', 'pon', '', '', '', '2025-11-25 11:28:40'),
+	(346, 311, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '47', 'pon', '', '', '', '2025-11-25 11:29:00'),
+	(347, 312, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '44', 'pon', '', '', '', '2025-11-25 11:29:18'),
+	(348, 313, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '57', 'pon', '', '', '', '2025-11-25 11:29:49'),
+	(349, 314, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '33', 'pon', '', '', '', '2025-11-25 11:30:13'),
+	(350, 315, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '51', 'pon', '', '', '', '2025-11-25 11:30:33'),
+	(351, 316, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '64', 'pon', '', '', '', '2025-11-25 11:31:07'),
+	(352, 317, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '47', 'pon', '', '', '', '2025-11-25 11:31:35'),
+	(353, 306, 'vreme', '01:00', 'mm:ss', 'ponavljanje', '42', 'pon', '', '', '', '2025-11-25 11:32:24');
 
---
--- Table structure for table `test_results_values`
---
-
-CREATE TABLE `test_results_values` (
-  `id` int(11) NOT NULL,
-  `test_result_id` int(11) NOT NULL,
-  `vrsta_rezultata_1` varchar(50) DEFAULT NULL,
-  `rezultat_1` varchar(50) DEFAULT NULL,
-  `jedinica_mere_1` varchar(20) DEFAULT NULL,
-  `vrsta_rezultata_2` varchar(50) NOT NULL,
-  `rezultat_2` varchar(50) NOT NULL,
-  `jedinica_mere_2` varchar(20) NOT NULL,
-  `vrsta_rezultata_3` varchar(50) NOT NULL,
-  `rezultat_3` varchar(50) NOT NULL,
-  `jedinica_mere_3` varchar(20) NOT NULL,
-  `timestamp` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `trainers`
---
-
-CREATE TABLE `trainers` (
-  `id` int(11) NOT NULL,
-  `ime` varchar(255) NOT NULL,
-  `prezime` varchar(255) NOT NULL,
+-- Dumping structure for table athlete_tracker.trainers
+CREATE TABLE IF NOT EXISTS `trainers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ime` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `prezime` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   `datum_rodenja` date DEFAULT NULL,
-  `adresa_stanovanja` varchar(255) DEFAULT NULL,
-  `mesto` varchar(255) DEFAULT NULL,
-  `telefon` varchar(50) DEFAULT NULL,
-  `mail` varchar(255) DEFAULT NULL,
-  `broj_licence` varchar(255) DEFAULT NULL,
+  `adresa_stanovanja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `mesto` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `telefon` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `mail` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `broj_licence` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
   `datum_isticanja` date DEFAULT NULL,
-  `user_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `user_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `mail` (`mail`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `trainers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `trainers`
---
-
+-- Dumping data for table athlete_tracker.trainers: ~0 rows (approximately)
 INSERT INTO `trainers` (`id`, `ime`, `prezime`, `datum_rodenja`, `adresa_stanovanja`, `mesto`, `telefon`, `mail`, `broj_licence`, `datum_isticanja`, `user_id`) VALUES
-(4, 'Zoran', 'Kosanović', '1982-11-10', 'Banatska 2v', 'Sombor', '063468077', 'seekness@gmail.com', '1345-24', '2026-05-31', 1),
-(6, 'Antonija', 'Nađ Kosanović', '1986-06-07', 'Banatska 2v', 'Sombor', '062266522', NULL, '', '2025-10-10', 7);
+	(6, 'Antonija', 'Nađ Kosanović', '1986-05-08', 'Banatska 2v', 'Sombor', '062/266-522', 'nadjantonija@gmail.com', 'nn', '2025-12-31', 6);
 
--- --------------------------------------------------------
+-- Dumping structure for table athlete_tracker.trainings
+CREATE TABLE IF NOT EXISTS `trainings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `program_id` int NOT NULL,
+  `opis` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `predicted_duration_minutes` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `program_id` (`program_id`),
+  CONSTRAINT `trainings_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Table structure for table `trainings`
---
+-- Dumping data for table athlete_tracker.trainings: ~5 rows (approximately)
+INSERT INTO `trainings` (`id`, `program_id`, `opis`, `predicted_duration_minutes`) VALUES
+	(6, 4, 'Dan 1', 45),
+	(8, 6, 'Dan 1 - blok vežbe u parovima', 60),
+	(9, 6, 'Dan 2', 89),
+	(10, 7, 'Dan 1 test', 60),
+	(11, 6, 'Dan 6 - kružni trening', 75);
 
-CREATE TABLE `trainings` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `opis` text DEFAULT NULL,
+-- Dumping structure for table athlete_tracker.training_attendance
+CREATE TABLE IF NOT EXISTS `training_attendance` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `athlete_id` int NOT NULL,
+  `status` enum('prisutan','odsutan','opravdano') CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `date` date NOT NULL,
+  `napomena` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `training_schedule_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `athlete_id` (`athlete_id`),
+  KEY `training_schedule_id` (`training_schedule_id`),
+  CONSTRAINT `training_attendance_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `training_attendance_ibfk_3` FOREIGN KEY (`training_schedule_id`) REFERENCES `training_schedules` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+-- Dumping data for table athlete_tracker.training_attendance: ~0 rows (approximately)
+
+-- Dumping structure for table athlete_tracker.training_exercises
+CREATE TABLE IF NOT EXISTS `training_exercises` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `training_id` int NOT NULL,
+  `exercise_id` int NOT NULL,
+  `broj_serija` int DEFAULT NULL,
+  `tezina_kg` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `vreme_sekunde` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `duzina_metri` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `broj_ponavljanja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `rest_duration_seconds` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `jacina_izvodjenja` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `rest_after_exercise_seconds` int DEFAULT NULL,
+  `vrsta_unosa` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `superset` tinyint(1) DEFAULT '0',
+  `sort_order` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `training_id` (`training_id`),
+  KEY `exercise_id` (`exercise_id`),
+  CONSTRAINT `training_exercises_ibfk_1` FOREIGN KEY (`training_id`) REFERENCES `trainings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `training_exercises_ibfk_2` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+-- Dumping data for table athlete_tracker.training_exercises: ~28 rows (approximately)
+INSERT INTO `training_exercises` (`id`, `training_id`, `exercise_id`, `broj_serija`, `tezina_kg`, `vreme_sekunde`, `duzina_metri`, `broj_ponavljanja`, `rest_duration_seconds`, `jacina_izvodjenja`, `rest_after_exercise_seconds`, `vrsta_unosa`, `superset`, `sort_order`) VALUES
+	(30, 6, 2, 5, '80', '0', '0', '120', '60-60-60-60-60', '50-60-70-80-90', 120, 'težina_ponavljanja', 0, 0),
+	(31, 6, 2, 5, NULL, '60', NULL, NULL, '125', '80', 120, 'vreme', 0, 1),
+	(36, 8, 30, 1, NULL, '15min', NULL, NULL, NULL, NULL, NULL, 'vreme', 0, 0),
+	(37, 8, 33, 3, NULL, '45', NULL, NULL, '25', NULL, 25, 'vreme', 0, 1),
+	(38, 8, 13, 3, NULL, '45', NULL, NULL, '25', NULL, 120, 'vreme', 1, 2),
+	(39, 8, 34, 3, NULL, '45', NULL, NULL, '25', NULL, 25, 'vreme', 0, 3),
+	(40, 8, 42, 3, NULL, '45', NULL, NULL, '25', NULL, 120, 'vreme', 1, 4),
+	(41, 8, 50, 3, NULL, '45', NULL, NULL, '25', NULL, 25, 'vreme', 0, 5),
+	(42, 8, 53, 3, NULL, '45', NULL, NULL, '25', NULL, 120, 'vreme', 1, 6),
+	(43, 9, 16, 3, NULL, NULL, NULL, '30', NULL, NULL, 120, 'ponavljanja', 0, 0),
+	(44, 10, 16, 3, '', '30', '', '', '60', '', 120, 'vreme', 0, 0),
+	(45, 11, 30, 1, NULL, '15:00', NULL, NULL, NULL, NULL, 120, 'vreme', 0, 0),
+	(46, 11, 2, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 0, 2),
+	(47, 11, 24, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 3),
+	(48, 11, 50, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 4),
+	(49, 11, 90, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 5),
+	(51, 11, 23, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 6),
+	(53, 11, 35, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 9),
+	(54, 11, 26, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 10),
+	(55, 11, 52, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 12),
+	(56, 11, 45, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 13),
+	(57, 11, 125, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 14),
+	(58, 11, 87, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 15),
+	(59, 11, 89, 3, NULL, '50', NULL, NULL, '300', NULL, 300, 'vreme', 1, 16),
+	(60, 11, 138, 1, NULL, '20:00', NULL, NULL, NULL, NULL, 120, 'vreme', 0, 1),
+	(61, 11, 31, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 11),
+	(62, 11, 58, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 8),
+	(63, 11, 139, 3, NULL, '50', NULL, NULL, '25', NULL, 25, 'vreme', 1, 7);
+
+-- Dumping structure for table athlete_tracker.training_plans
+CREATE TABLE IF NOT EXISTS `training_plans` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `naziv` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `created_by` (`created_by`),
+  CONSTRAINT `training_plans_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+-- Dumping data for table athlete_tracker.training_plans: ~0 rows (approximately)
+INSERT INTO `training_plans` (`id`, `naziv`, `created_at`, `created_by`) VALUES
+	(1, 'Zimske pripreme - mali takmičari', '2025-12-01 00:39:10', 6);
+
+-- Dumping structure for table athlete_tracker.training_plan_athlete_assignments
+CREATE TABLE IF NOT EXISTS `training_plan_athlete_assignments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `training_plan_id` int NOT NULL,
+  `athlete_id` int NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_plan_athlete` (`training_plan_id`,`athlete_id`),
+  KEY `athlete_id` (`athlete_id`),
+  CONSTRAINT `training_plan_athlete_assignments_ibfk_1` FOREIGN KEY (`training_plan_id`) REFERENCES `training_plans` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `training_plan_athlete_assignments_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table athlete_tracker.training_plan_athlete_assignments: ~0 rows (approximately)
+
+-- Dumping structure for table athlete_tracker.training_plan_group_assignments
+CREATE TABLE IF NOT EXISTS `training_plan_group_assignments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `training_plan_id` int NOT NULL,
+  `group_id` int NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_plan_group` (`training_plan_id`,`group_id`),
+  KEY `group_id` (`group_id`),
+  CONSTRAINT `training_plan_group_assignments_ibfk_1` FOREIGN KEY (`training_plan_id`) REFERENCES `training_plans` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `training_plan_group_assignments_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table athlete_tracker.training_plan_group_assignments: ~0 rows (approximately)
+INSERT INTO `training_plan_group_assignments` (`id`, `training_plan_id`, `group_id`, `assigned_at`) VALUES
+	(4, 1, 2, '2025-12-01 17:28:54');
+
+-- Dumping structure for table athlete_tracker.training_schedules
+CREATE TABLE IF NOT EXISTS `training_schedules` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `training_id` int NOT NULL,
   `datum` date DEFAULT NULL,
   `vreme` time DEFAULT NULL,
-  `predicted_duration_minutes` int(11) DEFAULT NULL,
-  `location_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `location_id` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `training_plan_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `training_id` (`training_id`),
+  KEY `location_id` (`location_id`),
+  KEY `training_plan_id` (`training_plan_id`),
+  CONSTRAINT `training_schedules_ibfk_1` FOREIGN KEY (`training_id`) REFERENCES `trainings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `training_schedules_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `training_schedules_ibfk_3` FOREIGN KEY (`training_plan_id`) REFERENCES `training_plans` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Dumping data for table `trainings`
---
+-- Dumping data for table athlete_tracker.training_schedules: ~0 rows (approximately)
+INSERT INTO `training_schedules` (`id`, `training_id`, `datum`, `vreme`, `location_id`, `created_at`, `training_plan_id`) VALUES
+	(4, 11, '2025-12-01', '19:30:00', 3, '2025-12-01 17:28:54', 1);
 
-INSERT INTO `trainings` (`id`, `program_id`, `opis`, `datum`, `vreme`, `predicted_duration_minutes`, `location_id`) VALUES
-(6, 4, 'Dan 1', '2025-07-27', '04:20:00', 45, 2),
-(9, 5, 'Trening 1', '2025-09-14', '09:00:04', 90, 1),
-(10, 5, 'Veslanje', '2025-09-14', '16:00:00', 75, 1);
+-- Dumping structure for table athlete_tracker.users
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `display_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `role` enum('admin','trener','sportista','individual') CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `training_attendance`
---
-
-CREATE TABLE `training_attendance` (
-  `id` int(11) NOT NULL,
-  `training_id` int(11) NOT NULL,
-  `athlete_id` int(11) NOT NULL,
-  `status` enum('prisutan','odsutan','opravdano') NOT NULL,
-  `date` date NOT NULL,
-  `napomena` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `training_attendance`
---
-
-INSERT INTO `training_attendance` (`id`, `training_id`, `athlete_id`, `status`, `date`, `napomena`, `created_at`) VALUES
-(1, 6, 1, 'prisutan', '0000-00-00', '', '2025-08-24 10:57:55'),
-(2, 6, 2, 'prisutan', '0000-00-00', '', '2025-08-24 10:57:55'),
-(3, 6, 3, 'odsutan', '0000-00-00', '', '2025-08-24 10:57:55'),
-(4, 6, 4, 'odsutan', '0000-00-00', '', '2025-09-07 23:59:23');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `training_exercises`
---
-
-CREATE TABLE `training_exercises` (
-  `id` int(11) NOT NULL,
-  `training_id` int(11) NOT NULL,
-  `exercise_id` int(11) NOT NULL,
-  `broj_serija` int(11) DEFAULT NULL,
-  `tezina_kg` varchar(255) DEFAULT NULL,
-  `vreme_sekunde` varchar(255) DEFAULT NULL,
-  `duzina_metri` varchar(255) DEFAULT NULL,
-  `broj_ponavljanja` varchar(255) DEFAULT NULL,
-  `rest_duration_seconds` varchar(255) DEFAULT NULL,
-  `jacina_izvodjenja` varchar(255) DEFAULT NULL,
-  `rest_after_exercise_seconds` int(11) DEFAULT NULL,
-  `vrsta_unosa` varchar(50) DEFAULT NULL,
-  `superset` tinyint(1) DEFAULT 0,
-  `sort_order` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `training_exercises`
---
-
-INSERT INTO `training_exercises` (`id`, `training_id`, `exercise_id`, `broj_serija`, `tezina_kg`, `vreme_sekunde`, `duzina_metri`, `broj_ponavljanja`, `rest_duration_seconds`, `jacina_izvodjenja`, `rest_after_exercise_seconds`, `vrsta_unosa`, `superset`, `sort_order`) VALUES
-(30, 6, 2, 5, '80', '0', '0', '120', '60-60-60-60-60', '50-60-70-80-90', 120, 'težina_ponavljanja', 0, 0),
-(31, 6, 2, 5, NULL, '60', NULL, NULL, '125', '80-70-60-50-90', 120, 'vreme', 1, 1),
-(34, 6, 3, 3, NULL, '45', NULL, NULL, '75', NULL, 120, 'vreme', 0, 2),
-(35, 9, 2, 3, '40-50-60', '', '', '10', '90', '100', 120, 'težina_ponavljanja', 0, NULL),
-(36, 9, 3, 3, '50-60-70', '45', '', '', '60-75-90', '50-70-90', 120, 'težina_vreme', 0, NULL),
-(37, 10, 5, 2, NULL, '120', NULL, NULL, '60', '50-60', 120, 'vreme', 0, 0),
-(38, 10, 6, 3, NULL, '30', NULL, NULL, '0', '70', NULL, 'vreme', 0, 1),
-(39, 10, 6, 3, NULL, '90', NULL, NULL, '0', '80', NULL, 'vreme', 1, 2),
-(40, 10, 6, 3, NULL, '30', NULL, NULL, '120', '90', 240, 'vreme', 1, 3),
-(41, 10, 7, 4, NULL, '30', NULL, NULL, '40', '50-70-90-100', 180, 'vreme', 0, 4);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(255) DEFAULT NULL,
-  `display_name` varchar(255) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `users`
---
-
+-- Dumping data for table athlete_tracker.users: ~0 rows (approximately)
 INSERT INTO `users` (`id`, `username`, `display_name`, `password`, `role`) VALUES
-(1, 'trener', 'Zoran Kosanović', '$2b$10$8kC/eEzsQ5g2tjwMYuggAOINNjJZw99g1O14BsGJBtF/HtT4q0N1S', 'trener'),
-(2, 'sportista', 'Sportista Miner', '$2b$10$78bWMOQQQ3vC2Q/inFUyievf4BsWivmzNQ50uJt/6ye3WwLsnnUS2', 'sportista'),
-(3, 'amala', 'Mala Antonija', '$2b$10$87fP20csTk.sQEGrs1VVGODa8iCUJDLgJdvY1GAPF/9Trr5lskEjm', 'sportista'),
-(4, 'admin', 'ZK', '$2b$10$rR4bPwO7F8rbhxmRwW2rNeRmZMBKSHlHvd45Zey1MGAF0LQoS7Uvu', 'admin'),
-(7, 'antonija', 'Antonija Nađ Kosanović', '$2b$10$Xdu0bTK33VD3FJyx2zyHWOMMTSzhqoefwF6yhxtm/9gBon29WFU3q', 'trener'),
-(8, 'individual', 'Individual Test', '$2b$10$vPMcSmeOJDSF2YyGKdONN.YVJXgqh7KCWh.5CjMzKOZImAtff9atW', 'individual');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `athletes`
---
-ALTER TABLE `athletes`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id` (`user_id`),
-  ADD UNIQUE KEY `username` (`username`);
-
---
--- Indexes for table `coach_athlete_assignments`
---
-ALTER TABLE `coach_athlete_assignments`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `coach_id` (`coach_id`,`athlete_id`),
-  ADD KEY `athlete_id` (`athlete_id`);
-
---
--- Indexes for table `coach_group_assignments`
---
-ALTER TABLE `coach_group_assignments`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `coach_id` (`coach_id`,`group_id`),
-  ADD KEY `group_id` (`group_id`);
-
---
--- Indexes for table `exercises`
---
-ALTER TABLE `exercises`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `naziv` (`naziv`),
-  ADD KEY `muscle_group_id` (`muscle_group_id`),
-  ADD KEY `exercise_category_id` (`exercise_category_id`),
-  ADD KEY `other_muscle_group_id` (`other_muscle_group_id`);
-
---
--- Indexes for table `exercise_categories`
---
-ALTER TABLE `exercise_categories`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `naziv` (`naziv`);
-
---
--- Indexes for table `fizicke_mere`
---
-ALTER TABLE `fizicke_mere`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `athlete_id` (`athlete_id`);
-
---
--- Indexes for table `groups`
---
-ALTER TABLE `groups`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `naziv` (`naziv`);
-
---
--- Indexes for table `group_memberships`
---
-ALTER TABLE `group_memberships`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `group_id` (`group_id`,`athlete_id`),
-  ADD KEY `athlete_id` (`athlete_id`);
-
---
--- Indexes for table `individuals`
---
-ALTER TABLE `individuals`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
-
---
--- Indexes for table `locations`
---
-ALTER TABLE `locations`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `naziv` (`naziv`);
-
---
--- Indexes for table `membership_fees`
---
-ALTER TABLE `membership_fees`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `membership_payments`
---
-ALTER TABLE `membership_payments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_payment_athlete` (`athlete_id`);
-
---
--- Indexes for table `muscle_groups`
---
-ALTER TABLE `muscle_groups`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `naziv` (`naziv`);
-
---
--- Indexes for table `napredne_mere`
---
-ALTER TABLE `napredne_mere`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `athlete_id` (`athlete_id`);
-
---
--- Indexes for table `programs`
---
-ALTER TABLE `programs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `naziv` (`naziv`);
-
---
--- Indexes for table `program_athlete_assignments`
---
-ALTER TABLE `program_athlete_assignments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `program_id` (`program_id`),
-  ADD KEY `athlete_id` (`athlete_id`),
-  ADD KEY `assigned_by_user_id` (`assigned_by_user_id`);
-
---
--- Indexes for table `program_group_assignments`
---
-ALTER TABLE `program_group_assignments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `program_id` (`program_id`),
-  ADD KEY `group_id` (`group_id`),
-  ADD KEY `assigned_by_user_id` (`assigned_by_user_id`);
-
---
--- Indexes for table `tests`
---
-ALTER TABLE `tests`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `trener_id` (`trener_id`);
-
---
--- Indexes for table `test_exercises`
---
-ALTER TABLE `test_exercises`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `test_id` (`test_id`),
-  ADD KEY `exercises_id` (`exercises_id`);
-
---
--- Indexes for table `test_results`
---
-ALTER TABLE `test_results`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `athlete_id` (`athlete_id`),
-  ADD KEY `test_exercises_id` (`test_exercises_id`);
-
---
--- Indexes for table `test_results_values`
---
-ALTER TABLE `test_results_values`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `test_result_id` (`test_result_id`);
-
---
--- Indexes for table `trainers`
---
-ALTER TABLE `trainers`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `trainings`
---
-ALTER TABLE `trainings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `program_id` (`program_id`),
-  ADD KEY `location_id` (`location_id`);
-
---
--- Indexes for table `training_attendance`
---
-ALTER TABLE `training_attendance`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `training_id` (`training_id`,`athlete_id`),
-  ADD KEY `athlete_id` (`athlete_id`);
-
---
--- Indexes for table `training_exercises`
---
-ALTER TABLE `training_exercises`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `training_id` (`training_id`),
-  ADD KEY `exercise_id` (`exercise_id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `athletes`
---
-ALTER TABLE `athletes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `coach_athlete_assignments`
---
-ALTER TABLE `coach_athlete_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
-
---
--- AUTO_INCREMENT for table `coach_group_assignments`
---
-ALTER TABLE `coach_group_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `exercises`
---
-ALTER TABLE `exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `exercise_categories`
---
-ALTER TABLE `exercise_categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `fizicke_mere`
---
-ALTER TABLE `fizicke_mere`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `groups`
---
-ALTER TABLE `groups`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `group_memberships`
---
-ALTER TABLE `group_memberships`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
-
---
--- AUTO_INCREMENT for table `individuals`
---
-ALTER TABLE `individuals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `locations`
---
-ALTER TABLE `locations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `membership_fees`
---
-ALTER TABLE `membership_fees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `membership_payments`
---
-ALTER TABLE `membership_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
-
---
--- AUTO_INCREMENT for table `muscle_groups`
---
-ALTER TABLE `muscle_groups`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- AUTO_INCREMENT for table `napredne_mere`
---
-ALTER TABLE `napredne_mere`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `programs`
---
-ALTER TABLE `programs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `program_athlete_assignments`
---
-ALTER TABLE `program_athlete_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `program_group_assignments`
---
-ALTER TABLE `program_group_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `tests`
---
-ALTER TABLE `tests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `test_exercises`
---
-ALTER TABLE `test_exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `test_results`
---
-ALTER TABLE `test_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `test_results_values`
---
-ALTER TABLE `test_results_values`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `trainers`
---
-ALTER TABLE `trainers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `trainings`
---
-ALTER TABLE `trainings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `training_attendance`
---
-ALTER TABLE `training_attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `training_exercises`
---
-ALTER TABLE `training_exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `athletes`
---
-ALTER TABLE `athletes`
-  ADD CONSTRAINT `athletes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `coach_athlete_assignments`
---
-ALTER TABLE `coach_athlete_assignments`
-  ADD CONSTRAINT `coach_athlete_assignments_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_coach_trainer` FOREIGN KEY (`coach_id`) REFERENCES `trainers` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `coach_group_assignments`
---
-ALTER TABLE `coach_group_assignments`
-  ADD CONSTRAINT `coach_group_assignments_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_group_trainer` FOREIGN KEY (`coach_id`) REFERENCES `trainers` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `exercises`
---
-ALTER TABLE `exercises`
-  ADD CONSTRAINT `exercises_ibfk_1` FOREIGN KEY (`muscle_group_id`) REFERENCES `muscle_groups` (`id`),
-  ADD CONSTRAINT `exercises_ibfk_2` FOREIGN KEY (`exercise_category_id`) REFERENCES `exercise_categories` (`id`),
-  ADD CONSTRAINT `exercises_ibfk_3` FOREIGN KEY (`other_muscle_group_id`) REFERENCES `muscle_groups` (`id`);
-
---
--- Constraints for table `fizicke_mere`
---
-ALTER TABLE `fizicke_mere`
-  ADD CONSTRAINT `fizicke_mere_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `group_memberships`
---
-ALTER TABLE `group_memberships`
-  ADD CONSTRAINT `group_memberships_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `group_memberships_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `individuals`
---
-ALTER TABLE `individuals`
-  ADD CONSTRAINT `individuals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `membership_payments`
---
-ALTER TABLE `membership_payments`
-  ADD CONSTRAINT `fk_payment_athlete` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `napredne_mere`
---
-ALTER TABLE `napredne_mere`
-  ADD CONSTRAINT `napredne_mere_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `program_athlete_assignments`
---
-ALTER TABLE `program_athlete_assignments`
-  ADD CONSTRAINT `program_athlete_assignments_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `program_athlete_assignments_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `program_athlete_assignments_ibfk_3` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `program_group_assignments`
---
-ALTER TABLE `program_group_assignments`
-  ADD CONSTRAINT `program_group_assignments_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `program_group_assignments_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `program_group_assignments_ibfk_3` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `tests`
---
-ALTER TABLE `tests`
-  ADD CONSTRAINT `tests_ibfk_1` FOREIGN KEY (`trener_id`) REFERENCES `trainers` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `test_exercises`
---
-ALTER TABLE `test_exercises`
-  ADD CONSTRAINT `test_exercises_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `test_exercises_ibfk_2` FOREIGN KEY (`exercises_id`) REFERENCES `exercises` (`id`);
-
---
--- Constraints for table `test_results`
---
-ALTER TABLE `test_results`
-  ADD CONSTRAINT `test_results_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`),
-  ADD CONSTRAINT `test_results_ibfk_2` FOREIGN KEY (`test_exercises_id`) REFERENCES `test_exercises` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `test_results_values`
---
-ALTER TABLE `test_results_values`
-  ADD CONSTRAINT `test_results_values_ibfk_1` FOREIGN KEY (`test_result_id`) REFERENCES `test_results` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `trainers`
---
-ALTER TABLE `trainers`
-  ADD CONSTRAINT `trainers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `trainings`
---
-ALTER TABLE `trainings`
-  ADD CONSTRAINT `trainings_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `trainings_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `training_attendance`
---
-ALTER TABLE `training_attendance`
-  ADD CONSTRAINT `training_attendance_ibfk_1` FOREIGN KEY (`training_id`) REFERENCES `trainings` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `training_attendance_ibfk_2` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `training_exercises`
---
-ALTER TABLE `training_exercises`
-  ADD CONSTRAINT `training_exercises_ibfk_1` FOREIGN KEY (`training_id`) REFERENCES `trainings` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `training_exercises_ibfk_2` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE CASCADE;
-COMMIT;
-
+	(4, 'zoran', 'Zoran Kosanović', '$2b$10$rR4bPwO7F8rbhxmRwW2rNeRmZMBKSHlHvd45Zey1MGAF0LQoS7Uvu', 'admin'),
+	(6, 'antonija', 'Antonija Nađ Kosanović', '$2b$10$hf1PqkddobOb2pe6iA.dTet2AoCjZT/6QvE.D7z36Ppi12SPk3wU2', 'trener'),
+	(7, 'ognjenk', 'Ognjen Kosanović', '$2b$10$Xq9mHPpSeDpYZVLIuhW.FehLzLL.iZJ/Zdz16fzO/Z6qyyM/tNny.', 'sportista');
+
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
