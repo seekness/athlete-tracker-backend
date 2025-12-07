@@ -9,11 +9,13 @@ async function saveWorkoutResult(req, res) {
     started_at,
     finished_at,
     rest_time,
-    user_id,
+    user_id, // The athlete who did the workout
     exercises // Array of exercise results
   } = req.body;
 
-  if (!user_id) {
+  const target_user_id = user_id || req.user.id; // Default to self if not provided
+
+  if (!target_user_id) {
     return res.status(400).json({ error: "User ID is required." });
   }
 
@@ -27,7 +29,7 @@ async function saveWorkoutResult(req, res) {
       `INSERT INTO result_workout 
       (training_schedule_id, training_id, started_at, finished_at, rest_time, user_id) 
       VALUES (?, ?, ?, ?, ?, ?)`,
-      [training_schedule_id, training_id, started_at, finished_at, rest_time, user_id]
+      [training_schedule_id, training_id, started_at, finished_at, rest_time, target_user_id]
     );
     const resultWorkoutId = workoutResult.insertId;
 
