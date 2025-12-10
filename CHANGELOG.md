@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2025-12-07
+
+### Database Changes
+- **Schema Updates**:
+  - `result_workout` table:
+    - Removed `recorded_by_user_id` column (redundant with `user_id`).
+    - Removed foreign key `fk_result_workout_recorder`.
+    - `user_id` now represents the performer of the workout (athlete or trainer).
+
+### Backend Logic
+- **Controllers**:
+  - `resultWorkoutController.js`:
+    - Updated `saveWorkoutResult` to use `user_id` from the request body (or logged-in user) as the performer.
+    - Removed logic related to `recorded_by_user_id`.
+  - `athleteController.js`:
+    - Updated `getAthlete` to fallback to fetching by `user_id` if fetching by `athlete_id` fails (supports "My Profile" feature).
+  - `testResultsController.js`:
+    - Updated `getTestResultsByAthlete` to correctly fetch results based on `athlete_id`.
+
 ## [Unreleased] - 2025-12-01
 
 ### Backend Logic

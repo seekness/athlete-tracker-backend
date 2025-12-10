@@ -7,6 +7,8 @@ const {
   createSchedule,
   getSchedules,
   getSchedulesByPlan,
+  getMySchedule,
+  generateMySchedulePDF,
   updateScheduleDetails,
   deleteScheduleById
 } = require("../controllers/trainingScheduleController");
@@ -17,6 +19,8 @@ const {
 // Let's use /api/schedules
 
 router.post("/", authenticateToken, isTrener, createSchedule);
+router.get("/my-schedule", authenticateToken, isTrener, getMySchedule);
+router.get("/my-schedule/pdf", authenticateToken, isTrener, generateMySchedulePDF);
 router.get("/program/:programId", authenticateToken, getSchedules);
 router.get("/plan/:planId", authenticateToken, getSchedulesByPlan);
 router.put("/:id", authenticateToken, isTrener, updateScheduleDetails);

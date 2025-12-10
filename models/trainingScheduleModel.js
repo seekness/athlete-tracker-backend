@@ -25,13 +25,28 @@ async function fetchSchedulesByProgramId(programId) {
 async function fetchSchedulesByPlanId(planId) {
   const [rows] = await dbPool.query(
     `SELECT ts.id, ts.training_id, ts.datum, ts.vreme, ts.location_id, ts.training_plan_id,
-            t.opis AS training_name, l.naziv AS location_name
+            t.opis, l.naziv AS location_name
      FROM training_schedules ts
      JOIN trainings t ON ts.training_id = t.id
      LEFT JOIN locations l ON ts.location_id = l.id
      WHERE ts.training_plan_id = ?
      ORDER BY ts.datum ASC, ts.vreme ASC`,
     [planId]
+  );
+  return rows;
+}
+
+async function fetchSchedulesByCreator(creatorId) {
+  const [rows] = await dbPool.query(
+    `SELECT ts.id, ts.training_id, ts.datum, ts.vreme, ts.location_id, ts.training_plan_id,
+            t.opis, l.naziv AS location_name, tp.naziv as plan_name
+     FROM training_schedules ts
+     JOIN training_plans tp ON ts.training_plan_id = tp.id
+     JOIN trainings t ON ts.training_id = t.id
+     LEFT JOIN locations l ON ts.location_id = l.id
+     WHERE tp.created_by = ?
+     ORDER BY ts.datum ASC, ts.vreme ASC`,
+    [creatorId]
   );
   return rows;
 }
@@ -51,6 +66,7 @@ module.exports = {
   insertSchedule,
   fetchSchedulesByProgramId,
   fetchSchedulesByPlanId,
+  fetchSchedulesByCreator,
   updateSchedule,
   deleteSchedule
 };

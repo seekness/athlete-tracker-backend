@@ -88,7 +88,7 @@ async function loginUser(req, res) {
       athlete_id: user.athlete_id,
       trainer_id: user.trainer_id
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "12h" });
 
     res.json({ token, user: payload });
   } catch (error) {
