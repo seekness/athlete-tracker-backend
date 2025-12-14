@@ -9,6 +9,7 @@ async function fetchExercisesWithDetails() {
       e.exercise_category_id, ec.naziv AS category_name,
       e.unilateral, e.video_link, e.slika, e.rep_duration_seconds,
       GROUP_CONCAT(DISTINCT eq.naziv SEPARATOR ', ') AS equipment_names,
+      CAST(GROUP_CONCAT(DISTINCT eq.id) AS CHAR) AS equipment_ids,
       GROUP_CONCAT(DISTINCT CASE WHEN emg.activation_type = 'Glavni (primarni)' THEN mg.naziv END SEPARATOR ', ') AS primary_muscle_groups,
       GROUP_CONCAT(DISTINCT CASE WHEN emg.activation_type = 'Pomoćni (sekundarni)' THEN mg.naziv END SEPARATOR ', ') AS secondary_muscle_groups,
       GROUP_CONCAT(DISTINCT CASE WHEN emg.activation_type = 'Stabilizatori' THEN mg.naziv END SEPARATOR ', ') AS stabilizer_muscle_groups,
