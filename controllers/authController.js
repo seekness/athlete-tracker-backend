@@ -4,7 +4,8 @@ const {
   findUserByUsername,
   findAthleteByUsername,
   createUser,
-  linkAthleteToUser
+  linkAthleteToUser,
+  findAllUsers
 } = require("../models/authModel");
 const dbPool = require("../db/pool");
 
@@ -97,4 +98,14 @@ async function loginUser(req, res) {
   }
 }
 
-module.exports = { registerUser, loginUser };
+async function getUsers(req, res) {
+  try {
+    const users = await findAllUsers();
+    res.json(users);
+  } catch (error) {
+    console.error("Greška pri dohvatanju korisnika:", error);
+    res.status(500).json("Greška na serveru.");
+  }
+}
+
+module.exports = { registerUser, loginUser, getUsers };

@@ -57,6 +57,13 @@ async function linkAthleteToUser(userId, username, connection = dbPool) {
   );
 }
 
+async function findAllUsers(connection = dbPool) {
+  const [users] = await connection.query(
+    "SELECT id, username, display_name, role FROM users ORDER BY id DESC"
+  );
+  return users;
+}
+
 module.exports = {
   findUserByUsername,
   findAthleteByUsername,
@@ -64,5 +71,6 @@ module.exports = {
   createUser,
   updateUserCore,
   updateUserPassword,
-  linkAthleteToUser
+  linkAthleteToUser,
+  findAllUsers
 };
