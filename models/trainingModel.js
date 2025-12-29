@@ -17,7 +17,7 @@ async function fetchTrainingsForUser(role, userId) {
   } else if (role === "trener") {
     query = `
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -31,7 +31,7 @@ async function fetchTrainingsForUser(role, userId) {
       )
       UNION
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -45,7 +45,7 @@ async function fetchTrainingsForUser(role, userId) {
       )
       UNION
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -59,7 +59,7 @@ async function fetchTrainingsForUser(role, userId) {
       )
       UNION
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -77,7 +77,7 @@ async function fetchTrainingsForUser(role, userId) {
   } else if (role === "sportista") {
     query = `
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -91,7 +91,7 @@ async function fetchTrainingsForUser(role, userId) {
       )
       UNION
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -102,7 +102,7 @@ async function fetchTrainingsForUser(role, userId) {
       )
       UNION
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
@@ -116,7 +116,7 @@ async function fetchTrainingsForUser(role, userId) {
       )
       UNION
       (
-        SELECT DISTINCT ts.id, t.opis, ts.datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
+        SELECT DISTINCT ts.id, t.opis, DATE_FORMAT(ts.datum, '%Y-%m-%d') AS datum, ts.vreme, p.naziv AS program_naziv, tp.naziv AS plan_naziv, ts.location_id, l.naziv AS location_name
         FROM training_schedules ts
         JOIN trainings t ON ts.training_id = t.id
         JOIN programs p ON t.program_id = p.id
