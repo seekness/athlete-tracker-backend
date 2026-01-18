@@ -53,6 +53,8 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://127.0.0.1:19006',
   'https://app.somborkayak.club',
   'http://app.somborkayak.club',
+  'https://appdemo.somborkayak.club',
+  'http://appdemo.somborkayak.club',
   '*.sslip.io'
 ];
 
