@@ -147,7 +147,7 @@ async function fetchTrainingDetailsById(scheduleId) {
      JOIN programs p ON t.program_id = p.id
      LEFT JOIN locations l ON ts.location_id = l.id
      LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
-     WHERE ts.training_id = ?
+     WHERE ts.id = ?
      LIMIT 1`,
     [scheduleId]
   );
