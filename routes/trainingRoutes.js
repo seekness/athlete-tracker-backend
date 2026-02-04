@@ -12,9 +12,9 @@ const {
 } = require("../controllers/trainingController");
 
 router.get("/", authenticateToken, getAvailableTrainings);
-router.get("/:trainingId", authenticateToken, getTrainingDetails);
+router.get("/:trainingId", authenticateToken, );
 router.post("/", authenticateToken, isTrener, createTraining);
 router.put("/:trainingId", authenticateToken, isTrener, updateTraining);
 router.delete("/:trainingId", authenticateToken, isTrener, deleteTraining);
 
-module.exports = router;
+module.exports = router;getTrainingDetails

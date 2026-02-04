@@ -3,9 +3,11 @@ const jwt = require("jsonwebtoken");
 const {
   findUserByUsername,
   findAthleteByUsername,
+  findUserById,
   createUser,
   linkAthleteToUser,
-  findAllUsers
+  findAllUsers,
+  updateUserPassword
 } = require("../models/authModel");
 const dbPool = require("../db/pool");
 
@@ -108,4 +110,41 @@ async function getUsers(req, res) {
   }
 }
 
-module.exports = { registerUser, loginUser, getUsers };
+async function changePassword(req, res) {
+  const userId = req.user?.id;
+  const { currentPassword, newPassword } = req.body || {};
+
+  if (!userId) {
+    return res.status(401).json({ error: "Niste autorizovani." });
+  }
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Trenutna i nova lozinka su obavezne." });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: "Nova lozinka mora imati najmanje 6 karaktera." });
+  }
+
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Korisnik nije pronađen." });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Trenutna lozinka nije ispravna." });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await updateUserPassword(userId, hashedPassword);
+
+    res.json({ message: "Lozinka je uspešno promenjena." });
+  } catch (error) {
+    console.error("Greška pri promeni lozinke:", error);
+    res.status(500).json({ error: "Greška na serveru." });
+  }
+}
+
+module.exports = { registerUser, loginUser, getUsers, changePassword };
