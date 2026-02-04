@@ -136,7 +136,7 @@ async function fetchTrainingsForUser(role, userId) {
   return rows;
 }
 
-async function fetchTrainingDetailsById(Id) {
+async function fetchTrainingDetailsById(scheduleId) {
   // Try to find as a schedule first
   const [scheduleRows] = await dbPool.query(
     `SELECT ts.id, ts.training_id, ts.datum, ts.vreme, ts.location_id,
@@ -149,7 +149,7 @@ async function fetchTrainingDetailsById(Id) {
      LEFT JOIN training_plans tp ON ts.training_plan_id = tp.id
      WHERE ts.training_id = ?
      LIMIT 1`,
-    [Id]
+    [scheduleId]
   );
 
   let training;
